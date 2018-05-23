@@ -92,8 +92,8 @@ ex0=e*data.FD.vector.b.ex0;eu0=e*data.FD.vector.b.eu0;
 exf=e*data.FD.vector.b.exf;euf=e*data.FD.vector.b.euf;
 
 for i=1:nfd
-    bp=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),[],tf+etf,vdat);
-    bm=b(x0-ex0(:,i),xf-exf(:,i),u0-eu0(:,i),uf-euf(:,i),p-ep(:,i),[],tf-etf,vdat);
+    bp=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),[],tf+etf(i),vdat);
+    bm=b(x0-ex0(:,i),xf-exf(:,i),u0-eu0(:,i),uf-euf(:,i),p-ep(:,i),[],tf-etf(i),vdat);
     bz=bz+sparse(1:nb,idx(:,i),(bp-bm)/(2*e),nb,nz);
 end
 end
