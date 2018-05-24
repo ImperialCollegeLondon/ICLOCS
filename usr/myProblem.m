@@ -128,7 +128,7 @@ problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,pr
 function stageCost=L_unscaled(x,u,p,t,data)
 
 
-% L - Returns the stage cost.
+% L_unscaled - Returns the stage cost.
 % The function must be vectorized and
 % xi, ui are column vectors taken as x(:,i) and u(:,i) (i denotes the i-th
 % variable)
@@ -169,7 +169,7 @@ stageCost = ...;
 
 function boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,data) 
 
-% E - Returns the boundary value cost
+% E_unscaled - Returns the boundary value cost
 %
 % Syntax:  boundaryCost=E(x0,xf,u0,uf,p,tf,data)
 %
@@ -194,7 +194,7 @@ boundaryCost=...;
 
 
 function dx = f_unscaled(x,u,p,t,data)
-% f - Returns the ODE right hand side where x'= f(x,u,p,t)
+% f_unscaled - Returns the ODE right hand side where x'= f(x,u,p,t)
 % The function must be vectorized and
 % xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
 % state corresponds to one column of dx.
@@ -246,7 +246,7 @@ dx(:,n) = fn(x1,..xn,u1,..um,p,t);
 
 function c=g_unscaled(x,u,p,t,data)
 
-% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
+% g_unscaled - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
 % The function must be vectorized and
 % xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
 % constraint corresponds to one column of c
@@ -315,7 +315,7 @@ function cr=avrc_unscaled(x,u,p,t,data)
 
 function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 
-% b - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
+% b_unscaled - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 %
 % Syntax:  bc=b(x0,xf,u0,uf,p,tf,data)
 %
