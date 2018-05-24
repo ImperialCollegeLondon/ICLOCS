@@ -125,7 +125,7 @@ problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,pr
 
 %------------- END OF CODE --------------
 
-function stageCost=L_unscaled(x,xr,u,ur,p,t,data)
+function stageCost=L_unscaled(x,u,p,t,data)
 
 
 % L - Returns the stage cost.
@@ -137,9 +137,7 @@ function stageCost=L_unscaled(x,xr,u,ur,p,t,data)
 %
 % Inputs:
 %    x  - state vector
-%    xr - state reference
 %    u  - input
-%    ur - input reference
 %    p  - parameter
 %    t  - time
 %    data- structured variable containing the values of additional data used inside
@@ -155,14 +153,14 @@ function stageCost=L_unscaled(x,xr,u,ur,p,t,data)
 %------------- BEGIN CODE --------------
 
 %Define states and setpoints
-x1 = x(:,1); xr1=xr(:,1);
+x1 = x(:,1); 
 %...
-xn=x(:,n); xrn=xr(:,n);
+xn=x(:,n); 
 
 %Define inputs
-u1 = u(:,1);ur1=ur(:,1);
+u1 = u(:,1);
 % ...
-um = u(:,m);urm=ur(:,m);
+um = u(:,m);
 
 stageCost = ...;
 
