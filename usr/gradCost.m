@@ -36,12 +36,15 @@ function [dL,dE]=gradCost(L,X,Xr,U,Ur,P,t,E,x0,xf,u0,uf,p,tf,data)
 % MAT-files required: none
 %
 %
-% Copyright (C) 2010 Paola Falugi, Eric Kerrigan and Eugene van Wyk. All Rights Reserved.
+% Copyright (C) 2018 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
+% The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
 % This code is published under the BSD License.
-% Department of Electrical and Electronic Engineering,
+% Department of Aeronautics and Department of Electrical and Electronic Engineering,
 % Imperial College London London  England, UK 
-% ICLOCS (Imperial College London Optimal Control) 5 May 2010
+% ICLOCS (Imperial College London Optimal Control) Version 2.0 
+% 1 May 2018
 % iclocs@imperial.ac.uk
+
 
 %------------- BEGIN CODE --------------
 
@@ -61,6 +64,7 @@ dL.du=20*U;
 % Terminal cost gradients
 
 dE.flag=1;
+dE.dt0=[];
 dE.dtf=[];
 dE.dp=[];
 dE.dx0=2*x0';
