@@ -763,8 +763,7 @@ end
 % warm starting from guess
 if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
     if (strcmp(options.start,'Cold'))
-        
-        if isfield(guess,'time')
+        if isfield(guess,'time') && ~isempty(guess.time)
             Tx=linspace(0,guess.time(end), M+1);
             Tu=linspace(0,guess.time(end), M);
             x_guess=interp1(guess.time, guess.states,Tx,'linear');
@@ -840,7 +839,7 @@ if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hp
     end
 else
     if (strcmp(options.start,'Cold'))
-        if ~isempty(guess.time)
+        if isfield(guess,'time') && ~isempty(guess.time)
             Tx=linspace(0,guess.time(end), M);
             Tu=linspace(0,guess.time(end-1), N);
             x_guess=interp1(guess.time, guess.states,Tx,'linear');
