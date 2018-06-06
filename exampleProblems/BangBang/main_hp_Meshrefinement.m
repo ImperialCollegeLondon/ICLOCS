@@ -22,7 +22,7 @@ clear all;close all;format compact;
 global sol;  
 sol=[];                             % Initialize solution structure
 
-options= settings_hp(1,8);                  % Get options and solver settings 
+options= settings_hp(1,4);                  % Get options and solver settings 
 [problem,guess]=BangBang;          % Fetch the problem definition
 errorHistory=zeros(2,length(problem.states.x0));
 npsegmentHistory=zeros(2,1);

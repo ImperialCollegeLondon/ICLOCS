@@ -32,10 +32,18 @@ else
     Xout=zeros(length(T),1);Xpi=Xp(:,n);
     for i=1:length(TSeg_Bar)-1 
         Tau_Seg=normalizeT(T(T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),TSeg_Bar(i),TSeg_Bar(i+1));
-        Xout((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=legendreEval(Xpi{i},Tau_Seg);
+        if size(Xpi{i},2)==1
+            Xout((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=legendreEval(Xpi{i},Tau_Seg);
+        else
+            Xout((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=BaryEval(Xpi{i},Tau_Seg);
+        end
     end
     if TSeg_Bar(end)==T(end)
-        Xout(end)=legendreEval(Xpi{i},1);
+        if size(Xpi{i},2)==1
+            Xout(end)=legendreEval(Xpi{i},1);
+        else
+            Xout(end)=BaryEval(Xpi{i},1);
+        end
     end
 end
 

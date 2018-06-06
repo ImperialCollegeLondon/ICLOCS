@@ -52,16 +52,18 @@ options.resultRep='default';
 %   - Piecewise linear          ('linear'), available for Euler transcription method  
 %   - Piecewise quadratic       ('quadratic'), available for Euler and Trapezoidal transcription methods  
 %   - Piecewise cubic           ('cubic'), available for Hermite-Simpson transcription method  
-%   - Legendre polynomials      ('Legendre'), available for LGR transcription method  
+%   - Barycentric Lagrange Interpolation ('Barycentric'), available for LGR transcription method  
+%   - Legendre polynomial fitting  ('Legendre'), available for LGR transcription method  
 %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
-options.stateRep='cubic';
+options.stateRep='Barycentric';
 % Input representation
 %   - Piecewise constant        ('constant'), available for all transcription methods
 %   - Piecewise linear          ('linear'), available for all transcription methods
 %   - Piecewise quadratic       ('quadratic'), available for Trapezoidal transcription methods  
-%   - Legendre polynomials      ('Legendre'), available for LGR transcription method  
+%   - Barycentric Lagrange Interpolation ('Barycentric'), available for LGR transcription method  
+%   - Legendre polynomial fitting  ('Legendre'), available for LGR transcription method  
 %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
-options.inputRep='quadratic';
+options.inputRep='pchip';
 
 
 % Derivative generation :

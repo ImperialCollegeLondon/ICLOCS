@@ -32,10 +32,10 @@ options.discErrorTol_Scaled= discErrorTol_Scaled;
 solution.ErrorMax = max( solution.Error, [], 1 );
 solution.ErrorScaled = scale_variables( solution.Error, Xscales, 0 );
 error_ratio=solution.ErrorMax./discErrorTol;
-const_active_ratio=solution.NumActiveConstraint/data.sizes{3};
 nt=data.sizes{1};
 
 if isfield(options,'AutoDirect')
+    const_active_ratio=solution.NumActiveConstraint/data.sizes{3};
     if strcmp(options.transcription,'hpLGR') || strcmp(options.transcription,'globalLGR')
         fcn_smoothness=max(std(abs([diff(solution.X(1:end-1,:))./repmat(diff(solution.T),1,size(solution.X,2)) diff(solution.U)./repmat(diff(solution.T),1,size(solution.U,2))]))./median(abs([diff(solution.X(1:end-1,:))./repmat(diff(solution.T),1,size(solution.X,2)) diff(solution.U)./repmat(diff(solution.T),1,size(solution.U,2))])));
     else
@@ -86,7 +86,7 @@ else
     elseif strcmp(options.transcription,'globalLGR')
         options.pdegree=options.pdegree+2;
         if options.pdegree>=40
-            if max(error_ratio)<=50 || const_active_ratio>=0.5
+            if max(error_ratio)>=50 
                 options= settings_h(40);
                 options.resultRep='default';
             else

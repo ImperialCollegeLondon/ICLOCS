@@ -79,20 +79,20 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
     F_Np1=f(X_Np1,U_Np1,P,[T;solution.tf],vdat);
     Xp=cell(length(npd),n);dXp=cell(length(npd),n);Up=cell(1,m);
 
-    if strcmp(data.options.resultRep,'direct') % Legendre interpolation
+    if strcmp(data.options.resultRep,'direct') % Barycentric Lagrange Interpolation
         for i=1:n 
              for j=1:length(npd)
                  idxst=sum(npd(1:j-1))+1;
                  idxed=sum(npd(1:j))+1;
-                 Xp{j,i}=legendrefit([data.map.LGR.points{npduidx(j)};1],X_Np1(idxst:idxed,i), npd(j)+1, 'qr');
-                 dXp{j,i}=legendrefit(data.map.LGR.points{npduidx(j)},F(idxst:idxed-1,i), npd(j), 'qr');
+                 Xp{j,i}=[[data.map.LGR.points{npduidx(j)};1],X_Np1(idxst:idxed,i)];
+                 dXp{j,i}=[[data.map.LGR.points{npduidx(j)};1],F_Np1(idxst:idxed,i)];
              end
         end
         for i=1:m 
          for j=1:length(npd)
              idxst=sum(npd(1:j-1))+1;
              idxed=sum(npd(1:j))+1;
-             Up{j,i}=legendrefit([data.map.LGR.points{npduidx(j)};1],U_Np1(idxst:idxed,i), npd(j)+1, 'qr');
+             Up{j,i}=[[data.map.LGR.points{npduidx(j)};1],U_Np1(idxst:idxed,i)];
          end
         end
     else
@@ -111,6 +111,15 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
                 Xp{i}=pchip([T;solution.tf],X_Np1(:,i)');
                 dXp{i}=pchip([T;solution.tf],F_Np1(:,i)');
             end
+        elseif strcmp(data.options.stateRep,'Barycentric') %Barycentric Lagrange Interpolation
+            for i=1:n 
+                 for j=1:length(npd)
+                     idxst=sum(npd(1:j-1))+1;
+                     idxed=sum(npd(1:j))+1;
+                     Xp{j,i}=[[data.map.LGR.points{npduidx(j)};1],X_Np1(idxst:idxed,i)];
+                     dXp{j,i}=[[data.map.LGR.points{npduidx(j)};1],F_Np1(idxst:idxed,i)];
+                 end
+            end
         else
             error('State representation method invalid or not supported by the selected transcription method');
         end
@@ -127,6 +136,22 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
         elseif strcmp(data.options.inputRep,'pchip') || strcmp(data.options.resultRep,'default') % pchip interpolation
             for i=1:m 
                 Up{i}=pchip([T;solution.tf],U_Np1(:,i)');
+            end
+        elseif strcmp(data.options.inputRep,'Legendre') % Legendre fitting
+            for i=1:m 
+             for j=1:length(npd)
+                 idxst=sum(npd(1:j-1))+1;
+                 idxed=sum(npd(1:j))+1;
+                 Up{j,i}=legendrefit([data.map.LGR.points{npduidx(j)};1],U_Np1(idxst:idxed,i), npd(j)+1, 'qr');
+             end
+            end
+        elseif strcmp(data.options.inputRep,'Barycentric') % Barycentric Lagrange Interpolation
+            for i=1:m 
+             for j=1:length(npd)
+                 idxst=sum(npd(1:j-1))+1;
+                 idxed=sum(npd(1:j))+1;
+                 Up{j,i}=[[data.map.LGR.points{npduidx(j)};1],U_Np1(idxst:idxed,i)];
+             end
             end
         else
             error('Input representation method invalid or not supported by the selected transcription method');
@@ -155,8 +180,10 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
         disp('Maximum relative local error:');disp(max(ErrorRelative));
         [ConstraintError,T_ConstraintError]=estimateConstraintViolation_LGR(Xp,Up,p,tf,TSeg_Bar,n,m,problem,data);
         disp('Maximum absolute constraint violation:');disp(max(ConstraintError));
-        [NumActiveConstraint]=calcNumActiveConstraint_LGR(solution,problem,data);
-        disp('Number of active constraints:');disp(NumActiveConstraint);
+        if isfield(options,'AutoDirect')
+            [NumActiveConstraint]=calcNumActiveConstraint_LGR(solution,problem,data);
+            disp('Number of active constraints:');disp(NumActiveConstraint);
+        end
     end
 
     % Figure generation
@@ -256,7 +283,9 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
     solution.ErrorRelative=ErrorRelative;
     solution.ConstraintError=ConstraintError;
     solution.T_ConstraintError=T_ConstraintError;
-    solution.NumActiveConstraint=NumActiveConstraint;
+    if isfield(options,'AutoDirect')
+         solution.NumActiveConstraint=NumActiveConstraint;
+    end
     solution.TSeg_Bar=TSeg_Bar;
     [ solution ] = getVariableRate( solution,data );
 
@@ -407,9 +436,10 @@ else
     disp('Maximum relative local error:');disp(max(ErrorRelative));
     [ConstraintError,T_ConstraintError]=estimateConstraintViolation(Xp,Up,p,tf,n,m,problem,data);
     disp('Maximum absolute constraint violation:');disp(max(ConstraintError));
-    [NumActiveConstraint]=calcNumActiveConstraint(solution,problem,data);
-    disp('Number of active constraints:');disp(NumActiveConstraint);
-
+    if isfield(options,'AutoDirect')
+        [NumActiveConstraint]=calcNumActiveConstraint(solution,problem,data);
+        disp('Number of active constraints:');disp(NumActiveConstraint);
+    end
 
     % Obtain multipliers
     switch(data.options.NLPsolver)
@@ -516,7 +546,9 @@ else
     solution.multipliers.lambda_1toN=lambda;
     solution.ConstraintError=ConstraintError;
     solution.T_ConstraintError=T_ConstraintError;
-    solution.NumActiveConstraint=NumActiveConstraint;
+    if isfield(options,'AutoDirect')
+         solution.NumActiveConstraint=NumActiveConstraint;
+    end
     if ~strcmp(data.options.transcription,'multiple_shooting')
         [ solution ] = getVariableRate( solution,data );
     end

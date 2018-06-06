@@ -80,7 +80,8 @@ switch(data.options.NLPsolver)
        
     
     case{'fmincon'}                               % Solve the NLP using FMINCON
-        
+        prompt = 'WARNING: Use of fmincon is NOT ADVISABLE because the solution speed can be significantly slower with a higher chance of failure. \n We would recommend to use fmincon only for sanity checks. \n For solving, please consider use IPOPT (see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html). \n Press any key to continue...\n ';
+        input(prompt)
         tA=tic;
         [z,cost,status,output,multipliers]=fmincon(@(z)fminCost(z,data),NLP.z0,...
             [],[],[],[],NLP.zl,NLP.zu,@(z)fminConst(z,data,NLP),data.options.fmincon);

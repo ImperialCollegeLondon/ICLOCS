@@ -22,8 +22,8 @@ clear all;close all;format compact;
 global sol;  
 sol=[];                             % Initialize solution structure
 
-% options= settings_hp(5,4);                  % Get options and solver settings 
-options= settings_hp([4 5 3],[-1 0.3 0.4 1]);                  % Get options and solver settings 
+options= settings_hp(1,10);                  % Get options and solver settings 
+% options= settings_hp([4 5 3],[-1 0.3 0.4 1]);                  % Get options and solver settings 
 [problem,guess]=BangBang;          % Fetch the problem definition
 
 [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver

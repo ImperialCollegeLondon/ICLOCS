@@ -160,6 +160,7 @@ problem.states.xfl=[altf speedf fpaf massmin];
 problem.states.xfu=[altf speedf fpaf massmax];
 
 % Guess the state trajectories with [x0 xf]
+guess.time=[];
 guess.states(:,1)=[alt0 altf];
 guess.states(:,2)=[speed0 speedf];
 guess.states(:,3)=[fpa0 fpaf];
