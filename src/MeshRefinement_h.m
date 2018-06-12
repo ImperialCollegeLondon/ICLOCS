@@ -92,14 +92,14 @@ while k<=n_addIntv && i<=length(idx)
     seg_remesh=tau_inc<tau_remesh;
     tau_front=tau_inc(seg_remesh);
     tau_rear=tau_inc(~seg_remesh);
-    if tau_remesh-tau_front(end)<tau_mininterval
-        if tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
+    if ~isempty(tau_front) && tau_remesh-tau_front(end)<tau_mininterval
+        if ~isempty(tau_rear) && ~isempty(tau_front) && tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
             tau_remesh=tau_front(end)+tau_mininterval;
         else
             tau_remesh=[];
         end
-    elseif tau_rear(1)-tau_remesh<tau_mininterval
-        if (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
+    elseif ~isempty(tau_rear) && tau_rear(1)-tau_remesh<tau_mininterval
+        if ~isempty(tau_rear) && ~isempty(tau_front) && (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
             tau_remesh=tau_rear(1)-tau_mininterval;
         else
             tau_remesh=[];
@@ -113,7 +113,6 @@ while k<=n_addIntv && i<=length(idx)
     end
 end
 
-
 % Refinement (adding mesh point at exact location) based on constraint violation error
 for j=1:length(tau_remesh_constraint)
     tau_remesh= tau_remesh_constraint(j);
@@ -121,14 +120,14 @@ for j=1:length(tau_remesh_constraint)
     seg_remesh=tau_inc<tau_remesh;
     tau_front=tau_inc(seg_remesh);
     tau_rear=tau_inc(~seg_remesh);
-    if tau_remesh-tau_front(end)<tau_mininterval
-        if tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
+    if ~isempty(tau_front) && tau_remesh-tau_front(end)<tau_mininterval
+        if ~isempty(tau_rear) && tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
             tau_remesh=tau_front(end)+tau_mininterval;
         else
             tau_remesh=[];
         end
-    elseif tau_rear(1)-tau_remesh<tau_mininterval
-        if (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
+    elseif ~isempty(tau_rear) && tau_rear(1)-tau_remesh<tau_mininterval
+        if ~isempty(tau_rear) && ~isempty(tau_front) && (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
             tau_remesh=tau_rear(1)-tau_mininterval;
         else
             tau_remesh=[];

@@ -139,14 +139,14 @@ for i=1:length(T_remesh_div)
     seg_remesh=options.tau_segment<tau_remesh;
     tau_front=options.tau_segment(seg_remesh);
     tau_rear=options.tau_segment(~seg_remesh);
-    if tau_remesh-tau_front(end)<tau_mininterval
-        if tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
+    if ~isempty(tau_front) && tau_remesh-tau_front(end)<tau_mininterval
+        if ~isempty(tau_rear) && ~isempty(tau_front) && tau_rear(1)-(tau_front(end)+tau_mininterval)>=tau_mininterval
             tau_remesh=tau_front(end)+tau_mininterval;
         else
             tau_remesh=[];
         end
-    elseif tau_rear(1)-tau_remesh<tau_mininterval
-        if (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
+    elseif ~isempty(tau_rear) && tau_rear(1)-tau_remesh<tau_mininterval
+        if ~isempty(tau_rear) && ~isempty(tau_front) && (tau_rear(1)-tau_mininterval)-tau_front(end)>=tau_mininterval
             tau_remesh=tau_rear(1)-tau_mininterval;
         else
             tau_remesh=[];

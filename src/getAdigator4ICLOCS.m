@@ -57,11 +57,11 @@ else
     Fvec_dY_location1=Fvec.dY_location(:,1);
     Fvec_dY_location2=Fvec.dY_location(:,2);
 end
-if length(Fvec.dYdY_size)==2
+if isfield(Fvec,'dYdY_size') && length(Fvec.dYdY_size)==2
     Fvec_dYdY_size3=n+m;
     Fvec_dYdY_size=[1,Fvec.dYdY_size(1),Fvec_dYdY_size3];
     Fvec_dYdY_location3=Fvec.dYdY_location(:,2);
-else
+elseif isfield(Fvec,'dYdY_size')
     Fvec_dYdY_size3=Fvec.dYdY_size(3);
     Fvec_dYdY_size=Fvec.dYdY_size;
     Fvec_dYdY_location3=Fvec.dYdY_location(:,3);
