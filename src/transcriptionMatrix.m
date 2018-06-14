@@ -29,23 +29,24 @@ if strcmp(method,'globalLGR') || strcmp(method,'hpLGR')
     % Create matrix to extract x vector from z 
     Vx = sparse(nx,nz);
     Vx(1:nx,1:nx)=speye(nx);
-    xV=Vx\speye(nx);
+    xV=Vx';
+
     Vx_LGRpts = zeros(nx-n,nz);
     for i=1:n
         Vx_LGRpts(((i-1)*M+1):((i-1)*M+M),((i-1)*M+i):((M+1)*i-1))=speye(M);
     end
     Vx_LGRpts=sparse(Vx_LGRpts);
-    xV_LGRpts=Vx_LGRpts\speye(nx-n);
+    xV_LGRpts=Vx_LGRpts';
 
     % Create matrix to extract u vector from z
     Vu = sparse(nu,nz);
     Vu(1:nu,nx+1:nx+nu)=speye(nu);   
-    uV=Vu\speye(nu);
-    
+    uV=Vu';
+
     % Create matrix to extract t vector from z
     Vt = sparse(nt,nz);
     Vt(1:nt,nz-nt+1:nz)=speye(nt);   
-    tV=Vt\speye(nt);
+    tV=Vt';
 
 
     % Create matrices to extract x and u from (x,u) 
@@ -61,11 +62,11 @@ else % h methods
 
     % Create matrix to extract x vector from z 
     Vx=[zeros(nx,nt+np) kron(speye(N),[speye(n*Mi) zeros(n*Mi,m)])];
-    xV=Vx\speye(n*M);
+    xV=Vx';
 
     % Create matrix to extract u vector from z
     Vu=[zeros(nu,nt+np) kron(speye(N),[zeros(m,n*Mi) speye(m)])];   
-    uV=Vu\speye(m*N);
+    uV=Vu';
 
     % Create matrices to extract x and u from (x,u) 
     vx=Vx;vu=Vu;
