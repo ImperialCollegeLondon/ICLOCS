@@ -70,7 +70,7 @@ end
 Fx = cell(1,Fvec_dY_size1);fx = cell(1,Fvec_dY_size2);
 if strcmp(probinfo.options.ipopt.hessian_approximation,'limited-memory') || ~isfield(Fvec,'dYdY')
     for i=1:Fvec_dY_size1
-        Fx{i}=full(sparse(Fvec.dY_location(:,1),Fvec_dY_location2,Fvec.dY(i,:)));
+        Fx{i}=sparse(Fvec.dY_location(:,1),Fvec_dY_location2,Fvec.dY(i,:));
     end
     for i=1:Fvec_dY_size1
         for j=1:Fvec_dY_size2
@@ -81,7 +81,7 @@ if strcmp(probinfo.options.ipopt.hessian_approximation,'limited-memory') || ~isf
 else
     Fxx = cell(1,size(Fvec.dYdY,1));Fxx_2d = cell(size(Fvec.dYdY,1),Fvec_dYdY_size3); fxx = cell(Fvec.dYdY_size(2),Fvec_dYdY_size3);
     for i=1:Fvec_dY_size1
-        Fx{i}=full(sparse(Fvec_dY_location1,Fvec_dY_location2,Fvec.dY(i,:)));
+        Fx{i}=sparse(Fvec_dY_location1,Fvec_dY_location2,Fvec.dY(i,:));
         Fxx3dmat=zeros(Fvec_dYdY_size);
         idx = sub2ind(size(Fxx3dmat), Fvec.dYdY_location(:,1),Fvec.dYdY_location(:,2),Fvec_dYdY_location3);
         Fxx3dmat(idx)=Fvec.dYdY(i,:);
@@ -94,7 +94,7 @@ else
     end
     for i=1:size(Fvec.dYdY,1)
         for j=1:Fvec_dYdY_size3
-            Fxx_2d{i,j}=Fxx{1,i}(:,:,j);
+            Fxx_2d{i,j}=sparse(Fxx{1,i}(:,:,j));
         end
     end
     for k=1:Fvec_dYdY_size3
