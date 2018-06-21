@@ -182,14 +182,11 @@ switch required
         
     case{'const'} 
         sol.const=[reshape(D_structure*X_Np1-diag(t_segment_end)*f(X,U,P,t,vdat),M*n,1);
-           reshape(g(X,U,P,t,vdat)',M*ng,1);
+           reshape(g(X,U,P,t,vdat),M*ng,1);
            avrc(X_Np1,U,P,[t;tf],data)';
            b(x0,xf,u0,uf,p,t0,tf,vdat,data.options,t_segment)];
         if data.options.reorderLGR
-            tic;
             solution=sol.const(data.reorder.vert_idx);
-            elapsedTime = toc;
-            ro_time=ro_time+elapsedTime;
         else
             solution=sol.const;
         end

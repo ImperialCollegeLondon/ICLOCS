@@ -430,6 +430,9 @@ end
 if strcmp(options.transcription,'multiple_shooting')
 infoNLP.cl=[kron(ones(M,1),zeros(n,1));kron(ones(M-1,1),gl(:));bl(:)];
 infoNLP.cu=[kron(ones(M,1),zeros(n,1));kron(ones(M-1,1),gu(:));bu(:)];   
+elseif strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
+infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));repelem(gl,M);rcl(:);bl(:)];
+infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));repelem(gu,M);rcu(:);bu(:)];
 else
 infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));kron(ones(M,1),gl(:));rcl(:);bl(:)];
 infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));kron(ones(M,1),gu(:));rcu(:);bu(:)];

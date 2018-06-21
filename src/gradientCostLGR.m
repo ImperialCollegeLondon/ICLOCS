@@ -109,11 +109,7 @@ else   % Numerical evalution of the gradient of the stage cost
      for i=1:nfd
       dL=(((data.t_segment_end+etf{i}*e/2-et0{i}*e/2).*L(X+ex{i}*e,Xr,U+eu{i}*e,Ur,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*T+(tf+etf{i}*e+t0+et0{i}*e)/2,vdat)-...
       (data.t_segment_end-etf{i}*e/2+et0{i}*e/2).*L(X-ex{i}*e,Xr,U-eu{i}*e,Ur,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*T+(tf-etf{i}*e+t0-et0{i}*e)/2,vdat)).*snm)/(2*e);
-%       dL=(L(X+ex{i}*e,Xr,U+eu{i}*e,Ur,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*T+(tf+etf{i}*e+t0+et0{i}*e)/2,vdat)-...
-%           L(X-ex{i}*e,Xr,U-eu{i}*e,Ur,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*T+(tf-etf{i}*e+t0-et0{i}*e)/2,vdat)).*snm/(2*e);
-%       Lz=Lz+sparse(1,idx(:,i),diag(data.map.w)*dL,1,nz);
       Lz=Lz+sparse(1,idx(:,i),data.map.w.*dL,1,nz);
-%       Lz=Lz+sparse(1,idx(:,i),data.map.w'*(data.t_segment_end.*dL),1,nz);
       JL{i}=dL;
      end
  end
