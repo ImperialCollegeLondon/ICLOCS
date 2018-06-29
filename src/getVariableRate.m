@@ -35,7 +35,7 @@ else
     [nt,~,n,m,~,~,M,N,ns]=deal(data.sizes{1:9});
     t0=data.t0;
 
-    z=solution.z;
+    z=solution.z_orgscale;
     Vx=data.map.Vx;
     Vu=data.map.Vu;
 

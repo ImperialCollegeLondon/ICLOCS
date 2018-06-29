@@ -76,7 +76,7 @@ switch(data.options.NLPsolver)
        solution.multipliers.zl=info.zl;
        solution.multipliers.zu=info.zu;
        solution.multipliers.lambda=info.lambda;
-       status=info.status;
+       status=info;
        
     
     case{'fmincon'}                               % Solve the NLP using FMINCON
@@ -296,20 +296,23 @@ if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcr
     end
     
     solution.T=(solution.tf-t0)/2*data.tau_inc+(solution.tf+t0)/2; 
-    solution.multipliers.lambdaNLP=solution.multipliers.lambda;
-    solution.multipliers.lambda_1toN=reshape(solution.multipliers.lambda(1:M*n),M,n);
-    D_N=diag(1./data.map.w);
-    solution.multipliers.lambda=D_N*solution.multipliers.lambda_1toN;
-    D_Np1=data.map.LGR.diff_matrix{end}(:,end);
-    solution.multipliers.lambda(end+1,:)=D_Np1'*solution.multipliers.lambda_1toN(end-length(data.map.LGR.points{end})+1:end,:);
-    if ng
-        solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP((M*n+1):M*(n+ng)),M,ng);
-    end
-    if nrc
-        solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP((M*(n+ng)+1):M*(n+ng)+nrc);
-    end
-    if nb
-        solution.multipliers.lambda_b=solution.multipliers.lambdaNLP((M*(n+ng)+nrc+1):end);
+    
+    if ~strcmp(data.options.NLPsolver,'MADS') 
+        solution.multipliers.lambdaNLP=solution.multipliers.lambda;
+        solution.multipliers.lambda_1toN=reshape(solution.multipliers.lambda(1:M*n),M,n);
+        D_N=diag(1./data.map.w);
+        solution.multipliers.lambda=D_N*solution.multipliers.lambda_1toN;
+        D_Np1=data.map.LGR.diff_matrix{end}(:,end);
+        solution.multipliers.lambda(end+1,:)=D_Np1'*solution.multipliers.lambda_1toN(end-length(data.map.LGR.points{end})+1:end,:);
+        if ng
+            solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP((M*n+1):M*(n+ng)),M,ng);
+        end
+        if nrc
+            solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP((M*(n+ng)+1):M*(n+ng)+nrc);
+        end
+        if nb
+            solution.multipliers.lambda_b=solution.multipliers.lambdaNLP((M*(n+ng)+nrc+1):end);
+        end
     end
 
 else
@@ -344,28 +347,34 @@ else
         solution.U=kron(usp,ones((M)/N,1));
         solution.T=(solution.tf-t0)*[0;cumsum(data.tau)*data.Nm/ns]+data.k0;
 
-        solution.multipliers.lambdaNLP=solution.multipliers.lambda;
+        if ~strcmp(data.options.NLPsolver,'MADS') 
 
-%         solution.multipliers.lambda_1toN=reshape(solution.multipliers.lambdaNLP(n+1:n*M)'*data.map.B,n,M)';
-        solution.multipliers.lambda_1toM=reshape(solution.multipliers.lambdaNLP(1:n*M)',n,M)';
+            solution.multipliers.lambdaNLP=solution.multipliers.lambda;
+
+    %         solution.multipliers.lambda_1toN=reshape(solution.multipliers.lambdaNLP(n+1:n*M)'*data.map.B,n,M)';
+            solution.multipliers.lambda_1toM=reshape(solution.multipliers.lambdaNLP(1:n*M)',n,M)';
+        end
         
         if strcmp(data.options.transcription,'hermite')
             solution.X=solution.X(1:2:end,:);
             solution.U=solution.U(1:2:end,:);
             solution.T=solution.T(1:2:end);
-            solution.multipliers.lambda_1toN=solution.multipliers.lambda_1toM(1:2:end,:);
+            if ~strcmp(data.options.NLPsolver,'MADS') 
+                solution.multipliers.lambda_1toN=solution.multipliers.lambda_1toM(1:2:end,:);
+            end
         end
         
 
-        
-        if ng
-            solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP(n*M+1:n*M+ng*M)',ng,M)';
-        end
-        if nrc
-            solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP(n*M+ng*M+1:n*M+ng*M+nrc);
-        end
-        if nb
-            solution.multipliers.lambda_b=solution.multipliers.lambdaNLP(n*M+M*ng+nrc+(~~nb):n*M+M*ng+nrc+nb);
+        if ~strcmp(data.options.NLPsolver,'MADS') 
+            if ng
+                solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP(n*M+1:n*M+ng*M)',ng,M)';
+            end
+            if nrc
+                solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP(n*M+ng*M+1:n*M+ng*M+nrc);
+            end
+            if nb
+                solution.multipliers.lambda_b=solution.multipliers.lambdaNLP(n*M+M*ng+nrc+(~~nb):n*M+M*ng+nrc+nb);
+            end
         end
     end
 end

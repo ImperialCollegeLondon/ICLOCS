@@ -23,10 +23,9 @@ function [vector,index]=getPertubations(sparsity,sizes,data)
 %------------- BEGIN CODE --------------
 disp('Generate finite-difference pertubation vectors')
 % Get dimensions
-[nt,np,n,m,ng,nb,M,N,~,nrcl,nrcu,nrce]=deal(sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
-% vdat=data.data;
 
 % Get sparsity templates
 dLdp=sparsity.dLdp;     dLdx=sparsity.dLdx;        dLdu=sparsity.dLdu;
@@ -37,10 +36,8 @@ dfdp=sparsity.dfdp;        dfdx=sparsity.dfdx;
 dfdu=sparsity.dfdu;     
 
 drcdp=sparsity.drcdp;        drcdt=sparsity.drcdt;
-% drcdx=sparsity.drcdx;     drcdu=sparsity.drcdu; 
 
-dgdp=sparsity.dgdp;        dgdt=sparsity.dgdt;
-% dgdx=sparsity.dgdx;     dgdu=sparsity.dgdu;        
+dgdp=sparsity.dgdp;        dgdt=sparsity.dgdt;       
 dbdx0=sparsity.dbdx0;   
 dbdxf=sparsity.dbdxf;   dbdu0=sparsity.dbdu0;      dbduf=sparsity.dbduf;  
 dbdp=sparsity.dbdp;     dbdtf=sparsity.dbdtf;
@@ -74,7 +71,7 @@ ezf_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1);ones(n,1);ones(m,1)];
 
 idx0=find([dLdtf dLdp dLdx dLdu]);
 nfd=nnz(idx0);
-idx=spalloc(M,nfd,M*nfd);
+idx=zeros(M,nfd);
 
 etf=cell(1,nfd);ep=cell(1,nfd);
 ex=cell(1,nfd);eu=cell(1,nfd);
@@ -110,9 +107,9 @@ for i=1:nfd
      eu{i}=sparse(e0,idx0(i)-nt-np-n,1,M,m);
      idx(:,i)=find(data.map.uV*repmat(sparse(idx0(i)-nt-np-n,1,1,m,1),N,1))';
  end
- 
- 
 end
+
+idx=sparse(idx);
 
 vector.Ly.etf=etf;vector.Ly.ep=ep;
 vector.Ly.ex=ex;vector.Ly.eu=eu;vector.Ly.ez=ez_scaled;
@@ -180,11 +177,12 @@ colgroup=[ones(nt);ones(~(np==0))*(overlapping(dfdp)+nt);...
          nt+dp+colFxu];ngcol=max(colgroup);                      
 
 
-eg=spalloc(nz,ngcol,nz);
+% eg=spalloc(nz,ngcol,nz);
+eg=zeros(nz,ngcol);
 vector.f.etf=zeros(1,ngcol);vector.f.etf(1)=nt;
 vector.f.ep=eg;vector.f.ex=eg;vector.f.eu=eg;
-
-ixf=spalloc(n*M,ngcol,n*M*ngcol);
+ixf=zeros(n*M,ngcol);
+% ixf=spalloc(n*M,ngcol,n*M*ngcol);
 
 
 for i=1:ngcol
@@ -229,12 +227,10 @@ colgroup=[ones(nt);ones(~(np==0))*(overlapping(dgdp)+nt);...
          nt+dp+colGxu];ngcol=max(colgroup);
 
 
-
-eg=spalloc(nz,ngcol,ngcol*nz);
+eg=zeros(nz,ngcol);
 vector.g.etf=zeros(1,ngcol);vector.g.etf(1)=nt;
 vector.g.ep=eg;vector.g.ex=eg;vector.g.eu=eg;
-
-ig=spalloc(ng*M,ngcol,ng*M*ngcol);
+ig=zeros(ng*M,ngcol);
 
 
 for i=1:ngcol
@@ -246,6 +242,8 @@ for i=1:ngcol
     ig(ig(:,i)==0,i)=1;
   
 end
+eg=sparse(eg);
+ig=sparse(ig);
 
 ex=data.map.Vx*eg;eu=data.map.Vu*eg;
 
@@ -262,11 +260,11 @@ end
 
 % dgdz where z=[tf p x0 ...u0...  uf xf]; 
 
+
 if nrc
 RCxu=[kron(speye(M/N),sparse(sparsity.drcdx)),repmat(sparse(sparsity.drcdu),M/N,1)];
 
-drc=[repmat(drcdt,M,1) repmat(drcdp,M,1) kron(speye(N),RCxu)];
-
+drc=[repmat(drcdt,M,1) repmat(drcdp,M,1) kron(speye(M),RCxu)];
    
 cRCxu=overlapping(RCxu);   
 colRCxu=repmat(cRCxu,N,1);
@@ -277,13 +275,10 @@ colgroup=[ones(nt);ones(~(np==0))*(overlapping(drcdp)+nt);...
          nt+dp+colRCxu];nrccol=max(colgroup);
 
 
-
-erc=spalloc(nz,nrccol,nrccol*nz);
+erc=zeros(nz,nrccol);
 vector.rc.etf=zeros(1,nrccol);vector.rc.etf(1)=nt;
 vector.rc.ep=erc;vector.rc.ex=erc;vector.rc.eu=erc;
-
-irc=spalloc(nrc*M,nrccol,nrc*M*nrccol);
-
+irc=zeros(nrc,nrccol);
 
 for i=1:nrccol
     erc(colgroup==i,i)=1;
@@ -294,6 +289,9 @@ for i=1:nrccol
     irc(irc(:,i)==0,i)=1;
   
 end
+erc=sparse(erc);
+irc=sparse(irc);
+
 
 ex=data.map.Vx*erc;eu=data.map.Vu*erc;
 
@@ -305,6 +303,9 @@ for i=1:nrccol
     vector.rc.ep{i}=repmat(erc(nt+1:nt+np,i)',M,1);
 end
 
+irc=irc(1:ns:end,:);
+idxicrm=1:size(irc,1)/M;
+irc(idxicrm*M,:)=[];
 index.rc=irc;
 end
 

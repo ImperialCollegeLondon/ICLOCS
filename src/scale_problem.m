@@ -8,7 +8,6 @@ function [ problem,guess ] = scale_problem( problem,guess )
  idxeq=xl==xu;
  xl(idxeq)=xl(idxeq)-0.1;
  xu(idxeq)=xu(idxeq)+0.1;
-%  xl=problem.states.xl;xl(isinf(xl))=-500;
  
  problem.states.scales=1./(xu-xl);
  problem.states.shifts=0.5-xu./(xu-xl);
@@ -24,8 +23,8 @@ function [ problem,guess ] = scale_problem( problem,guess )
     guess.states=scale_variables(guess.states, problem.states.scales, problem.states.shifts );
  end
  if isfield(problem.states,'xrl')
-     problem.states.xrl=scale_variables( problem.states.xrl, problem.states.scales, problem.states.shifts );
-     problem.states.xru=scale_variables( problem.states.xru, problem.states.scales, problem.states.shifts );
+     problem.states.xrl=scale_variables( problem.states.xrl, problem.states.scales, 0 );
+     problem.states.xru=scale_variables( problem.states.xru, problem.states.scales, 0 );
  end
  
  if ~isempty(problem.setpoints.states)
@@ -49,8 +48,8 @@ function [ problem,guess ] = scale_problem( problem,guess )
  problem.inputs.u0u=scale_variables( problem.inputs.u0u, problem.inputs.scales, problem.inputs.shifts );
  
  if isfield(problem.inputs,'url')
-     problem.inputs.url=scale_variables( problem.inputs.url, problem.inputs.scales, problem.inputs.shifts );
-     problem.inputs.uru=scale_variables( problem.inputs.uru, problem.inputs.scales, problem.inputs.shifts );
+     problem.inputs.url=scale_variables( problem.inputs.url, problem.inputs.scales, 0 );
+     problem.inputs.uru=scale_variables( problem.inputs.uru, problem.inputs.scales, 0 );
  end
  if ~isempty(guess.inputs)
     guess.inputs=scale_variables( guess.inputs, problem.inputs.scales, problem.inputs.shifts );

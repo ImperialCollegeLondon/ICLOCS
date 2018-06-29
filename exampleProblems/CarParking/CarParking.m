@@ -154,14 +154,6 @@ problem.constraints.bu=[0 0 0 0];
 % store the necessary problem parameters used in the functions
 problem.data.auxdata=auxdata;
 
-% For algebraic variable rate constraint
-problem.data.xrl=problem.states.xrl;
-problem.data.xru=problem.states.xru;
-problem.data.xrConstraintTol=problem.states.xrConstraintTol;
-problem.data.url=problem.inputs.url;
-problem.data.uru=problem.inputs.uru;
-problem.data.urConstraintTol=problem.inputs.urConstraintTol;
-
 % Get function handles and return to Main.m
 problem.functions={@L,@E,@f,@g,@avrc,@b};
 problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc_unscaled,@b_unscaled};
@@ -355,34 +347,6 @@ c=[curvature_dot, auxdata.CL-A_y, auxdata.CL-B_y, auxdata.CL-C_y, auxdata.CL-D_y
 %------------- END OF CODE --------------
 
 
-function cr=avrc_unscaled(x,u,p,t,data)
-% avrc_unscaled - Returns the rate constraint algebraic function where [xrl url] =<
-% avrc(x,u,p,t) =< [xru uru]
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% constraint corresponds to one column of c
-% 
-% Syntax:  cr=avrc_unscaled(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%   data- structured variable containing the values of additional data used inside
-%          the function
-%
-% Output:
-%    cr - constraint function
-%
-%
-%------------- BEGIN CODE --------------
-
-
-[ cr ] = addRateConstraint( x,u,p,t,data );
-
-%------------- END OF CODE --------------
-
 function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 % b_unscaled - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 %
@@ -512,22 +476,30 @@ end
 %------------- END OF CODE --------------
 
 
-function cr=avrc(x,u,p,t,vdat)
-% avrc - Returns the rate constraint algebraic function where [xrl url] =< avrc(x,u,p,t) =< [xru uru]
-% Warp function
+function cr=avrc(x,u,p,t,data)
+
+% avrc - Returns the rate constraint algebraic function where [xrl url] =<
+% avrc(x,u,p,t) =< [xru uru]
+% The function must be vectorized and
+% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
+% constraint corresponds to one column of c
+% 
+% Syntax:  cr=avrc(x,u,p,t,data)
+%
+% Inputs:
+%    x  - state vector
+%    u  - input
+%    p  - parameter
+%    t  - time
+%   data- structured variable containing the values of additional data used inside
+%          the function
+%
+% Output:
+%    cr - constraint function
+%
+%
 %------------- BEGIN CODE --------------
-
-if isfield(vdat,'Xscale')
-    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
-    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-    if isfield(vdat,'Pscale')
-        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
-    end
-    cr = avrc_unscaled(x,u,p,t,vdat);
-else
-    cr = avrc_unscaled(x,u,p,t,vdat);
-end
-
+[ cr ] = addRateConstraint( x,u,p,t,data );
 %------------- END OF CODE --------------
 
 function bc=b(x0,xf,u0,uf,p,t0,tf,vdat,varargin)

@@ -68,6 +68,15 @@ if options.scaling
     [ problem,guess ] = scale_problem( problem,guess );
 end
 
+% Variable rate constraints
+if isfield(problem.states,'xrl')
+    data.data.xrl=problem.states.xrl;
+    data.data.xru=problem.states.xru;
+    data.data.xrConstraintTol=problem.states.xrConstraintTol;
+    data.data.url=problem.inputs.url;
+    data.data.uru=problem.inputs.uru;
+    data.data.urConstraintTol=problem.inputs.urConstraintTol;
+end
 
 % Two options for the LGR points on interval t=[-1,tau_n], tau_n<1. The
 % corresponding parameters are extracted. 
@@ -242,6 +251,38 @@ else
     end
 end
 nrc=nrcl+nrcu+nrce; 
+
+
+if nrc
+    if strcmp(options.transcription,'hermite')
+
+        data.RCmap.AxHS1=diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2);
+        data.RCmap.AxHS1([2:2:end,end],:)=[];
+        data.RCmap.AxHS2=diag(ones(M,1))+diag(-4*ones(M-1,1),1)+diag(3*ones(M-2,1),2);
+        data.RCmap.AxHS2([2:2:end,end],:)=[];
+        data.RCmap.AxHS3=diag(-ones(M,1))+diag(ones(M-2,1),2);
+        data.RCmap.AxHS3([2:2:end,end],:)=[];
+        data.RCmap.AxHS4=diag(-ones(M,1))+diag(ones(M-1,1),1);
+        data.RCmap.AxHS4([2:2:end,end],:)=[];
+
+        data.RCmap.AuHS1=diag(-3*ones(N,1))+diag(4*ones(N-1,1),1)+diag(-ones(N-2,1),2);
+        data.RCmap.AuHS1([2:2:end,end],:)=[];
+        data.RCmap.AuHS2=diag(ones(N,1))+diag(-4*ones(N-1,1),1)+diag(3*ones(N-2,1),2);
+        data.RCmap.AuHS2([2:2:end,end],:)=[];
+        data.RCmap.AuHS3=diag(-ones(N,1))+diag(ones(N-2,1),2);
+        data.RCmap.AuHS3([2:2:end,end],:)=[];
+        data.RCmap.AuHS4=diag(-ones(N,1))+diag(ones(N-1,1),1);
+        data.RCmap.AuHS4([2:2:end,end],:)=[];
+    elseif (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,'hpLGR'))
+    else
+
+        data.RCmap.Ax=diag(-ones(M,1))+diag(ones(M-1,1),1);
+        data.RCmap.Ax(end,:)=[];
+        data.RCmap.Au=diag(-ones(N,1))+diag(ones(N-1,1),1);
+        data.RCmap.Au(end,:)=[];
+    end
+end
+    
 
 % Number of path constraints
 % Save the corrsponding variables sizes
@@ -616,9 +657,8 @@ if ~strcmp(options.transcription,'multiple_shooting')
             RCxu_2=kron(speye((M-1)/ns),RCxu_2);
             RCxu_1=[RCxu_1 zeros(size(RCxu_1,1),m+n)];
             RCxu_2=[zeros(size(RCxu_2,1),(m+n)) RCxu_2];
-            RCxu=RCxu_1(1:(M-1)/ns:size(RCxu_1,1),:)+RCxu_2(1:(M-1)/ns:size(RCxu_2,1),:);
+            RCxu=RCxu_1+RCxu_2;
             drcz=[repmat(sparsity.drcdt,(M-1)/ns,1) repmat(sparsity.drcdp,(M-1)/ns,1)];
-            drcz=drcz(1:(M-1)/ns:size(drcz,1),:);
             drcz=[drcz RCxu];
             idx_rcl=logical(repmat([ones(1,vnrcl),zeros(1,vnrcu),zeros(1,vnrce)],1,(M-1)/ns));
             idx_rcu=logical(repmat([zeros(1,vnrcl),ones(1,vnrcu),zeros(1,vnrce)],1,(M-1)/ns));

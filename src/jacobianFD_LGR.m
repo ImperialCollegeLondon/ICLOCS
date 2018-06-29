@@ -25,8 +25,7 @@ vdat=data.data;
 DTLP=repmat(data.t_segment_end,1,n);
 
 X=X_Np1(1:M,:);
-% DTLP=(tf-t0)/2;
-% t0=data.t0;
+
 % Compute fz
 %------------
 
@@ -84,7 +83,7 @@ for i=1:nfd
     if ~any(ex{i}(:)) && ~any(eu{i}(:))
         rcp=avrc(X_Np1+ex{i}*e,U+eu{i}*e,P+ep{i}*e,[(tf+etf(i)-t0-et0(i))/2.*T+(tf+etf(i)+t0+et0(i))/2;tf],data);
         rcm=avrc(X_Np1-ex{i}*e,U-eu{i}*e,P-ep{i}*e,[(tf-etf(i)-t0+et0(i))/2.*T+(tf-etf(i)+t0-et0(i))/2;tf],data);
-        rcz=rcz+sparse(1:nrc,idx(1:M+1:end,i),(rcp-rcm)/(2*e),nrc,nz);
+        rcz=rcz+sparse(1:nrc,idx(:,i),(rcp-rcm)/(2*e),nrc,nz);
     end
 end
     rcz=rcz+[data.map.Acl;data.map.Ae;data.map.Acu];
@@ -119,19 +118,8 @@ end
 
 end
 
-
-% figure
-% plot(fz)
-% 
-% 
-% figure
-% plot([kron(speye(n),data.map.LGR.diff_matrix) zeros(M*n,M*m+np+nt)])
 % Map derivatives to the jacobian
 %---------------------------------
-% D_structure=kron(speye(nps),data.map.LGR.diff_matrix(:,1:end-1));
-% for i=1:nps
-%     D_structure((i-1)*npd+1:(i-1)*npd+npd,npd*i+1)=data.map.LGR.diff_matrix(:,end);
-% end
 jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt)]+fz;gz;rcz;bz];
 
 

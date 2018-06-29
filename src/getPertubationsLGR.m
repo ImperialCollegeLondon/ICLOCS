@@ -67,8 +67,7 @@ idx0{2}=find(dLdu);
 idx0{3}=find(dLdp);
 idx0{4}=find(dLdt);
 nfd=nnz(cell2mat(idx0));
-idx=spalloc(M,nfd,M*nfd);
-
+idx=zeros(M,nfd);
 
 ex=cell(1,nfd);eu=cell(1,nfd);
 ep=cell(1,nfd);et=cell(1,nfd);et0=cell(1,nfd);etf=cell(1,nfd);
@@ -130,6 +129,7 @@ for k=1:size(idx0,2)
 
  
 end
+idx=sparse(idx);
 vector.Ly.et=et;
 vector.Ly.et0=et0;vector.Ly.etf=etf;
 vector.Ly.ep=ep;
@@ -248,12 +248,11 @@ end
 colgroup=[colFxu;ones(~(np==0))*(dp+max(colFxu));((1:nt)+max(colFxu)+dp)'];
 ngcol=max(colgroup);    
      
-eg=spalloc(nz,ngcol,nz);
+eg=zeros(nz,ngcol);
 vector.f.et0=zeros(1,ngcol);vector.f.et0(ngcol-nt+1)=1;
 vector.f.etf=zeros(1,ngcol);vector.f.etf(ngcol)=1;
 vector.f.ep=eg;vector.f.ex=eg;vector.f.eu=eg;vector.f.et=eg;
-
-ixf=spalloc(n*M,ngcol,n*M*ngcol);
+ixf=zeros(n*M,ngcol);
 
 
 for i=1:ngcol
@@ -271,7 +270,8 @@ end
 for i=1:nt
     ixf(:,end-nt+i)=nz-nt+i;
 end
-
+ixf=sparse(ixf);
+eg=sparse(eg);
 
 ex=data.map.Vx*eg;eu=data.map.Vu*eg;et=data.map.Vt*eg;
 
@@ -323,14 +323,11 @@ if ng
     colgroup=[colGxu;ones(~(np==0))*(dp+max(colGxu));((1:nt)+max(colGxu)+dp)'];
     ngcol=max(colgroup);
 
-
-    eg=spalloc(nz,ngcol,ngcol*nz);
+    eg=zeros(nz,ngcol);
     vector.g.et0=zeros(1,ngcol);vector.g.et0(ngcol-nt+1)=1;
     vector.g.etf=zeros(1,ngcol);vector.g.etf(ngcol)=1;
     vector.g.ep=eg;vector.g.ex=eg;vector.g.eu=eg;vector.g.et=eg;
-
-    ig=spalloc(ng*M,ngcol,ng*M*ngcol);
-
+    ig=zeros(ng*M,ngcol);
 
     for i=1:ngcol
         eg(colgroup==i,i)=1;
@@ -349,7 +346,8 @@ if ng
     for i=1:nt
         ig(:,end-nt+i)=nz-nt+i;
     end
-
+    eg=sparse(eg);
+    ig=sparse(ig);
     ex=data.map.Vx*eg;eu=data.map.Vu*eg;et=data.map.Vt*eg;
 
     vector.g.ex=cell(ngcol,1);vector.g.eu=cell(ngcol,1);vector.g.ep=cell(ngcol,1);vector.g.et=cell(nt,1);
@@ -375,7 +373,7 @@ end
 
 if nrc
     
-    drcxu=zeros((M+1)*nrc,(M+1)*n+M*m);
+    drcxu=zeros((M+1)*nrc/M,(M+1)*n+M*m);
     for rci=1:size(drcdx,1)
         for xi=1:size(drcdx,2)
             drcxu(((rci-1)*(M+1)+1):rci*(M+1),((xi-1)*(M+1)+1):(xi*(M+1)))=kron(speye(M+1),drcdx(rci,xi));
@@ -398,18 +396,16 @@ if nrc
     colgroup=[colRCxu;ones(~(np==0))*(dp+max(colRCxu));((1:nt)+max(colRCxu)+dp)'];
     nrccol=max(colgroup);
 
-
-    erc=spalloc(nz,nrccol,nrccol*nz);
+    erc=zeros(nz,nrccol);
     vector.rc.et0=zeros(1,nrccol);vector.rc.et0(nrccol-nt+1)=1;
     vector.rc.etf=zeros(1,nrccol);vector.rc.etf(nrccol)=1;
     vector.rc.ep=erc;vector.rc.ex=erc;vector.rc.eu=erc;vector.rc.et=erc;
 
-    irc=spalloc(nrc*(M+1),nrccol,nrc*(M+1)*nrccol);
-
+    irc=zeros(nrc/M*(M+1),nrccol);
 
     for i=1:nrccol
         erc(colgroup==i,i)=1;
-        [a,b]=find([drcxu sparse((M+1)*nrc,np+nt)]*spdiags(erc(:,i),0,nz,nz));
+        [a,b]=find([drcxu sparse((M+1)*nrc/M,np+nt)]*spdiags(erc(:,i),0,nz,nz));
 
         irc(a,i)=b;
         
@@ -418,13 +414,13 @@ if nrc
         else
             irc(irc(:,i)==0,i)=1;
         end
-
-
     end
 
     for i=1:nt
         irc(:,end-nt+i)=nz-nt+i;
     end
+    irc=sparse(irc);
+    erc=sparse(erc);
 
     ex=data.map.Vx*erc;eu=data.map.Vu*erc;et=data.map.Vt*erc;
 
@@ -444,13 +440,14 @@ if nrc
         end
     end
 
+    idxicrm=1:size(irc,1)/(M+1);
+    irc(idxicrm*(M+1),:)=[];
     index.rc=irc;
 end
 
 % dbdzb where zb=[x0 xf u0 uf p t0 tf];
 % -----------------------------------
 
-    
     idxx0=1:M+1:(M+1)*(n-1)+1;
     idxxf=(M+1):(M+1):(M+1)*n;
     idxu0=(M+1)*n+1:(M):((M+1)*n+(M)*(m-1)+1);

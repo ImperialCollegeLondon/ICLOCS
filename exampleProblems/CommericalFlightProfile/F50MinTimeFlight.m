@@ -109,7 +109,7 @@ problem.time.t0=0;
 % Final time. Let tf_min=tf_max if tf is fixed.
 problem.time.tf_min=0;     
 problem.time.tf_max=15000; 
-guess.tf=9000;
+guess.tf=10000;
 % guess.tf=presol.T(end);
 
 % Parameters bounds. pl=< p <=pu
@@ -196,14 +196,6 @@ problem.constraints.bu=[0];
 % store the necessary problem parameters used in the functions
 problem.data.auxdata=auxdata;
 
-% For algebraic variable rate constraint
-problem.data.xrl=problem.states.xrl;
-problem.data.xru=problem.states.xru;
-problem.data.xrConstraintTol=problem.states.xrConstraintTol;
-problem.data.url=problem.inputs.url;
-problem.data.uru=problem.inputs.uru;
-problem.data.urConstraintTol=problem.inputs.urConstraintTol;
-
 % Get function handles and return to Main.m
 problem.functions={@L,@E,@f,@g,@avrc,@b};
 problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc_unscaled,@b_unscaled};
@@ -265,7 +257,7 @@ function boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,data)
 %    boundaryCost - Scalar boundary cost
 %
 %------------- BEGIN CODE --------------
-% boundaryCost=-xf(5);
+%
 boundaryCost=tf;
 
 %------------- END OF CODE --------------
@@ -372,33 +364,6 @@ npos = x(:,2);
 epos = x(:,3);
 
 c=[(npos-data.auxdata.obs_npos).^2+(epos-data.auxdata.obs_epos).^2-data.auxdata.obs_r.^2];
-
-%------------- END OF CODE --------------
-
-function cr=avrc_unscaled(x,u,p,t,data)
-
-% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% constraint corresponds to one column of c
-% 
-% Syntax:  c=g(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%   data- structured variable containing the values of additional data used inside
-%          the function
-%
-% Output:
-%    c - constraint function
-%
-%
-%------------- BEGIN CODE --------------
-
-[ cr ] = addRateConstraint( x,u,p,t,data );
 
 %------------- END OF CODE --------------
 
@@ -544,14 +509,15 @@ end
 %------------- END OF CODE --------------
 
 
-function cr=avrc(x,u,p,t,vdat)
+function cr=avrc(x,u,p,t,data)
 
-% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
+% avrc - Returns the rate constraint algebraic function where [xrl url] =<
+% avrc(x,u,p,t) =< [xru uru]
 % The function must be vectorized and
 % xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
 % constraint corresponds to one column of c
 % 
-% Syntax:  c=g(x,u,p,t,data)
+% Syntax:  cr=avrc(x,u,p,t,data)
 %
 % Inputs:
 %    x  - state vector
@@ -562,21 +528,11 @@ function cr=avrc(x,u,p,t,vdat)
 %          the function
 %
 % Output:
-%    c - constraint function
+%    cr - constraint function
+%
 %
 %------------- BEGIN CODE --------------
-
-if isfield(vdat,'Xscale')
-    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
-    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-    if isfield(vdat,'Pscale')
-        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
-    end
-    cr = avrc_unscaled(x,u,p,t,vdat);
-else
-    cr = avrc_unscaled(x,u,p,t,vdat);
-end
-
+[ cr ] = addRateConstraint( x,u,p,t,data );
 %------------- END OF CODE --------------
 
 function c=g(x,u,p,t,vdat)
