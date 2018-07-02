@@ -82,7 +82,7 @@ if strcmp(data.options.transcription,'hermite')
             AxHScu2=zeros(size(AxHS2));AxHScu2(:,idx)=AxHS2(:,idx);
             AxHScu3=zeros(size(AxHS3));AxHScu3(:,idx)=AxHS3(:,idx);
             Acu(:,m:m+nz*3-1)=[sparse(AxHScu1)*data.map.Vx sparse(AxHScu2)*data.map.Vx sparse(AxHScu3)*data.map.Vx];
-            m=m+m*3;
+            m=m+nz*3;
         end
     end
     for i=1:nu
@@ -103,7 +103,7 @@ if strcmp(data.options.transcription,'hermite')
             AuHScu1=zeros(size(AuHS1));AuHScu1(:,idx)=AuHS1(:,idx);
             AuHScu2=zeros(size(AuHS2));AuHScu2(:,idx)=AuHS2(:,idx);
             Acu(:,m:m+nz*2-1)=[sparse(AuHScu1)*data.map.Vu sparse(AuHScu2)*data.map.Vu];
-            m=m+m*2;
+            m=m+nz*2;
         end
     end
 
