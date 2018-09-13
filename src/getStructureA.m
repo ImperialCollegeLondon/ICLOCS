@@ -25,9 +25,9 @@ disp('Determine sparsity structure');
 
 % Get dimensions
 if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcription,'hpLGR')
-    [nt,np,n,m,ng,nb,~,~,~,~,~,~,~,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,n,m,ng,nb,M,~,ns,npd,~,~,~,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 else
-    [nt,np,n,m,ng,nb,~,~,~,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,n,m,ng,nb,M,~,ns,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 end
 nrc=nrcl+nrcu+nrce;
 
@@ -128,15 +128,31 @@ else
 end
 
 if nrc
- drcdx=ones(nrc,n);
- drcdu=ones(nrc,m);
- drcdp=ones(nrc,np);  
- drcdt=ones(nrc,nt);
+    if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcription,'hpLGR')
+        M=sum(npd);
+        drcdx=ones(nrc/M,n);
+        drcdu=ones(nrc/M,m);
+        drcdp=ones(nrc/M,np);  
+        drcdt=ones(nrc/M,nt);
+    else
+        drcdx=ones(nrc/((M-1)/ns),n);
+        drcdu=ones(nrc/((M-1)/ns),m);
+        drcdp=ones(nrc/((M-1)/ns),np);  
+        drcdt=ones(nrc/((M-1)/ns),nt);
+    end
 else
- drcdx=zeros(nrc,n);
- drcdu=zeros(nrc,m);
- drcdp=zeros(nrc,np);  
- drcdt=zeros(nrc,nt);
+    if strcmp(method,'globalLGR') || strcmp(method,'hpLGR')
+        M=sum(npd);
+        drcdx=zeros(nrc/M,n);
+        drcdu=zeros(nrc/M,m);
+        drcdp=zeros(nrc/M,np);  
+        drcdt=zeros(nrc/M,nt);
+    else
+        drcdx=zeros(nrc/((M-1)/ns),n);
+        drcdu=zeros(nrc/((M-1)/ns),m);
+        drcdp=zeros(nrc/((M-1)/ns),np);  
+        drcdt=zeros(nrc/((M-1)/ns),nt);
+    end
 end
 
 

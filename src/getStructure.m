@@ -25,9 +25,9 @@ disp('Determine sparsity structure');
 
 % Get dimensions
 if strcmp(method,'globalLGR') || strcmp(method,'hpLGR')
-    [nt,np,n,m,ng,nb,M,~,ns,npd,~,~,~,nrcl,nrcu,nrce]=deal(sizes{:});
+    [nt,np,n,m,ng,nb,M,~,ns,npd,~,~,~,nrcl,nrcu,nrce,~]=deal(sizes{:});
 else
-    [nt,np,n,m,ng,nb,M,~,ns,nrcl,nrcu,nrce]=deal(sizes{:});
+    [nt,np,n,m,ng,nb,M,~,ns,nrcl,nrcu,nrce,~]=deal(sizes{:});
 end
 nrc=nrcl+nrcu+nrce;
 

@@ -33,14 +33,17 @@ function hessian=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
 
 
 % Define some useful variables
-[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;                              % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
 Gamma_1toN=reshape(data.lambda(1:M*n),M,n);
 adjoint_f=Gamma_1toN;
-adjoint_g=reshape(data.lambda((M*n+1):M*(n+ng)),M,ng);
-adjoint_b=data.lambda((M*(n+ng)+nrc+1):end);
+
+adjoint_g=zeros(M,ng);
+adjoint_g(logical(data.gActiveIdx))=data.lambda(n*M+1:n*M+ngActive);
+
+adjoint_b=data.lambda((M*n+ngActive+nrc+1):end);
 
 
 
@@ -110,7 +113,8 @@ for i=1:nfd
         (DT+et0(i)-et0(j)-etf(i)+etf(j))/2.*T+(k0-et0(i)+et0(j)-etf(i)+etf(j))/2,vdat);
      gt=(gpp-gpm+gmm-gmp).*adjoint_g/e2/4;
     end
-     gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt,M*ng,1),nz,nz);
+     g_vect=reshape(gt,M*ng,1);
+     gzz=gzz+sparse(idx(data.gAllidx,i),idx(data.gAllidx,j),g_vect(data.gAllidx),nz,nz);
     end
 end
 

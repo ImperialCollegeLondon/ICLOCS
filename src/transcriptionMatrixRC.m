@@ -19,10 +19,10 @@ function data = transcriptionMatrixRC( data )
 % iclocs@imperial.ac.uk
 
 if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcription,'hpLGR')
-    [nt,np,nx,nu,~,~,M,N,ns,npd,~,~,~,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,nx,nu,~,~,M,N,ns,npd,~,~,~,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
     nz=nt+np+(M+1)*nx+M*nu;  
 else
-    [nt,np,nx,nu,~,~,M,N,ns,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,nx,nu,~,~,M,N,ns,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
     nz=nt+np+M*nx+N*nu;
 end
 
@@ -46,6 +46,15 @@ if strcmp(data.options.transcription,'hermite')
     AuHS3([2:2:end,end],:)=[];
     AuHS4=diag(-ones(N,1))+diag(ones(N-1,1),1);
     AuHS4([2:2:end,end],:)=[];
+    
+    data.data.RC.AxHS1=AxHS1;
+    data.data.RC.AxHS2=AxHS2;
+    data.data.RC.AxHS3=AxHS3;
+    data.data.RC.AxHS4=AxHS4;
+    data.data.RC.AuHS1=AuHS1;
+    data.data.RC.AuHS2=AuHS2;
+    data.data.RC.AuHS3=AuHS3;
+    data.data.RC.AuHS4=AuHS4;
     
     AxHS1=repelem(AxHS1,1,nx);
     AxHS2=repelem(AxHS2,1,nx);
@@ -113,6 +122,7 @@ if strcmp(data.options.transcription,'hermite')
     Ae=reshape(Ae(:),nz,length(Ae(:))/nz)';
     Acu=Acu';
     Acu=reshape(Acu(:),nz,length(Acu(:))/nz)';
+    
     
     data.map.Acl=sparse(Acl);
     data.map.Ae=sparse(Ae);

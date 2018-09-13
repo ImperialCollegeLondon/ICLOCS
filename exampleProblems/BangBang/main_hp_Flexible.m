@@ -23,7 +23,7 @@ close all;clear all;format compact;
 global sol;    
 sol=[];                             % Initialize solution structure
 
-options= settings_hp_Flexible(5,4);                  % Get options and solver settings  
+options= settings_hp_Flexible(4,4);                  % Get options and solver settings  
 [problem,guess]=BangBang;          % Fetch the problem definition
 [infoNLP,data]=transcribeOCP(problem,guess,options); % Format for NLP solver
 [solution,infoNLP1,data] = solveNLP(infoNLP,data);      % Solve the NLP

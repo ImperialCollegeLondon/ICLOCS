@@ -50,7 +50,9 @@ for i=1:n
     
     idx=union(idx,idxi);
 end
-T_remesh_div=solution.T(idx+1);
+idxd=idx+1;
+idxd(idxd>length(solution.T))=[];
+T_remesh_div=solution.T(idxd);
 
 % Identify refinement locations based on constraint violation
 ConstraintError=solution.ConstraintError;

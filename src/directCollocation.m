@@ -33,7 +33,7 @@ global sol;
 
 
 % Define some useful variables
-[nt,np,n,m,ng,~,M,N,ns,~,~,~]=deal(data.sizes{:});
+[nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(data.sizes{:});
 
 
 % Get function definitions
@@ -55,7 +55,12 @@ U=reshape(mp.Vu*z,m,N)';
 %%
 % Extract design parameters if specified and convert to cells
 if np
-    P=reshape(repmat(z(nt+1:nt+np),M,1),np,M)';
+%     if isfield(vdat.mode, 'np') && vdat.mode.np~=0
+%         npactual=np-vdat.mode.np*ng;
+%         P=[reshape(repmat(z(nt+1:nt+npactual),M,1),npactual,M)',reshape(z(nt+npactual+1:nt+np),M,ng)];
+%     else
+        P=reshape(repmat(z(nt+1:nt+np),M,1),np,M)';
+%     end
 else
     P=spalloc(M,0,1);
 end
@@ -129,8 +134,9 @@ switch required
       
     case{'const'}
         X_vect=reshape(X',n*M,1);
+        g_vect=reshape(g(X,U,P,t,vdat)',M*ng,1);
         sol.const=[(x0-data.x0t)*data.cx0;mp.A*X_vect+mp.B*reshape((tf-t0)*f(X,U,P,t,vdat)',M*n,1);
-                  reshape(g(X,U,P,t,vdat)',M*ng,1);
+                  g_vect(data.gAllidx);
                   avrc(X,U,P,t,data)';
                   b(x0,xf,u0,uf,p,t0,tf,vdat)];
         solution=sol.const;
@@ -144,7 +150,7 @@ switch required
         end
         if strcmp(data.options.derivatives,'analytic')
             [df,dg,db]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
-            [sol.jacConst,sol.Jf]=jacConstz(df,dg,g,f,X,U,P,T,db,b,x0,xf,u0,uf,p,t0,tf,data);
+            [sol.jacConst,sol.Jf]=jacConstz(df,dg,g,f,avrc,X,U,P,T,db,b,x0,xf,u0,uf,p,t0,tf,data);
         end
           
         if strcmp(data.options.NLPsolver,'worhp')

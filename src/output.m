@@ -28,11 +28,14 @@ function [solution]=output(problem,solution,options,data,plotid)
 
 %------------- BEGIN CODE --------------
 
+% if isfield(problem.inputs,'singular_arc_lift')
+%     [ problem ] = avoidSingularArc( problem );
+% end
 
 
 if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,'hpLGR'))
     % Define some variables
-    [nt,np,n,m,~,~,M,~,ns,npd,~,npduidx,~,~,~,~]=deal(data.sizes{:});
+    [nt,np,n,m,~,~,M,~,ns,npd,~,npduidx,~,~,~,~,~]=deal(data.sizes{:});
     vdat=data.data;
     t0=data.t0;
 
@@ -97,7 +100,12 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
         end
     else
         % State trajectory
-        if strcmp(data.options.stateRep,'Legendre') % Legendre interpolation
+        if strcmp(data.options.stateRep,'pchip') || strcmp(data.options.resultRep,'default')% pchip interpolation
+            for i=1:n
+                Xp{i}=pchip([T;solution.tf],X_Np1(:,i)');
+                dXp{i}=pchip([T;solution.tf],F_Np1(:,i)');
+            end
+        elseif strcmp(data.options.stateRep,'Legendre') % Legendre interpolation
             for i=1:n 
                  for j=1:length(npd)
                      idxst=sum(npd(1:j-1))+1;
@@ -105,11 +113,6 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
                      Xp{j,i}=legendrefit([data.map.LGR.points{npduidx(j)};1],X_Np1(idxst:idxed,i), npd(j)+1, 'qr');
                      dXp{j,i}=legendrefit(data.map.LGR.points{npduidx(j)},F(idxst:idxed-1,i), npd(j), 'qr');
                  end
-            end
-        elseif strcmp(data.options.stateRep,'pchip') || strcmp(data.options.resultRep,'default')% pchip interpolation
-            for i=1:n
-                Xp{i}=pchip([T;solution.tf],X_Np1(:,i)');
-                dXp{i}=pchip([T;solution.tf],F_Np1(:,i)');
             end
         elseif strcmp(data.options.stateRep,'Barycentric') %Barycentric Lagrange Interpolation
             for i=1:n 
@@ -125,17 +128,17 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
         end
 
         % Input trajectory
-        if strcmp(data.options.inputRep,'constant') % Piecewise constant polynomials
+        if strcmp(data.options.inputRep,'pchip') || strcmp(data.options.resultRep,'default') % pchip interpolation
+            for i=1:m 
+                Up{i}=pchip([T;solution.tf],U_Np1(:,i)');
+            end
+        elseif strcmp(data.options.inputRep,'constant') % Piecewise constant polynomials
             for i=1:m 
                 Up{i}=mkpp([T;solution.tf],U(:,i)');
             end
         elseif strcmp(data.options.inputRep,'linear') % Piecewise linear polynomials
             for i=1:m 
                 Up{i}=Linsplines([T;solution.tf],U_Np1(:,i),diff(U_Np1(:,i)));
-            end
-        elseif strcmp(data.options.inputRep,'pchip') || strcmp(data.options.resultRep,'default') % pchip interpolation
-            for i=1:m 
-                Up{i}=pchip([T;solution.tf],U_Np1(:,i)');
             end
         elseif strcmp(data.options.inputRep,'Legendre') % Legendre fitting
             for i=1:m 
@@ -174,16 +177,18 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
 
     % Display discretization error, constaint violation and number of active
     % constraints
-    if options.print.relative_local_error
+        
+        [ solution ] = getVariableRate( solution,data );
+    
         [Error, ErrorRelative]=estimateError_LGR(Xp,Up,dXp,p,T,TSeg_Bar,n,m,f,M,data);
+        
+        [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation_LGR(Xp,Up,p,t0,tf,TSeg_Bar,n,m,solution,problem,data,1);
+            
+    if options.print.relative_local_error
         disp('Maximum absolute local error:');disp(max(Error));
         disp('Maximum relative local error:');disp(max(ErrorRelative));
-        [ConstraintError,T_ConstraintError]=estimateConstraintViolation_LGR(Xp,Up,p,tf,TSeg_Bar,n,m,problem,data);
         disp('Maximum absolute constraint violation:');disp(max(ConstraintError));
-        if isfield(options,'AutoDirect')
-            [NumActiveConstraint]=calcNumActiveConstraint_LGR(solution,problem,data);
-            disp('Number of active constraints:');disp(NumActiveConstraint);
-        end
+        disp('Number of active constraints:');disp(NumActiveConstraint);
     end
 
     % Figure generation
@@ -254,14 +259,14 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
 
           figure(4)
             hold on
-            plot(T(2:end),max(Error,[],2))
+            plot(T,max(Error,[],2))
             xlabel('Time')
             title('Maximum absolute Local error') 
             grid on; axis tight; 
 
            figure(5)
             hold on
-            plot(T(2:end),max(ErrorRelative,[],2))
+            plot(T,max(ErrorRelative,[],2))
             xlabel('Time')
             title('Maximum relative Local error') 
             grid on; axis tight; 
@@ -283,11 +288,12 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
     solution.ErrorRelative=ErrorRelative;
     solution.ConstraintError=ConstraintError;
     solution.T_ConstraintError=T_ConstraintError;
-    if isfield(options,'AutoDirect')
+%     if isfield(options,'AutoDirect')
+         solution.ActiveConstraint=ActiveConstraint;
          solution.NumActiveConstraint=NumActiveConstraint;
-    end
+%     end
     solution.TSeg_Bar=TSeg_Bar;
-    [ solution ] = getVariableRate( solution,data );
+
 
     
 else
@@ -313,7 +319,7 @@ else
 
     % Extract design parameters
     if np
-        p=solution.p';
+        p=solution.p;
         P=repmat(p,M,1);
     else
         P=[];
@@ -330,14 +336,21 @@ else
             X=scale_variables_back( X, data.data.Xscale, data.data.Xshift );
             U=scale_variables_back( U, data.data.Uscale, data.data.Ushift );
         end
+        if isfield(vdat,'singular_arc_lift')
+            U(:,vdat.singular_arc_lift)=(U(:,vdat.singular_arc_lift)+1).^2+vdat.singular_arc_lift_shift(vdat.singular_arc_lift);
+        end
         solution.z_orgscale=[tf*ones(nt);p;zeros(n*M+m*N,1)]+data.map.xV*reshape(X',M*n,1)+data.map.uV*reshape(U',m*N,1);
         U=[U;U(end,:)];
+
     else
         X=reshape(Vx*z,n,M)';
         U=reshape(Vu*z,m,N)';
         if data.options.scaling
             X=scale_variables_back( X, data.data.Xscale, data.data.Xshift );
             U=scale_variables_back( U, data.data.Uscale, data.data.Ushift );
+        end
+        if isfield(vdat,'singular_arc_lift')
+            U(:,vdat.singular_arc_lift)=(U(:,vdat.singular_arc_lift)+1).^2+vdat.singular_arc_lift_shift(vdat.singular_arc_lift);
         end
         solution.z_orgscale=[tf*ones(nt);p;zeros(n*M+m*N,1)]+data.map.xV*reshape(X',M*n,1)+data.map.uV*reshape(U',m*N,1);
     end
@@ -429,17 +442,23 @@ else
         disp('minimized cost:');disp(costFunction(z,data));
     end
 
+    % Calculate variable rates
+    if ~strcmp(data.options.transcription,'multiple_shooting')
+        [ solution ] = getVariableRate( solution,data );
+    end
+    
     % Display discretization error, constaint violation and number of active
     % constraints
     [Error, ErrorRelative,T_error]=estimateError(Xp,Up,dXp,p,tf,n,m,f,M,ns,data);
     disp('Maximum absolute local error:');disp(max(Error));
     disp('Maximum relative local error:');disp(max(ErrorRelative));
-    [ConstraintError,T_ConstraintError]=estimateConstraintViolation(Xp,Up,p,tf,n,m,problem,data);
+    
+    
+    [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation(Xp,Up,p,tf,n,m,solution,problem,data,1);
     disp('Maximum absolute constraint violation:');disp(max(ConstraintError));
-    if isfield(options,'AutoDirect')
-        [NumActiveConstraint]=calcNumActiveConstraint(solution,problem,data);
-        disp('Number of active constraints:');disp(NumActiveConstraint);
-    end
+%     if isfield(options,'AutoDirect')
+    disp('Number of active constraints:');disp(NumActiveConstraint);
+%     end
 
     % Obtain multipliers
     switch(data.options.NLPsolver)
@@ -546,12 +565,11 @@ else
     solution.multipliers.lambda_1toN=lambda;
     solution.ConstraintError=ConstraintError;
     solution.T_ConstraintError=T_ConstraintError;
-    if isfield(options,'AutoDirect')
+%     if isfield(options,'AutoDirect')
+         solution.ActiveConstraint=ActiveConstraint;
          solution.NumActiveConstraint=NumActiveConstraint;
-    end
-    if ~strcmp(data.options.transcription,'multiple_shooting')
-        [ solution ] = getVariableRate( solution,data );
-    end
+%     end
+
 end
 %------------- END OF CODE --------------
 
@@ -662,7 +680,7 @@ end
 end
 
 
-function [MaxConstraintError,tg]=estimateConstraintViolation(Xp,Up,p,tf,n,m,problem,data)
+function [MaxConstraintError,tg,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation(Xp,Up,p,tf,n,m,solution,problem,data, id)
 
 %estimateConstraintViolation - Estimate the absolute local constraint violation
 %
@@ -734,62 +752,168 @@ Uu(Uu>0)=0;
 
 MaxConstraintError=[abs(Gu),abs(Gl),abs(Xu),abs(Xl),abs(Uu),abs(Ul)];
 
+
+%% 
+
+if id==1
+    Gl=G-problem.constraints.gl;
+    Glpactive=min(Gl,problem.constraints.gTol)-problem.constraints.gTol;
+    Glpactive=Glpactive<0;
+    Glabs=min(min(Gl,[],1),problem.constraints.gTol);
+    Glactive=Glabs<problem.constraints.gTol;
+
+    Gu=problem.constraints.gu-G;
+    Gupactive=min(Gu,problem.constraints.gTol)-problem.constraints.gTol;
+    Gupactive=Gupactive<0;
+    Guabs=min(min(Gu,[],1),problem.constraints.gTol);
+    Guactive=Guabs<problem.constraints.gTol;
+
+    Xl=solution.X-problem.states.xl;
+    Xlabs=min(min(Xl,[],1),problem.states.xConstraintTol);
+    Xlactive=Xlabs<problem.states.xConstraintTol;
+
+    Xu=problem.states.xu-solution.X;
+    Xuabs=min(min(Xu,[],1),problem.states.xConstraintTol);
+    Xuactive=Xuabs<problem.states.xConstraintTol;
+
+    Ul=solution.U-problem.inputs.ul;
+    Ulabs=min(min(Ul,[],1),problem.inputs.uConstraintTol);
+    Ulactive=Ulabs<problem.inputs.uConstraintTol;
+
+    Uu=problem.inputs.uu-solution.U;
+    Uuabs=min(min(Uu,[],1),problem.inputs.uConstraintTol);
+    Uuactive=Uuabs<problem.inputs.uConstraintTol;
+
+    NumActiveRateConstraint=0;
+    if isfield(solution,'dX') && isfield(problem.states,'xrl')
+        Xrl=solution.dX-problem.states.xrl;
+        Xrlabs=min(min(Xrl,[],1),problem.states.xrConstraintTol);
+        Xrlactive=Xrlabs<problem.states.xrConstraintTol;
+
+        Xru=problem.states.xru-solution.dX;
+        Xruabs=min(min(Xru,[],1),problem.states.xrConstraintTol);
+        Xruactive=Xruabs<problem.states.xrConstraintTol;
+
+        Url=solution.dU-problem.inputs.url;
+        Urlabs=min(min(Url,[],1),problem.inputs.urConstraintTol);
+        Urlactive=Urlabs<problem.inputs.urConstraintTol;
+
+        Uru=problem.inputs.uru-solution.dU;
+        Uruabs=min(min(Uru,[],1),problem.inputs.urConstraintTol);
+        Uruactive=Uruabs<problem.inputs.urConstraintTol;
+
+        ActiveConstraint.Xrlactive=Xrlactive;
+        ActiveConstraint.Xruactive=Xruactive;
+        ActiveConstraint.Urlactive=Urlactive;
+        ActiveConstraint.Uruactive=Uruactive;
+        
+        NumActiveRateConstraint=nnz(Xrlactive)+nnz(Xruactive)+nnz(Urlactive)+nnz(Uruactive);
+    end
+
+    ActiveConstraint.Glactive=Glactive;
+    ActiveConstraint.Guactive=Guactive;
+    ActiveConstraint.Xlactive=Xlactive;
+    ActiveConstraint.Xuactive=Xuactive;
+    ActiveConstraint.Ulactive=Ulactive;
+    ActiveConstraint.Uuactive=Uuactive;
+    ActiveConstraint.Glpactive=Glpactive;
+    ActiveConstraint.Gupactive=Gupactive;
+    
+    NumActiveConstraint=nnz(Glactive)+nnz(Guactive)+nnz(Xlactive)+nnz(Xuactive)+nnz(Ulactive)+nnz(Uuactive)+NumActiveRateConstraint;
+else
+    ActiveConstraint=[];
+    NumActiveConstraint=[];
+end
+
+
+
 end
 %------------- END OF CODE --------------
-
-function [NumActiveConstraint]=calcNumActiveConstraint(solution,problem,data)
-
-%calcNumActiveConstraint - calculate the number of active constraints
-%
-% Syntax:  NumActiveConstraint=calcNumActiveConstraint(solution,X,problem,data)
-%
-% Inputs:
-%    solutions - Structure containing the solution
-%    problem - Optimal control problem definition
-%    data - structure containing matrices to format data 
-%
-% Output:
-%    NumActiveConstraint - number of active constraints
-%
-% Other m-files required: none
-% Subfunctions: none
-% MAT-files required: none
-%
-%------------- BEGIN CODE --------------
-
-
-g=data.functions_unscaled{4};
-
-G=g(solution.X,solution.U,solution.p,solution.T,data.data);           % Function evaluations.
-
-Gl=G-problem.constraints.gl;
-Glabs=min(abs(Gl),[],1);
-Glactive=length(Glabs(Glabs<1e-04));
-
-Gu=problem.constraints.gu-G;
-Guabs=min(abs(Gu),[],1);
-Guactive=length(Guabs(Guabs<1e-04));
-
-Xl=solution.X-problem.states.xl;
-Xlabs=min(abs(Xl),[],1);
-Xlactive=length(Xlabs(Xlabs<1e-04));
-
-Xu=problem.states.xu-solution.X;
-Xuabs=min(abs(Xu),[],1);
-Xuactive=length(Xuabs(Xuabs<1e-04));
-
-Ul=solution.U-problem.inputs.ul;
-Ulabs=min(abs(Ul),[],1);
-Ulactive=length(Ulabs(Ulabs<1e-04));
-
-Uu=problem.inputs.uu-solution.U;
-Uuabs=min(abs(Uu),[],1);
-Uuactive=length(Uuabs(Uuabs<1e-04));
-
-NumActiveConstraint=Glactive+Guactive+Xlactive+Xuactive+Ulactive+Uuactive;
-
-end
-%------------- END OF CODE --------------
+% 
+% function [ActiveConstraint,NumActiveConstraint]=calcNumActiveConstraint(solution,problem,data)
+% 
+% %calcNumActiveConstraint - calculate the number of active constraints
+% %
+% % Syntax:  NumActiveConstraint=calcNumActiveConstraint(solution,X,problem,data)
+% %
+% % Inputs:
+% %    solutions - Structure containing the solution
+% %    problem - Optimal control problem definition
+% %    data - structure containing matrices to format data 
+% %
+% % Output:
+% %    NumActiveConstraint - number of active constraints
+% %
+% % Other m-files required: none
+% % Subfunctions: none
+% % MAT-files required: none
+% %
+% %------------- BEGIN CODE --------------
+% 
+% 
+% g=data.functions_unscaled{4};
+% 
+% G=g(solution.X,solution.U,solution.p,solution.T,data.data);           % Function evaluations.
+% 
+% Gl=G-problem.constraints.gl;
+% Glabs=min(min(Gl,[],1),problem.constraints.gTol);
+% Glactive=Glabs<problem.constraints.gTol;
+% 
+% Gu=problem.constraints.gu-G;
+% Guabs=min(min(Gu,[],1),problem.constraints.gTol);
+% Guactive=Guabs<problem.constraints.gTol;
+% 
+% Xl=solution.X-problem.states.xl;
+% Xlabs=min(min(Xl,[],1),problem.states.xConstraintTol);
+% Xlactive=Xlabs<problem.states.xConstraintTol;
+% 
+% Xu=problem.states.xu-solution.X;
+% Xuabs=min(min(Xu,[],1),problem.states.xConstraintTol);
+% Xuactive=Xuabs<problem.states.xConstraintTol;
+% 
+% Ul=solution.U-problem.inputs.ul;
+% Ulabs=min(min(Ul,[],1),problem.inputs.uConstraintTol);
+% Ulactive=Ulabs<problem.inputs.uConstraintTol;
+% 
+% Uu=problem.inputs.uu-solution.U;
+% Uuabs=min(min(Uu,[],1),problem.inputs.uConstraintTol);
+% Uuactive=Uuabs<problem.inputs.uConstraintTol;
+% 
+% if isfield(solution,'dX')
+%     Xrl=solution.dX-problem.states.xrl;
+%     Xrlabs=min(min(Xrl,[],1),problem.states.xrConstraintTol);
+%     Xrlactive=Xrlabs<problem.states.xrConstraintTol;
+% 
+%     Xru=problem.states.xru-solution.dX;
+%     Xruabs=min(min(Xru,[],1),problem.states.xrConstraintTol);
+%     Xruactive=Xruabs<problem.states.xrConstraintTol;
+% 
+%     Url=solution.dU-problem.inputs.url;
+%     Urlabs=min(min(Url,[],1),problem.inputs.urConstraintTol);
+%     Urlactive=Urlabs<problem.inputs.urConstraintTol;
+% 
+%     Uru=problem.inputs.uru-solution.dU;
+%     Uruabs=min(min(Uru,[],1),problem.inputs.urConstraintTol);
+%     Uruactive=Uruabs<problem.inputs.urConstraintTol;
+%     
+%     ActiveConstraint.Xrlactive=Xrlactive;
+%     ActiveConstraint.Xruactive=Xruactive;
+%     ActiveConstraint.Urlactive=Urlactive;
+%     ActiveConstraint.Uruactive=Uruactive;
+% end
+% 
+% ActiveConstraint.Glactive=Glactive;
+% ActiveConstraint.Guactive=Guactive;
+% ActiveConstraint.Xlactive=Xlactive;
+% ActiveConstraint.Xuactive=Xuactive;
+% ActiveConstraint.Ulactive=Ulactive;
+% ActiveConstraint.Uuactive=Uuactive;
+% 
+% NumActiveConstraint=nnz(Glactive)+nnz(Guactive)+nnz(Xlactive)+nnz(Xuactive)+nnz(Ulactive)+nnz(Uuactive)+nnz(Xrlactive)+nnz(Xruactive)+nnz(Urlactive)+nnz(Uruactive);
+% 
+% 
+% end
+% %------------- END OF CODE --------------
 
 function [Error, ErrorRelative]=estimateError_LGR(Xp,Up,dXp,p,T,TSeg_Bar,n,m,f,M,data)
 %ESTIMATEERROR - Estimate the discretization error
@@ -822,6 +946,7 @@ function [Error, ErrorRelative]=estimateError_LGR(Xp,Up,dXp,p,T,TSeg_Bar,n,m,f,M
 
 q=11;% estimated relative error 10^(-q);
 tf=TSeg_Bar(end);
+T=[T;tf];
 
 vdat=data.data;
 %Computation of scale weights for the discretization error
@@ -829,12 +954,12 @@ vdat=data.data;
 wi=zeros(n,1);
 % tau = normalizeT( [T;tf], t0,tf );
 for i=1:n
-     wi(i)=max(max(abs(speval( Xp,i,TSeg_Bar,[T;tf])),abs(speval( dXp,i,TSeg_Bar,[T;tf]))));
+     wi(i)=max(max(abs(speval( Xp,i,TSeg_Bar,T)),abs(speval( dXp,i,TSeg_Bar,T))));
 end
 
-Error=zeros(M-1,n);         %Pre-allocation   
-ErrorRelative=zeros(M-1,n);         %Pre-allocation   
-for k=1:M-1
+Error=zeros(M,n);         %Pre-allocation   
+ErrorRelative=zeros(M,n);         %Pre-allocation   
+for k=1:M
 
 
 a=T(k); b=T(k+1);
@@ -900,7 +1025,7 @@ end
 
 end
 
-function [MaxConstraintError,tg]=estimateConstraintViolation_LGR(Xp,Up,p,tf,TSeg_Bar,n,m,problem,data)
+function [MaxConstraintError,tg,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation_LGR(Xp,Up,p,t0,tf,TSeg_Bar,n,m,solution,problem,data,id)
 %estimateConstraintViolation - Estimate the absolute local constraint violation
 %
 % Syntax:  [MaxConstraintError,tg]=estimateConstraintViolation(Xp,Up,p,tf,TSeg_Bar,n,m,problem,data)
@@ -927,7 +1052,7 @@ function [MaxConstraintError,tg]=estimateConstraintViolation_LGR(Xp,Up,p,tf,TSeg
 %------------- BEGIN CODE --------------
 
 ntg=1000;
-tg=linspace(0,tf,ntg);
+tg=linspace(t0,tf,ntg);
 
 Xg=zeros(ntg,n);
 
@@ -972,58 +1097,131 @@ Uu(Uu>0)=0;
 
 MaxConstraintError=[abs(Gu),abs(Gl),abs(Xu),abs(Xl),abs(Uu),abs(Ul)];
 
+
+%% 
+
+if id==1
+    Gl=G-problem.constraints.gl;
+    Glpactive=min(Gl,problem.constraints.gTol)-problem.constraints.gTol;
+    Glpactive=Glpactive<0;
+    Glabs=min(min(Gl,[],1),problem.constraints.gTol);
+    Glactive=Glabs<problem.constraints.gTol;
+
+    Gu=problem.constraints.gu-G;
+    Gupactive=min(Gu,problem.constraints.gTol)-problem.constraints.gTol;
+    Gupactive=Gupactive<0;
+    Guabs=min(min(Gu,[],1),problem.constraints.gTol);
+    Guactive=Guabs<problem.constraints.gTol;
+
+    Xl=solution.X-problem.states.xl;
+    Xlabs=min(min(Xl,[],1),problem.states.xConstraintTol);
+    Xlactive=Xlabs<problem.states.xConstraintTol;
+
+    Xu=problem.states.xu-solution.X;
+    Xuabs=min(min(Xu,[],1),problem.states.xConstraintTol);
+    Xuactive=Xuabs<problem.states.xConstraintTol;
+
+    Ul=solution.U-problem.inputs.ul;
+    Ulabs=min(min(Ul,[],1),problem.inputs.uConstraintTol);
+    Ulactive=Ulabs<problem.inputs.uConstraintTol;
+
+    Uu=problem.inputs.uu-solution.U;
+    Uuabs=min(min(Uu,[],1),problem.inputs.uConstraintTol);
+    Uuactive=Uuabs<problem.inputs.uConstraintTol;
+
+    NumActiveRateConstraint=0;
+    if isfield(solution,'dX') && isfield(problem.states,'xrl')
+        Xrl=solution.dX-problem.states.xrl;
+        Xrlabs=min(min(Xrl,[],1),problem.states.xrConstraintTol);
+        Xrlactive=Xrlabs<problem.states.xrConstraintTol;
+
+        Xru=problem.states.xru-solution.dX;
+        Xruabs=min(min(Xru,[],1),problem.states.xrConstraintTol);
+        Xruactive=Xruabs<problem.states.xrConstraintTol;
+
+        Url=solution.dU-problem.inputs.url;
+        Urlabs=min(min(Url,[],1),problem.inputs.urConstraintTol);
+        Urlactive=Urlabs<problem.inputs.urConstraintTol;
+
+        Uru=problem.inputs.uru-solution.dU;
+        Uruabs=min(min(Uru,[],1),problem.inputs.urConstraintTol);
+        Uruactive=Uruabs<problem.inputs.urConstraintTol;
+
+        ActiveConstraint.Xrlactive=Xrlactive;
+        ActiveConstraint.Xruactive=Xruactive;
+        ActiveConstraint.Urlactive=Urlactive;
+        ActiveConstraint.Uruactive=Uruactive;
+        
+        NumActiveRateConstraint=nnz(Xrlactive)+nnz(Xruactive)+nnz(Urlactive)+nnz(Uruactive);
+    end
+
+    ActiveConstraint.Glactive=Glactive;
+    ActiveConstraint.Guactive=Guactive;
+    ActiveConstraint.Xlactive=Xlactive;
+    ActiveConstraint.Xuactive=Xuactive;
+    ActiveConstraint.Ulactive=Ulactive;
+    ActiveConstraint.Uuactive=Uuactive;
+    ActiveConstraint.Glpactive=Glpactive;
+    ActiveConstraint.Gupactive=Gupactive;
+
+    NumActiveConstraint=nnz(Glactive)+nnz(Guactive)+nnz(Xlactive)+nnz(Xuactive)+nnz(Ulactive)+nnz(Uuactive)+NumActiveRateConstraint;
+else
+    ActiveConstraint=[];
+    NumActiveConstraint=[];
 end
 
-function [NumActiveConstraint]=calcNumActiveConstraint_LGR(solution,problem,data)
-%calcNumActiveConstraint - calculate the number of active constraints
-%
-% Syntax:  NumActiveConstraint=calcNumActiveConstraint(solution,X,problem,data)
-%
-% Inputs:
-%    solutions - Structure containing the solution
-%    problem - Optimal control problem definition
-%    data - structure containing matrices to format data 
-%
-% Output:
-%    NumActiveConstraint - number of active constraints
-%
-% Other m-files required: none
-% Subfunctions: none
-% MAT-files required: none
-%
-%------------- BEGIN CODE --------------
-X=solution.X(1:end-1,:);
-
-g=data.functions_unscaled{4};
-
-G=g(X,solution.U,solution.p,solution.T,data.data);           % Function evaluations.
-
-Gl=G-problem.constraints.gl;
-Glabs=min(abs(Gl),[],1);
-Glactive=length(Glabs(Glabs<1e-04));
-
-Gu=problem.constraints.gu-G;
-Guabs=min(abs(Gu),[],1);
-Guactive=length(Guabs(Guabs<1e-04));
-
-Xl=solution.X-problem.states.xl;
-Xlabs=min(abs(Xl),[],1);
-Xlactive=length(Xlabs(Xlabs<1e-04));
-
-Xu=problem.states.xu-solution.X;
-Xuabs=min(abs(Xu),[],1);
-Xuactive=length(Xuabs(Xuabs<1e-04));
-
-Ul=solution.U-problem.inputs.ul;
-Ulabs=min(abs(Ul),[],1);
-Ulactive=length(Ulabs(Ulabs<1e-04));
-
-Uu=problem.inputs.uu-solution.U;
-Uuabs=min(abs(Uu),[],1);
-Uuactive=length(Uuabs(Uuabs<1e-04));
-
-NumActiveConstraint=Glactive+Guactive+Xlactive+Xuactive+Ulactive+Uuactive;
-
 end
 
-%------------- END OF CODE --------------
+% function [NumActiveConstraint]=calcNumActiveConstraint_LGR(solution,problem,data)
+% %calcNumActiveConstraint - calculate the number of active constraints
+% %
+% % Syntax:  NumActiveConstraint=calcNumActiveConstraint(solution,X,problem,data)
+% %
+% % Inputs:
+% %    solutions - Structure containing the solution
+% %    problem - Optimal control problem definition
+% %    data - structure containing matrices to format data 
+% %
+% % Output:
+% %    NumActiveConstraint - number of active constraints
+% %
+% % Other m-files required: none
+% % Subfunctions: none
+% % MAT-files required: none
+% %
+% %------------- BEGIN CODE --------------
+% X=solution.X(1:end-1,:);
+% 
+% g=data.functions_unscaled{4};
+% 
+% G=g(X,solution.U,solution.p,solution.T,data.data);           % Function evaluations.
+% 
+% Gl=G-problem.constraints.gl;
+% Glabs=min(min(Gl,[],1),0);
+% Glactive=length(Glabs(Glabs<1e-04));
+% 
+% Gu=problem.constraints.gu-G;
+% Guabs=min(min(Gu,[],1),0);
+% Guactive=length(Guabs(Guabs<1e-04));
+% 
+% Xl=solution.X-problem.states.xl;
+% Xlabs=min(min(Xl,[],1),0);
+% Xlactive=length(Xlabs(Xlabs<1e-04));
+% 
+% Xu=problem.states.xu-solution.X;
+% Xuabs=min(min(Xu,[],1),0);
+% Xuactive=length(Xuabs(Xuabs<1e-04));
+% 
+% Ul=solution.U-problem.inputs.ul;
+% Ulabs=min(min(Ul,[],1),0);
+% Ulactive=length(Ulabs(Ulabs<1e-04));
+% 
+% Uu=problem.inputs.uu-solution.U;
+% Uuabs=min(min(Uu,[],1),0);
+% Uuactive=length(Uuabs(Uuabs<1e-04));
+% 
+% NumActiveConstraint=Glactive+Guactive+Xlactive+Xuactive+Ulactive+Uuactive;
+% 
+% end
+% 
+% %------------- END OF CODE --------------

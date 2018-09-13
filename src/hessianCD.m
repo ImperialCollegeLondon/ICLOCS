@@ -35,14 +35,17 @@ function hessian=hessianCD(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,tf,data)
 
 
 % Define some useful variables
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;                           % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
 lambda=data.lambda(:);
 % adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)'
 adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)';
-adjoint_g=reshape(lambda(n*M+1:n*M+ng*M)',ng,M)';
+adjoint_g=zeros(ng,M);
+adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
+adjoint_g=adjoint_g';
+% adjoint_g=reshape(lambda(n*M+1:n*M+ng*M)',ng,M)';
 % adjoint_rc=reshape(lambda((n+ng)*M+1:(n+ng)*M+nrc)',nrc,1)';
 % adjoint_rc=lambda(n*M+M*ng+1:n*M+M*ng+nrc).';
 % adjoint_b=data.lambda(n*M+M*ng+(~~nb):n*M+M*ng+nb).';
@@ -111,7 +114,8 @@ for i=1:nfd
         (DT-etf(i)+etf(j)).*T+data.k0,vdat);
      gt=(gpp-gpm+gmm-gmp).*adjoint_g/e2/4;
     end
-     gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt',M*ng,1),nz,nz);
+     g_vect=reshape(gt',M*ng,1);
+     gzz=gzz+sparse(idx(data.gAllidx,i),idx(data.gAllidx,j),g_vect(data.gAllidx),nz,nz);
     end
 end
 
@@ -231,7 +235,7 @@ etf=e*data.FD.vector.b.etf;ep=e*data.FD.vector.b.ep;
 ex0=e*data.FD.vector.b.ex0;eu0=e*data.FD.vector.b.eu0;
 exf=e*data.FD.vector.b.exf;euf=e*data.FD.vector.b.euf;ez=e*data.FD.vector.b.ez;
 
-adjoint=data.lambda(n*M+M*ng+nrc+(~~nb):n*M+M*ng+nrc+nb).';
+adjoint=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
 
 
 

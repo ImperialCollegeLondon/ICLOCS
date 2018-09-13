@@ -1,5 +1,5 @@
 function [problem,guess] = CarParking
-%BangBang - BangBang Control (Double Integrator Minimum Time Repositioning) Problem
+%CarParking - Minimum Time Parallel Parking
 %
 % The problem was adapted from 
 % B. Li, K. Wang, and Z. Shao, "Time-optimal maneuver planning in automatic parallel parking using a simultaneous dynamic optimization approach". IEEE Transactions on Intelligent Transportation Systems, 17(11), pp.3263-3274, 2016.
@@ -28,15 +28,16 @@ problem.data.plantmodel = 'CarParkingPlant';
 SL=5;
 SW=2;
 CL=3.5;
-l_front=0.8; 
-l_axes=2.5;
-l_rear=0.7; 
+l_front=0.839; 
+l_axes=2.588;
+l_rear=0.657; 
 b_width=1.771/2;
 phi_max=deg2rad(33);
 a_max=0.75;
 v_max=2;
 u1_max=0.5;
 curvature_dot_max=0.6;
+
 
 % Store data
 auxdata.SL=SL;
@@ -48,15 +49,15 @@ auxdata.l_rear=l_rear;
 auxdata.b_width=b_width;
 
 % Boundary Conditions 
-posx0 = SL+l_rear;
-posy0 = 1.5;
-theta0=0;
+posx0 = -5.14;
+posy0 = 1.41;
+theta0=deg2rad(6);
 v0=0; % Initial velocity (m/s)
 a0=0; % Initial accelration (m/s^2)
 phi0 = deg2rad(0); % Initial steering angle (rad)
 
 % Limits on Variables
-xmin = -10; xmax = 15;
+xmin = -10; xmax = 5;
 ymin = -SW; ymax = CL;
 vmin = -v_max; vmax = v_max;
 amin = -a_max; amax = a_max;
@@ -67,11 +68,10 @@ phimin = -phi_max; phimax = phi_max;
 %Initial Time. t0<tf
 problem.time.t0=0;
 
-
 % Final time. Let tf_min=tf_max if tf is fixed.
 problem.time.tf_min=10;     
-problem.time.tf_max=20; 
-guess.tf=14;
+problem.time.tf_max=70; 
+guess.tf=20;
 
 % Parameters bounds. pl=< p <=pu
 problem.parameters.pl = [];
@@ -94,24 +94,26 @@ problem.states.xrl=[-inf -inf -inf -inf -inf];
 problem.states.xru=[inf inf inf inf inf]; 
 
 % State error bounds
-problem.states.xErrorTol=[0.1 0.1 0.1 deg2rad(0.5) deg2rad(0.5)];
+problem.states.xErrorTol=[0.1 0.1 0.1 deg2rad(0.5) deg2rad(2)];
 
 % State constraint error bounds
 problem.states.xConstraintTol=[0.1 0.1 0.1 deg2rad(0.5) deg2rad(0.5)];
 problem.states.xrConstraintTol=[0.1 0.1 0.1 deg2rad(0.5) deg2rad(0.5)];
 
 % Terminal state bounds. xfl=< xf <=xfu
-problem.states.xfl=[l_rear ymin 0 theta0-deg2rad(5) -deg2rad(5)]; 
-problem.states.xfu=[SL ymax 0 theta0+deg2rad(5) deg2rad(5)];
+problem.states.xfl=[l_rear ymin 0 theta0-deg2rad(5) -deg2rad(1)]; 
+problem.states.xfu=[SL ymax 0 theta0+deg2rad(5) deg2rad(1)];
 
 % Guess the state trajectories with [x0 xf]
-guess.time=[0 guess.tf/2 guess.tf];
+guess.time=[0 guess.tf/3 guess.tf*2/3 guess.tf];
 
-guess.states(:,1)=[posx0 l_rear SL-l_axes-l_front];
-guess.states(:,2)=[posy0 -SW/2 -SW/2];
-guess.states(:,3)=[v0 0 0];
-guess.states(:,4)=[theta0 deg2rad(1) 0];
-guess.states(:,5)=[phi0 0 0];
+guess.states(:,1)=[posx0 SL+l_rear l_rear SL-l_axes-l_front];
+guess.states(:,2)=[posy0 posy0 -SW/2 -SW/2];
+guess.states(:,3)=[v0 0 0 0];
+guess.states(:,4)=[theta0 theta0 theta0 0];
+guess.states(:,5)=[phi0 0 0 0];
+
+
 
 % Number of control actions N 
 % Set problem.inputs.N=0 if N is equal to the number of integration steps.  
@@ -130,13 +132,16 @@ problem.inputs.u0u=[amax curvature_dot_max*l_axes*cos(phimax)^2];
 problem.inputs.url=[-u1_max -inf];
 problem.inputs.uru=[u1_max inf];
 
+% Singular arc lifting
+% problem.inputs.singular_arc_lift=[2];
+
 % Input constraint error bounds
 problem.inputs.uConstraintTol=[0.1 deg2rad(0.5)];
 problem.inputs.urConstraintTol=[0.1 deg2rad(0.5)];
 
 % Guess the input sequences with [u0 uf]
-guess.inputs(:,1)=[a0 0 0];
-guess.inputs(:,2)=[0 0 0];
+guess.inputs(:,1)=[amax amin amax 0];
+guess.inputs(:,2)=[0 0 0 0];
 
 % Choose the set-points if required
 problem.setpoints.states=[];
@@ -145,7 +150,7 @@ problem.setpoints.inputs=[];
 % Bounds for path constraint function gl =< g(x,u,p,t) =< gu
 problem.constraints.gl=[-curvature_dot_max 0 0 0 0 0 0 0 0 0 0];
 problem.constraints.gu=[curvature_dot_max inf inf inf inf inf inf inf inf inf inf];
-problem.constraints.gTol=[deg2rad(0.01) 1e-04 1e-04 1e-04 1e-04 1e-01 1e-01 1e-01 1e-01 1e-04 1e-04];
+problem.constraints.gTol=[deg2rad(0.01) 1e-04 1e-04 1e-04 1e-04 1e-04 1e-04 1e-04 1e-04 1e-04 1e-04];
 
 % Bounds for boundary constraints bl =< b(x0,xf,u0,uf,p,t0,tf) =< bu
 problem.constraints.bl=[-inf, -inf, -inf, -inf];
@@ -160,7 +165,7 @@ problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avr
 problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,problem.states.xConstraintTol,problem.states.xConstraintTol,problem.inputs.uConstraintTol,problem.inputs.uConstraintTol];
 %------------- END OF CODE --------------
 
-function stageCost=L_unscaled(x,u,p,t,data)
+function stageCost=L_unscaled(x,xr,u,ur,p,t,data)
 
 
 % L_unscaled - Returns the stage cost.
@@ -398,6 +403,12 @@ end
 
 %------------- END OF CODE --------------
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Leave the following unchanged! %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 % L - Returns the stage cost.
@@ -410,12 +421,23 @@ if isfield(vdat,'Xscale')
         xr=scale_variables_back( xr, vdat.Xscale, vdat.Xshift );
     end
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     if ~isempty(ur)
         ur=scale_variables_back( ur, vdat.Uscale, vdat.Ushift );
     end
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 else
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 end
 
 %------------- END OF CODE --------------
@@ -426,15 +448,25 @@ function boundaryCost=E(x0,xf,u0,uf,p,t0,tf,vdat)
 % E - Returns the boundary value cost
 % Warp function
 %------------- BEGIN CODE --------------
-
 if isfield(vdat,'Xscale')
-    x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift )';
-    xf=scale_variables_back( xf', vdat.Xscale, vdat.Xshift )';
-    u0=scale_variables_back( u0', vdat.Uscale, vdat.Ushift )';
-    uf=scale_variables_back( uf', vdat.Uscale, vdat.Ushift )';
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift );
+    xf=scale_variables_back( xf', vdat.Xscale, vdat.Xshift );
+    u0=scale_variables_back( u0', vdat.Uscale, vdat.Ushift );
+    uf=scale_variables_back( uf', vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p', vdat.Pscale, vdat.Pshift );
+    end
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 else
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 end
 
 
@@ -449,6 +481,9 @@ function dx = f(x,u,p,t,vdat)
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     dx = f_unscaled(x,u,p,t,vdat);
     dx= scale_variables( dx, vdat.Xscale, 0 );
 else
@@ -456,7 +491,6 @@ else
 end
 
 %------------- END OF CODE --------------
-
 
 function c=g(x,u,p,t,vdat)
 
@@ -467,14 +501,23 @@ function c=g(x,u,p,t,vdat)
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-%     t=scale_variables_back( t, vdat.Tscale, vdat.Tshift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     c = g_unscaled(x,u,p,t,vdat);
 else
     c = g_unscaled(x,u,p,t,vdat);
 end
 
-%------------- END OF CODE --------------
+if isfield(vdat,'gFilter')
+    c(:,vdat.gFilter)=[];
+end
 
+if strcmp(vdat.mode.currentMode,'Feasibility')
+    c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
+end
+
+%------------- END OF CODE --------------
 
 function cr=avrc(x,u,p,t,data)
 
@@ -502,6 +545,8 @@ function cr=avrc(x,u,p,t,data)
 [ cr ] = addRateConstraint( x,u,p,t,data );
 %------------- END OF CODE --------------
 
+
+
 function bc=b(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 % b - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 % Warp function
@@ -519,4 +564,6 @@ if isfield(vdat,'Xscale')
         bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin);
     end
 end
-%------------- END OF CODE --------------
+
+
+%------------- END OF CODE ---------------------

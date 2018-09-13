@@ -224,7 +224,7 @@ end
 % end
 % D_structure=[kron(speye(n*nps),data.map.LGR.diff_matrix(:,1:end-1)) zeros(M*n,M*m+np+nt)];
 % repmat(data.t_segment_mat_m,n,1)
-jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt) ]-fz;gz;bz];
+jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt) ]-fz;gz(data.gAllidx,:);bz];
 
 
 

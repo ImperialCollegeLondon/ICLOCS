@@ -1,4 +1,4 @@
-function Weight_dot = calcWeight(V,H,throttle)
+function Weight_dot = calcWeight(V,H,throttle,FFModel)
 
 %% constants
 
@@ -41,7 +41,8 @@ ci=ci1.*Vcas.^2+ci2.*Vcas+ci3;  %                      [-]
 Fidle=ai.*H.^2+bi.*H+ci;        % minimum fuel flow    [kg/s]
 
 % Interpolation
-FF= Fidle+(Fmax-Fidle).*((throttle-0)/(1-0)); % Current fuel flow [kg/s]
+% FF= Fidle+(Fmax-Fidle).*((throttle-0)/(1-0)); % Current fuel flow [kg/s]
+FF= Fidle+(Fmax-Fidle).*ppval(FFModel,throttle); % Current fuel flow [kg/s]
 
 % Calculation of weight
 Weight_dot=-2*FF*9.81;

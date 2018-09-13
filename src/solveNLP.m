@@ -34,14 +34,14 @@ function [solution,status,data]=solveNLP(NLP,data)
 
 
 if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcription,'hpLGR')
-    [nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{:});
     if data.options.reorderLGR
         NLP.z0(1:n)=data.x0t;
     else
         NLP.z0(1:M+1:M*n)=data.x0t;
     end
 else
-    [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(data.sizes{:});
+    [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{:});
     NLP.z0(nt+np+1:n+nt+np)=data.x0t;
 end
 nrc=nrcl+nrcu+nrce;
@@ -95,6 +95,19 @@ switch(data.options.NLPsolver)
         solution.multipliers.lambda=multipliers.eqnonlin;
         solution.iterates=ni;
         solution.cost=cost;
+
+%     case{'MADS'}                               % Solve the NLP using FMINCON
+%         tA=tic;
+%         [z,cost,status,output]=patternsearch(@(z)fminCost(z,data),NLP.z0,...
+%             [],[],[],[],NLP.zl,NLP.zu,@(z)fminConst(z,data,NLP),data.options.MADS);
+%         tB=toc(tA);
+%         if  ((strcmp(data.options.transcription,'globalLGR')) || (strcmp(data.options.transcription,'hpLGR'))) && data.options.reorderLGR
+%            solution.z_org=z;
+%            z=z(data.reorder.z_idx_back);
+%         end
+%         ni=output.iterations;
+%         solution.iterates=ni;
+%         solution.cost=cost;
         
     case{'builtinSQP'}
         SQPoptions=data.options.SQP;
@@ -305,13 +318,15 @@ if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcr
         D_Np1=data.map.LGR.diff_matrix{end}(:,end);
         solution.multipliers.lambda(end+1,:)=D_Np1'*solution.multipliers.lambda_1toN(end-length(data.map.LGR.points{end})+1:end,:);
         if ng
-            solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP((M*n+1):M*(n+ng)),M,ng);
+            solution.multipliers.lambda_g=zeros(ng,M);
+            solution.multipliers.lambda_g(logical(data.gActiveIdx'))=solution.multipliers.lambdaNLP(n*M+1:n*M+ngActive);
+            solution.multipliers.lambda_g=solution.multipliers.lambda_g';
         end
         if nrc
-            solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP((M*(n+ng)+1):M*(n+ng)+nrc);
+            solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP((M*(n)+ngActive+1):M*(n)+ngActive+nrc);
         end
         if nb
-            solution.multipliers.lambda_b=solution.multipliers.lambdaNLP((M*(n+ng)+nrc+1):end);
+            solution.multipliers.lambda_b=solution.multipliers.lambdaNLP((M*(n)+ngActive+nrc+1):end);
         end
     end
 
@@ -367,13 +382,15 @@ else
 
         if ~strcmp(data.options.NLPsolver,'MADS') 
             if ng
-                solution.multipliers.lambda_g=reshape(solution.multipliers.lambdaNLP(n*M+1:n*M+ng*M)',ng,M)';
+                solution.multipliers.lambda_g=zeros(ng,M);
+                solution.multipliers.lambda_g(logical(data.gActiveIdx'))=solution.multipliers.lambdaNLP(n*M+1:n*M+ngActive);
+                solution.multipliers.lambda_g=solution.multipliers.lambda_g';
             end
             if nrc
-                solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP(n*M+ng*M+1:n*M+ng*M+nrc);
+                solution.multipliers.lambda_rc=solution.multipliers.lambdaNLP(n*M+ngActive+1:n*M+ngActive+nrc);
             end
             if nb
-                solution.multipliers.lambda_b=solution.multipliers.lambdaNLP(n*M+M*ng+nrc+(~~nb):n*M+M*ng+nrc+nb);
+                solution.multipliers.lambda_b=solution.multipliers.lambdaNLP(n*M+ngActive+nrc+1:n*M+ngActive+nrc+nb);
             end
         end
     end
@@ -385,13 +402,19 @@ if data.options.scaling
     solution.x0=scale_variables_back( solution.x0', data.data.Xscale, data.data.Xshift )';
     solution.U=scale_variables_back( solution.U, data.data.Uscale, data.data.Ushift );
     if isfield(data.data,'Pscale')
-        solution.p=scale_variables_back( solution.p, data.data.Pscale, data.data.Pshift );
+        solution.p=scale_variables_back( solution.p', data.data.Pscale, data.data.Pshift )';
     end
     solution.tf=scale_variables_back( solution.tf, data.data.Tscale, data.data.Tshift );
     solution.T=scale_variables_back( solution.T, data.data.Tscale, data.data.Tshift );
 end
 
+
+if isfield(data.data,'singular_arc_lift')
+    solution.U(:,data.data.singular_arc_lift)=(solution.U(:,data.data.singular_arc_lift)+1).^2+data.data.singular_arc_lift_shift(data.data.singular_arc_lift);
+end
 %------------- END OF CODE --------------
+
+
 end
 
 %% Functions needed for the built-in SQP

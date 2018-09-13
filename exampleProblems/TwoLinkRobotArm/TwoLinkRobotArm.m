@@ -118,9 +118,8 @@ problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,pr
 
 %------------- END OF CODE --------------
 
-%------------- END OF CODE --------------
 
-function stageCost=L_unscaled(x,u,p,t,vdat)
+function stageCost=L_unscaled(x,xr,u,ur,p,t,vdat)
 
 % L_unscaled - Returns the stage cost.
 % The function must be vectorized and
@@ -131,7 +130,9 @@ function stageCost=L_unscaled(x,u,p,t,vdat)
 %
 % Inputs:
 %    x  - state vector
+%    xr - state reference
 %    u  - input
+%    ur - input reference
 %    p  - parameter
 %    t  - time
 %    data- structured variable containing the values of additional data used inside
@@ -288,6 +289,10 @@ end
 
 %------------- END OF CODE --------------
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Leave the following unchanged! %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 % L - Returns the stage cost.
@@ -300,12 +305,23 @@ if isfield(vdat,'Xscale')
         xr=scale_variables_back( xr, vdat.Xscale, vdat.Xshift );
     end
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     if ~isempty(ur)
         ur=scale_variables_back( ur, vdat.Uscale, vdat.Ushift );
     end
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 else
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 end
 
 %------------- END OF CODE --------------
@@ -316,15 +332,25 @@ function boundaryCost=E(x0,xf,u0,uf,p,t0,tf,vdat)
 % E - Returns the boundary value cost
 % Warp function
 %------------- BEGIN CODE --------------
-
 if isfield(vdat,'Xscale')
-    x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift )';
-    xf=scale_variables_back( xf', vdat.Xscale, vdat.Xshift )';
-    u0=scale_variables_back( u0', vdat.Uscale, vdat.Ushift )';
-    uf=scale_variables_back( uf', vdat.Uscale, vdat.Ushift )';
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift );
+    xf=scale_variables_back( xf', vdat.Xscale, vdat.Xshift );
+    u0=scale_variables_back( u0', vdat.Uscale, vdat.Ushift );
+    uf=scale_variables_back( uf', vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p', vdat.Pscale, vdat.Pshift );
+    end
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 else
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 end
 
 
@@ -339,6 +365,9 @@ function dx = f(x,u,p,t,vdat)
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     dx = f_unscaled(x,u,p,t,vdat);
     dx= scale_variables( dx, vdat.Xscale, 0 );
 else
@@ -346,7 +375,6 @@ else
 end
 
 %------------- END OF CODE --------------
-
 
 function c=g(x,u,p,t,vdat)
 
@@ -357,14 +385,23 @@ function c=g(x,u,p,t,vdat)
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-%     t=scale_variables_back( t, vdat.Tscale, vdat.Tshift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
     c = g_unscaled(x,u,p,t,vdat);
 else
     c = g_unscaled(x,u,p,t,vdat);
 end
 
-%------------- END OF CODE --------------
+if isfield(vdat,'gFilter')
+    c(:,vdat.gFilter)=[];
+end
 
+if strcmp(vdat.mode.currentMode,'Feasibility')
+    c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
+end
+
+%------------- END OF CODE --------------
 
 function cr=avrc(x,u,p,t,data)
 
@@ -392,6 +429,8 @@ function cr=avrc(x,u,p,t,data)
 [ cr ] = addRateConstraint( x,u,p,t,data );
 %------------- END OF CODE --------------
 
+
+
 function bc=b(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 % b - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 % Warp function
@@ -409,4 +448,6 @@ if isfield(vdat,'Xscale')
         bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin);
     end
 end
-%------------- END OF CODE --------------
+
+
+%------------- END OF CODE ---------------------

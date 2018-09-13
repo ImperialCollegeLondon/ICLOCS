@@ -24,6 +24,12 @@ function [problem,guess] = F50MinTimeFlight
 % Plant model name
 problem.data.plantmodel = 'F50MinTimeFlightPlant';
 
+
+% Thrust model
+x=[0 0.5 1];
+y=[0 0.48 1];
+FFModel=pchip(x,y);
+
 % Constants
 auxdata.g=9.81;
 auxdata.ktomps=0.514444;
@@ -42,6 +48,7 @@ auxdata.k_cd=0.033;
 auxdata.cd0=0.0233;
 auxdata.S=70;
 auxdata.alphat=0*pi/180;
+auxdata.FFModel=FFModel;
 
 % Look up tables
 auxdata.a1p=1.5456*10^-9;
@@ -97,9 +104,26 @@ chif=-3/4*pi;
 gammaf=-3*pi/180;
 
 % Parameter for the obstacle
-auxdata.obs_npos=745000;
-auxdata.obs_epos=842000;
-auxdata.obs_r=30000;
+auxdata.obs_npos_1=775000;
+auxdata.obs_epos_1=842000;
+auxdata.obs_r_1=40000;
+
+auxdata.obs_npos_2=545000;
+auxdata.obs_epos_2=442000;
+auxdata.obs_r_2=30000;
+
+auxdata.obs_npos_3=505000;
+auxdata.obs_epos_3=842000;
+auxdata.obs_r_3=20000;
+
+
+auxdata.obs_npos_4=105000;
+auxdata.obs_epos_4=72000;
+auxdata.obs_r_4=60000;
+
+auxdata.obs_npos_5=445000;
+auxdata.obs_epos_5=0;
+auxdata.obs_r_5=70000;
 
 %%
 %Initial Time. t0<tf
@@ -107,10 +131,9 @@ problem.time.t0=0;
 
 
 % Final time. Let tf_min=tf_max if tf is fixed.
-problem.time.tf_min=0;     
-problem.time.tf_max=15000; 
-guess.tf=10000;
-% guess.tf=presol.T(end);
+problem.time.tf_min=7475;     
+problem.time.tf_max=7475; 
+guess.tf=7475;
 
 % Parameters bounds. pl=< p <=pu
 problem.parameters.pl=[];
@@ -133,17 +156,26 @@ problem.states.xrl=[-inf -inf -inf -inf -inf -inf -inf];
 problem.states.xru=[inf inf inf inf inf inf inf]; 
 
 % State error bounds
-problem.states.xErrorTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 1];
+problem.states.xErrorTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 0.1*auxdata.g];
 
 % State constraint error bounds
-problem.states.xConstraintTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 1];
-problem.states.xrConstraintTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 1];
+problem.states.xConstraintTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 0.1*auxdata.g];
+problem.states.xrConstraintTol=[5 1 1 0.5 deg2rad(0.5) deg2rad(0.5) 0.1*auxdata.g];
 
 % Terminal state bounds. xfl=< xf <=xfu
 problem.states.xfl=[Hf xf yf Vtasf gammaf chif W_min]; 
 problem.states.xfu=[Hf xf yf Vtasf gammaf chif W0];
 
 % Guess the state trajectories with [x0 xf]
+% guess.time=[0 guess.tf/2 guess.tf];
+% guess.states(:,1)=[H_max H_max H_max];
+% guess.states(:,2)=[x0 xf/2 xf];
+% guess.states(:,3)=[y0 yf/3 yf];
+% guess.states(:,4)=[Vtas_max Vtas_max Vtas_max];
+% guess.states(:,5)=[gamma0 gammaf gammaf];
+% guess.states(:,6)=[chi0 chi0 chif];
+% guess.states(:,7)=[W0 (18000-2000)*auxdata.g W_min];
+
 guess.time=[0 guess.tf/2 guess.tf];
 guess.states(:,1)=[H_max H_max H_max];
 guess.states(:,2)=[x0 xf/2 xf];
@@ -151,7 +183,7 @@ guess.states(:,3)=[y0 yf/2 yf];
 guess.states(:,4)=[Vtas_max Vtas_max Vtas_max];
 guess.states(:,5)=[gamma0 gammaf gammaf];
 guess.states(:,6)=[chi0 chi0 chif];
-guess.states(:,7)=[W0 (18000-2000)*auxdata.g W_min];
+guess.states(:,7)=[W0 (18000-1000)*auxdata.g (18000-2000)*auxdata.g];
 
 % Number of control actions N 
 % Set problem.inputs.N=0 if N is equal to the number of integration steps.  
@@ -168,26 +200,44 @@ problem.inputs.u0l=[-alpha_max -phi_max throttle_min];
 problem.inputs.u0u=[alpha_max phi_max throttle_max];
 
 % Input rate bounds
-problem.inputs.url=[-deg2rad(2) -deg2rad(10) -0.2];
-problem.inputs.uru=[deg2rad(2) deg2rad(10) 0.2];
+problem.inputs.url=[-deg2rad(2) -deg2rad(10) -inf];
+problem.inputs.uru=[deg2rad(2) deg2rad(10) inf];
 
 % Input constraint error bounds
 problem.inputs.uConstraintTol=[deg2rad(0.5) deg2rad(0.5) 0.1];
 problem.inputs.urConstraintTol=[deg2rad(0.5) deg2rad(0.5) 0.1];
 
+% problem.inputs.singular_arc_lift=[3];
+
 % Guess the input sequences with [u0 uf]
 guess.inputs(:,1)=[alpha0 alpha0 alpha0];
 guess.inputs(:,2)=[phi_0 phi_0 phi_0];
 guess.inputs(:,3)=[1 1 1];
+% guess.inputs(:,3)=[0 0 0];
 
 % Choose the set-points if required
 problem.setpoints.states=[];
 problem.setpoints.inputs=[];
 
 % Bounds for path constraint function gl =< g(x,u,p,t) =< gu
-problem.constraints.gl=[0];
-problem.constraints.gu=[inf];
-problem.constraints.gTol=[0.1];
+problem.constraints.gl=[0 0 0 0 0];
+problem.constraints.gu=[inf inf inf inf inf];
+problem.constraints.gTol=[(auxdata.obs_r_1+1)^2-(auxdata.obs_r_1)^2 (auxdata.obs_r_2+1)^2-(auxdata.obs_r_2)^2 (auxdata.obs_r_3+1)^2-(auxdata.obs_r_3)^2 (auxdata.obs_r_4+1)^2-(auxdata.obs_r_4)^2 (auxdata.obs_r_5+1)^2-(auxdata.obs_r_5)^2]/1e04;
+% problem.constraints.gTol=[1e04 1e04 1e04 1e04 1e04];
+
+% problem.constraints.gActiveTime{1}=[guess.tf/2 guess.tf];
+% problem.constraints.gActiveTime{2}=[];
+% problem.constraints.gActiveTime{3}=[];
+% problem.constraints.gActiveTime{4}=[0 guess.tf/2];
+% problem.constraints.gActiveTime{5}=[];
+
+% problem.constraints.gl=[0 0 ];
+% problem.constraints.gu=[inf inf ];
+% problem.constraints.gTol=[1e04 1e04 ];
+
+% problem.constraints.gl=[0 ];
+% problem.constraints.gu=[inf ];
+% problem.constraints.gTol=[1e04 ];
 
 % Bounds for boundary constraints bl =< b(x0,xf,u0,uf,p,t0,tf) =< bu
 problem.constraints.bl=[0];
@@ -258,7 +308,7 @@ function boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,data)
 %
 %------------- BEGIN CODE --------------
 %
-boundaryCost=tf;
+boundaryCost= -xf(7);
 
 %------------- END OF CODE --------------
 
@@ -329,7 +379,7 @@ H_dot=V_tas.*sin(gamma);
 x_dot=V_tas.*cos(gamma).*cos(chi);
 y_dot=V_tas.*cos(gamma).*sin(chi);
 chi_dot=L.*sin(phi)./cos(gamma)*auxdata.g./W./V_tas;
-W_dot= calcWeight(V_cas,H,throttle);
+W_dot= calcWeight(V_cas,H,throttle,auxdata.FFModel);
 
 dx = [H_dot, x_dot, y_dot, TAS_dot, gamma_dot, chi_dot, W_dot];
 
@@ -363,8 +413,13 @@ function c=g_unscaled(x,u,p,t,data)
 npos = x(:,2);
 epos = x(:,3);
 
-c=[(npos-data.auxdata.obs_npos).^2+(epos-data.auxdata.obs_epos).^2-data.auxdata.obs_r.^2];
-
+c1=(npos-data.auxdata.obs_npos_1).^2+(epos-data.auxdata.obs_epos_1).^2-data.auxdata.obs_r_1.^2;
+c2=(npos-data.auxdata.obs_npos_2).^2+(epos-data.auxdata.obs_epos_2).^2-data.auxdata.obs_r_2.^2;
+c3=(npos-data.auxdata.obs_npos_3).^2+(epos-data.auxdata.obs_epos_3).^2-data.auxdata.obs_r_3.^2;
+c4=(npos-data.auxdata.obs_npos_4).^2+(epos-data.auxdata.obs_epos_4).^2-data.auxdata.obs_r_4.^2;
+c5=(npos-data.auxdata.obs_npos_5).^2+(epos-data.auxdata.obs_epos_5).^2-data.auxdata.obs_r_5.^2;
+c=[c1,c2,c3,c4,c5]/1e04;
+% c=[c1,c4];
 %------------- END OF CODE --------------
 
 function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
@@ -407,6 +462,7 @@ end
 
 %------------- END OF CODE --------------
 
+
 function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 % L - Returns the stage cost.
@@ -415,16 +471,27 @@ function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
-%     xr=scale_variables( xr, 1./vdat.Xscale );
+    if ~isempty(xr)
+        xr=scale_variables_back( xr, vdat.Xscale, vdat.Xshift );
+    end
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-    
     if isfield(vdat,'Pscale')
         p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
     end
-%     ur=scale_variables( ur, 1./vdat.Xscale );
-    stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    if ~isempty(ur)
+        ur=scale_variables_back( ur, vdat.Uscale, vdat.Ushift );
+    end
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 else
-    stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 end
 
 %------------- END OF CODE --------------
@@ -433,22 +500,7 @@ end
 function boundaryCost=E(x0,xf,u0,uf,p,t0,tf,vdat) 
 
 % E - Returns the boundary value cost
-%
-% Syntax:  boundaryCost=E(x0,xf,u0,uf,p,tf,data)
-%
-% Inputs:
-%    x0  - state at t=0
-%    xf  - state at t=tf
-%    u0  - input at t=0
-%    uf  - input at t=tf
-%    p   - parameter
-%    tf  - final time
-%    data- structured variable containing the values of additional data used inside
-%          the function
-%
-% Output:
-%    boundaryCost - Scalar boundary cost
-%
+% Warp function
 %------------- BEGIN CODE --------------
 if isfield(vdat,'Xscale')
     x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift );
@@ -458,9 +510,17 @@ if isfield(vdat,'Xscale')
     if isfield(vdat,'Pscale')
         p=scale_variables_back( p', vdat.Pscale, vdat.Pshift );
     end
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 else
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 end
 
 
@@ -469,29 +529,7 @@ end
 
 function dx = f(x,u,p,t,vdat)
 % f - Returns the ODE right hand side where x'= f(x,u,p,t)
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% state corresponds to one column of dx.
-% 
-% 
-% Syntax:  dx = f(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%    data-structured variable containing the values of additional data used inside
-%          the function 
-%
-% Output:
-%    dx - time derivative of x
-%
-%  Remark: If the i-th ODE right hand side does not depend on variables it is necessary to multiply
-%          the assigned value by a vector of ones with the same length  of t  in order 
-%          to have  a vector with the right dimesion  when called for the optimization. 
-%          Example: dx(:,i)= 0*ones(size(t,1)); 
-%
+% Warp function
 %------------- BEGIN CODE --------------
 
 if isfield(vdat,'Xscale')
@@ -508,6 +546,32 @@ end
 
 %------------- END OF CODE --------------
 
+function c=g(x,u,p,t,vdat)
+
+% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
+% Warp function
+%------------- BEGIN CODE --------------
+
+if isfield(vdat,'Xscale')
+    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
+    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
+    c = g_unscaled(x,u,p,t,vdat);
+else
+    c = g_unscaled(x,u,p,t,vdat);
+end
+
+if isfield(vdat,'gFilter')
+    c(:,vdat.gFilter)=[];
+end
+
+if strcmp(vdat.mode.currentMode,'Feasibility')
+    c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
+end
+
+%------------- END OF CODE --------------
 
 function cr=avrc(x,u,p,t,data)
 
@@ -535,60 +599,11 @@ function cr=avrc(x,u,p,t,data)
 [ cr ] = addRateConstraint( x,u,p,t,data );
 %------------- END OF CODE --------------
 
-function c=g(x,u,p,t,vdat)
 
-% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% constraint corresponds to one column of c
-% 
-% Syntax:  c=g(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%   data- structured variable containing the values of additional data used inside
-%          the function
-%
-% Output:
-%    c - constraint function
-%
-%------------- BEGIN CODE --------------
-
-if isfield(vdat,'Xscale')
-    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
-    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
-    if isfield(vdat,'Pscale')
-        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
-    end
-    c = g_unscaled(x,u,p,t,vdat);
-else
-    c = g_unscaled(x,u,p,t,vdat);
-end
-
-%------------- END OF CODE --------------
 
 function bc=b(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 % b - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
-%
-% Syntax:  bc=b(x0,xf,u0,uf,p,tf,data)
-%
-% Inputs:
-%    x0  - state at t=0
-%    xf  - state at t=tf
-%    u0  - input at t=0
-%    uf  - input at t=tf
-%    p   - parameter
-%    tf  - final time
-%    data- structured variable containing the values of additional data used inside
-%          the function
-%
-%          
-% Output:
-%    bc - column vector containing the evaluation of the boundary function 
-%
+% Warp function
 %------------- BEGIN CODE --------------
 bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin);
 if isfield(vdat,'Xscale')
@@ -605,4 +620,4 @@ if isfield(vdat,'Xscale')
 end
 
 
-%------------- END OF CODE --------------
+%------------- END OF CODE ---------------------

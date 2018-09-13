@@ -137,7 +137,7 @@ options.ipopt.limited_memory_max_skipping=1;  % Threshold for successive iterati
 
 % Automatic scaling (recommended)
 %---------------------------------------
-options.scaling=1;
+options.scaling=0;
 
 % Cold/Warm/Hot Start 
 %---------------------------------------

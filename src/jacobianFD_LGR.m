@@ -18,7 +18,7 @@ function jac=jacobianFD_LGR(f,g,avrc,X_Np1,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
 
 
 e=data.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;
 vdat=data.data;
@@ -120,7 +120,7 @@ end
 
 % Map derivatives to the jacobian
 %---------------------------------
-jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt)]+fz;gz;rcz;bz];
+jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt)]+fz;gz(data.gAllidx,:);rcz;bz];
 
 
 

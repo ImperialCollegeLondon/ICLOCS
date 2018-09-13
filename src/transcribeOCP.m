@@ -34,6 +34,15 @@ function [infoNLP,data,options]=transcribeOCP(problem,guess,options)
 % iclocs@imperial.ac.uk
 
 
+% Running mode
+if ~isfield(problem.data,'mode')
+    problem.data.mode.currentMode='Original';
+end
+
+if isfield(problem.inputs,'singular_arc_lift')
+    [ problem ] = avoidSingularArc( problem );
+end
+
 % Discretization Error Tol
 options.discErrorTol=problem.states.xErrorTol;
 
@@ -47,8 +56,13 @@ if (strcmp(options.transcription,'AutoDirect')) && ~isfield(options,'AutoDirect'
 end
 
 if strcmp(options.transcription,'hpLGR') && options.adaptseg==1
-    problem.constraints.bu=[problem.constraints.bl,ones(1,options.nsegment)*options.maxtimeinterval];
-    problem.constraints.bl=[problem.constraints.bl,ones(1,options.nsegment)*options.mintimeinterval];
+    if isfield(options,'nsegment')
+        problem.constraints.bu=[problem.constraints.bl,ones(1,options.nsegment)*options.maxtimeinterval];
+        problem.constraints.bl=[problem.constraints.bl,ones(1,options.nsegment)*options.mintimeinterval];
+    elseif isfield(options,'npsegment')
+        problem.constraints.bu=[problem.constraints.bl,ones(1,length(options.npsegment))*options.maxtimeinterval];
+        problem.constraints.bl=[problem.constraints.bl,ones(1,length(options.npsegment))*options.mintimeinterval];
+    end
 end
 
 % Define (and assign) some parameters
@@ -60,6 +74,10 @@ ng=length(problem.constraints.gl);         % Number of path constraints
 nb=length(problem.constraints.bl);         % Number of boundary constraints
 N=problem.inputs.N;                        % Number of control actions
 data.data=problem.data;
+if isfield(problem.inputs,'singular_arc_lift')
+    data.data.singular_arc_lift=problem.inputs.singular_arc_lift;
+    data.data.singular_arc_lift_shift=problem.inputs.singular_arc_lift_shift;
+end
 data.data.transcription=options.transcription;
 
 
@@ -168,6 +186,8 @@ else
      data.k0=problem.time.t0;
      data.Nm=1;
 end
+
+
 
 % Number of algebraic variable rate constraints
 if (strcmp(options.transcription,'hermite'))
@@ -282,14 +302,58 @@ if nrc
         data.RCmap.Au(end,:)=[];
     end
 end
-    
+
+% Generation of mesh (time dimension)
+if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
+    [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( options, data, nps, npdu, npd, npduidx, M );
+else
+    [ data, tau ] = genTimeMesh( options, data, ns, M );
+end
+
+
+if ng
+    if isfield(problem.constraints,'gActiveTime')
+        if (strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')) && options.reorderLGR && ~all(cellfun('isempty',problem.constraints.gActiveTime))
+            error('Alternative ordering of variables with LGR method currently does not support external constraint handling in time dimension')
+        else
+            for i=1:ng
+                if ~isempty(problem.constraints.gActiveTime{i})
+                    gActiveTime=problem.constraints.gActiveTime{i}./guess.tf*ns;
+                    for j=1:size(problem.constraints.gActiveTime{i},1)
+                        if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,'hpLGR'))
+                            gActiveTimeLower=data.tau_segment(data.tau_segment<=(gActiveTime(j,1)*2-1));
+                            gActiveTimeUpper=data.tau_segment(data.tau_segment>=(gActiveTime(j,2)*2-1));
+                            gActiveIdxi(:,j)=(data.tau_inc>=gActiveTimeLower(end) & data.tau_inc<=gActiveTimeUpper(1));
+                        else
+                            gActiveIdxi(:,j)=([0;data.tau_inc]>=gActiveTime(j,1) & [0;data.tau_inc]<=gActiveTime(j,2));
+                        end
+                    end
+                    gActiveIdx(:,i)=logical(sum(gActiveIdxi,2));
+                else
+                    gActiveIdx(:,i)=true(M,1);
+                end
+            end
+            ngActive=sum(sum(gActiveIdx));
+        end
+    else
+        gActiveIdx=true(M,ng);
+        ngActive=M*ng;
+    end
+else
+    gActiveIdx=[];
+    ngActive=0;
+end
+            
+if isfield(problem.data,'gFilter')
+    data.data.gFilter=problem.data.gFilter;
+end
 
 % Number of path constraints
 % Save the corrsponding variables sizes
 if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,'hpLGR'))
-    data.sizes={nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce};
+    data.sizes={nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive};
 else    
-    data.sizes={nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce};
+    data.sizes={nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive};
 end
 
 % Get state and input bounds
@@ -335,10 +399,35 @@ end
 if ng 
     gl=problem.constraints.gl(:);
     gu=problem.constraints.gu(:);
+    if (strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')) && length(gl)>1
+        glAll=repelem(gl,M);
+        guAll=repelem(gu,M);
+        gAllidx=logical(gActiveIdx(:));
+    elseif strcmp(options.transcription,'multiple_shooting')
+        glAll=kron(ones(M-1,1),gl(:));
+        guAll=kron(ones(M-1,1),gu(:));
+%         gAllidx=logical(reshape(gActiveIdx',size(gActiveIdx,1)*size(gActiveIdx,2),1));
+    else
+        glAll=kron(ones(M,1),gl(:));
+        guAll=kron(ones(M,1),gu(:));
+        gAllidx=logical(reshape(gActiveIdx',size(gActiveIdx,1)*size(gActiveIdx,2),1));
+%         gAllidxAlt=logical(reshape(gActiveIdx,size(gActiveIdx,1)*size(gActiveIdx,2),1));
+    end
+    data.gActiveIdx=gActiveIdx;
+    data.gAllidx=gAllidx;
 else 
     gl=[];
-    gu=[]; 
+    gu=[];
+    glAll=[];
+    guAll=[];
+    gAllidx=[];
+    data.gActiveIdx=gActiveIdx;
+    data.gAllidx=gAllidx;
 end
+
+
+
+
 
 % Get bounds for the constraint functions
 if nrc
@@ -469,14 +558,14 @@ end
 %              k=0,...,ng-1
 %              bo(k) -> nb boundary conditions b(x(0),x(f),u(0),u(f),p,t)
 if strcmp(options.transcription,'multiple_shooting')
-infoNLP.cl=[kron(ones(M,1),zeros(n,1));kron(ones(M-1,1),gl(:));bl(:)];
-infoNLP.cu=[kron(ones(M,1),zeros(n,1));kron(ones(M-1,1),gu(:));bu(:)];   
+infoNLP.cl=[kron(ones(M,1),zeros(n,1));glAll;bl(:)];
+infoNLP.cu=[kron(ones(M,1),zeros(n,1));guAll;bu(:)];   
 elseif (strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')) && length(gl)>1
-infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));repelem(gl,M);rcl(:);bl(:)];
-infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));repelem(gu,M);rcu(:);bu(:)];
+infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
+infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
 else
-infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));kron(ones(M,1),gl(:));rcl(:);bl(:)];
-infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));kron(ones(M,1),gu(:));rcu(:);bu(:)];
+infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
+infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
 end
 
 % Extract sparsity structures
@@ -491,41 +580,6 @@ end
 data.sparsity=sparsity; 
 
 
-% Generation of mesh (time dimension)
-if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
-    if isfield(options,'tau_segment')
-        tau_segment=options.tau_segment; %user specified mesh segments
-    else
-        tau_segment=-1:2/nps:1; %uniform mesh segments
-    end
-    %Calculate all the LGR points, weights and differentiation matrices
-    LGR=generateLGR_All(npdu); 
-    tau_local_seg=zeros(M,1); %mesh in local (segmental) time frame
-    idxtemp=[0,cumsum(npd)];
-    for i=1:length(npduidx)
-        tau_local_seg(idxtemp(i)+1:idxtemp(i+1),:)=LGR.points{npduidx(i)};
-    end
-    tau_inc=zeros(M,1); %mesh in incremental (global) time frame
-    tau_seg=cell(length(tau_segment)-1,1);
-    for i=1:length(tau_segment)-1
-        tau_seg{i} = ((tau_segment(i+1)+tau_segment(i)) + (tau_segment(i+1)-tau_segment(i)) * [LGR.points{npduidx(i)}; 1]) / (1-(-1));
-        tau_inc(idxtemp(i)+1:idxtemp(i+1),:)=tau_seg{i}(1:end-1);
-    end
-    tau=diff(tau_inc); %mesh in difference formulation
-    data.tau_inc=tau_inc;
-    data.tau_local_seg=tau_local_seg;
-    data.tau_segment=tau_segment;
-else
-    if options.tau==0
-        tau=ns*ones(M-1,1)/(M-1); 
-    else
-       texst=ones(ns,1);
-       tau=kron(options.tau,texst);
-    end
-    data.tau_inc=cumsum(tau);
-    if abs(sum(tau)-ns)>sqrt(eps);error('Time vector (tau) should sum to 1');end
-end
-data.tau=tau;
 
 
 % Format direct transcription matrices
@@ -596,8 +650,8 @@ if ~strcmp(options.transcription,'multiple_shooting')
             dbz=sparse(nb,nt+np+(M+1)*n+M*m);
         end
 
-        jS= [dfz;dgz;drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure
-        jS_noB=[dfz_noD;dgz;dbz]; %Jacobian structure excluding the Radau differentiation matrix
+        jS= [dfz;dgz(gAllidx,:);drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure
+        jS_noB=[dfz_noD;dgz(gAllidx,:);dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
         data.jS_noB=spones(jS_noB);
 
@@ -669,7 +723,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             if N==1
                 jS= [[zeros(n,nt), zeros(n,np), eye(n), zeros(n,nx+nu-n)]*cx0;...
                 A*Vx+B*dfz;...
-                dgz;...
+                dgz(gAllidx,:);...
                 drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:);...
                 [sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 zeros(nb,(((M)/N-1))*n),...
                 sparsity.dbdu0 zeros(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
@@ -677,7 +731,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             else
                 jS=[[zeros(n,nt), zeros(n,np), eye(n) zeros(n,nx+nu-n)]*cx0;...
                 A*Vx+B*dfz;
-                dgz;...
+                dgz(gAllidx,:);...
                 drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:);...
                 [sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 zeros(nb,(((M)/N-1))*n),...
                 sparsity.dbdu0 zeros(nb,nx+nu-2*(n+m)-(((M)/N-1))*n) sparsity.dbduf,...
@@ -782,11 +836,7 @@ end
 % Format initial guess/reference for NLP
 %---------------------------------------
 infoNLP.z0=zeros(nz,1);
-if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
-    x_guess=zeros(n,M+1);u_guess=zeros(m,M);
-else
-    x_guess=zeros(M,n);u_guess=zeros(N,m);
-end
+
 
 if isempty(guess.states)
    
@@ -797,165 +847,14 @@ if isempty(guess.states)
   guess.states=[(x0_lg+(x0_ug-x0_lg).*rand(n,1))';(xf_lg+(xf_ug-xf_lg).*rand(n,1))'];    % Prune bounds for initial conditions
 end
 
-if isempty(guess.inputs)
+if isfield(guess,'inputs') && isempty(guess.inputs)
    ul_g=ul;ul_g(ul==-inf)=-100;
    uu_g=uu;uu_g(uu==inf)=100;
    guess.inputs=[(ul_g+(uu_g-ul_g).*rand(m,1))';(ul_g+(uu_g-ul_g).*rand(m,1))'];
 end    
  
-% warm starting from guess
-if strcmp(options.transcription,'globalLGR') || strcmp(options.transcription,'hpLGR')
-    if (strcmp(options.start,'Cold'))
-        if isfield(guess,'time') && ~isempty(guess.time)
-            Tx=linspace(0,guess.time(end), M+1);
-            Tu=linspace(0,guess.time(end), M);
-            x_guess=interp1(guess.time, guess.states,Tx,'linear');
-            x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,Tu,'linear');
-            u_guess=u_guess(:);
-        else
-            for i=1:n
-              x_guess(i,:)=linspace(guess.states(1,i),guess.states(2,i),M+1);
-            end
-            x_guess=reshape(x_guess',(M+1)*n,1);
-            for i=1:m
-             if M>1  
-               u_guess(i,:)=linspace(guess.inputs(1,i),guess.inputs(2,i),M);
-              else
-               u_guess(i,:)=guess.inputs(1,i);
-              end
-            end
-            u_guess=reshape(u_guess',M*m,1);
-        end
-        data.multipliers=[];
-    elseif (strcmp(options.start,'Warm'))
-        T=(guess.tf-data.t0)/2*data.tau_inc+(guess.tf+data.t0)/2;
-        if size(guess.time,1)==size(guess.states,1)
-            x_guess=interp1(guess.time, guess.states,[T;guess.tf],'pchip');
-            x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=u_guess(:);
-        else
-            x_guess=interp1([guess.time;guess.tf], guess.states,[T;guess.tf],'pchip');
-            x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=u_guess(:);
-        end
-        data.multipliers=[];
-    elseif (strcmp(options.start,'Hot'))
-        T=(guess.tf-data.t0)/2*data.tau_inc+(guess.tf+data.t0)/2;
-        if size(guess.time,1)==size(guess.states,1)
-            x_guess=interp1(guess.time, guess.states,[T;guess.tf],'pchip');
-            x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=u_guess(:);
-            data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'pchip');
-            data.multipliers.lambda=data.multipliers.lambda(:);
-            if ng
-                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'pchip');
-                data.multipliers.lambda=[data.multipliers.lambda;lambda_g(:)];
-            end
-            if nb
-                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-            end
-            if nrc
-                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-            end
-        else
-            x_guess=interp1([guess.time;guess.tf], guess.states,[T;guess.tf],'pchip');
-            x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=u_guess(:);
-            data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'pchip');
-            data.multipliers.lambda=data.multipliers.lambda(:);
-            if ng
-                lambda_g=interp1(guess.time, guess.multipliers.lambda_g,T,'pchip');
-                data.multipliers.lambda=[data.multipliers.lambda;lambda_g(:)];
-            end
-            if nb
-                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-            end
-            if nrc
-                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-            end
-        end
-    end
-else
-    if (strcmp(options.start,'Cold'))
-        if isfield(guess,'time') && ~isempty(guess.time)
-            Tx=linspace(0,guess.time(end), M);
-            Tu=linspace(0,guess.time(end-1), N);
-            x_guess=interp1(guess.time, guess.states,Tx,'linear');
-            x_guess=reshape(x_guess',M*n,1);
-            u_guess=interp1(guess.time, guess.inputs,Tu,'linear');
-            u_guess=reshape(u_guess',N*m,1);
-        else
-            for i=1:n
-              x_guess(:,i)=linspace(guess.states(1,i),guess.states(2,i),M);
-            end
-            for i=1:m
-             if N>1  
-               u_guess(:,i)=linspace(guess.inputs(1,i),guess.inputs(2,i),N);
-              else
-               u_guess(:,i)=guess.inputs(1,i);
-              end
-            end
-        end
-        data.multipliers=[];
-    elseif (strcmp(options.start,'Warm'))
-        T=(guess.tf-data.t0)*[0;cumsum(data.tau)]*data.Nm/ns+data.k0;
-        if size(guess.time,1)==size(guess.states,1)
-            x_guess=interp1(guess.time, guess.states,T,'pchip');
-            x_guess=reshape(x_guess',M*n,1);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=reshape(u_guess',M*m,1);
-        else
-            x_guess=interp1([guess.time;guess.tf], guess.states,T,'pchip');
-            x_guess=reshape(x_guess',M*n,1);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=reshape(u_guess',M*m,1);
-        end
-        data.multipliers=[];
-    elseif (strcmp(options.start,'Hot'))
-        T=(guess.tf-data.t0)*[0;cumsum(data.tau)]*data.Nm/ns+data.k0;
-        if size(guess.time,1)==size(guess.states,1)
-            x_guess=interp1(guess.time, guess.states,T,'pchip');
-            x_guess=reshape(x_guess',M*n,1);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=reshape(u_guess',M*m,1);
-            data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'pchip');
-            data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
-            if ng
-                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
-                data.multipliers.lambda=[data.multipliers.lambda;reshape(lambda_g',M*ng,1)];
-            end
-            if nb
-                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-            end
-            if nrc
-                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-            end
-        else
-            x_guess=interp1([guess.time;guess.tf], guess.states,T,'pchip');
-            x_guess=reshape(x_guess',length(T)*n,1);
-            u_guess=interp1(guess.time, guess.inputs,T,'pchip');
-            u_guess=reshape(u_guess',length(T)*m,1);
-            data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'pchip');
-            data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
-            if ng
-                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
-                data.multipliers.lambda=[data.multipliers.lambda;reshape(lambda_g',M*ng,1)];
-            end
-            if nb
-                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-            end
-            if nrc
-                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-            end
-        end
-    end
-end
 
+[ x_guess, u_guess, data ] = getGuessSolution( options, guess, problem, data );
 
 if strcmp(options.transcription,'multiple_shooting')
     
@@ -973,8 +872,8 @@ if strcmp(options.transcription,'multiple_shooting')
     x_guess=x_guess';x_guess=x_guess(:);
     infoNLP.z0=data.map.xV*x_guess+data.map.uV*u_guess;
 else
-    u_guess=u_guess';u_guess=u_guess(:);
-    x_guess=x_guess';x_guess=x_guess(:);
+%     u_guess=u_guess';u_guess=u_guess(:);
+%     x_guess=x_guess';x_guess=x_guess(:);
     infoNLP.z0=data.map.xV*x_guess+data.map.uV*u_guess;
 end
 

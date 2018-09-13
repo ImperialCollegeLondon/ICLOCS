@@ -23,7 +23,7 @@ function [ data ] = ReOrderZLGR( data )
 % 1 May 2018
 % iclocs@imperial.ac.uk
 
-[nt,np,n,m,ng,nb,M,~,~,~,~,~,~,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,~,~,~,~,~,~,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 
 z_idx_org=transpose(1:((M+1)*n+M*m+np+nt));

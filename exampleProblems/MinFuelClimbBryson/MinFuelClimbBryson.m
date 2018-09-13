@@ -126,7 +126,7 @@ alphamin = -pi/4; alphamax = pi/4;
 
 
 %Initial Time. t0<tf
-problem.time.t0=0;
+problem.time.t0=5;
 
 % Final time. Let tf_min=tf_max if tf is fixed.
 problem.time.tf_min=0;     
@@ -227,19 +227,20 @@ problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,pr
 
 %------------- END OF CODE --------------
 
-function stageCost=L_unscaled(x,u,p,t,data)
-
+function stageCost=L_unscaled(x,xr,u,ur,p,t,vdat)
 
 % L_unscaled - Returns the stage cost.
 % The function must be vectorized and
 % xi, ui are column vectors taken as x(:,i) and u(:,i) (i denotes the i-th
 % variable)
 % 
-% Syntax:  stageCost=L_unscaled(x,xr,u,ur,p,t,data)
+% Syntax:  stageCost = L(x,xr,u,ur,p,t,data)
 %
 % Inputs:
 %    x  - state vector
+%    xr - state reference
 %    u  - input
+%    ur - input reference
 %    p  - parameter
 %    t  - time
 %    data- structured variable containing the values of additional data used inside
@@ -251,7 +252,7 @@ function stageCost=L_unscaled(x,u,p,t,data)
 %  Remark: If the stagecost does not depend on variables it is necessary to multiply
 %          the assigned value by t in order to have right vector dimesion when called for the optimization. 
 %          Example: stageCost = 0*t;
-%
+
 %------------- BEGIN CODE --------------
 
 
@@ -436,6 +437,10 @@ end
 
 %------------- END OF CODE --------------
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Leave the following unchanged! %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 % L - Returns the stage cost.
@@ -444,13 +449,27 @@ function stageCost=L(x,xr,u,ur,p,t,vdat)
 
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
+    if ~isempty(xr)
+        xr=scale_variables_back( xr, vdat.Xscale, vdat.Xshift );
+    end
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
     if isfield(vdat,'Pscale')
         p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
     end
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if ~isempty(ur)
+        ur=scale_variables_back( ur, vdat.Uscale, vdat.Ushift );
+    end
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 else
-    stageCost=L_unscaled(x,u,p,t,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        stageCost=0*t;
+    else
+        stageCost=L_unscaled(x,xr,u,ur,p,t,vdat);
+    end
 end
 
 %------------- END OF CODE --------------
@@ -469,10 +488,19 @@ if isfield(vdat,'Xscale')
     if isfield(vdat,'Pscale')
         p=scale_variables_back( p', vdat.Pscale, vdat.Pshift );
     end
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 else
-    boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    if strcmp(vdat.mode.currentMode,'Feasibility')
+        boundaryCost=sum(sum(p(:,end-vdat.mode.np*2+1:end)));
+    else
+        boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat);
+    end
 end
+
 
 %------------- END OF CODE --------------
 
@@ -496,7 +524,6 @@ end
 
 %------------- END OF CODE --------------
 
-
 function c=g(x,u,p,t,vdat)
 
 % g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
@@ -514,8 +541,15 @@ else
     c = g_unscaled(x,u,p,t,vdat);
 end
 
-%------------- END OF CODE --------------
+if isfield(vdat,'gFilter')
+    c(:,vdat.gFilter)=[];
+end
 
+if strcmp(vdat.mode.currentMode,'Feasibility')
+    c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
+end
+
+%------------- END OF CODE --------------
 
 function cr=avrc(x,u,p,t,data)
 
@@ -544,6 +578,7 @@ function cr=avrc(x,u,p,t,data)
 %------------- END OF CODE --------------
 
 
+
 function bc=b(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 % b - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 % Warp function
@@ -563,4 +598,4 @@ if isfield(vdat,'Xscale')
 end
 
 
-%------------- END OF CODE --------------
+%------------- END OF CODE ---------------------

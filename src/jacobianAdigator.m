@@ -19,7 +19,7 @@ function jac=jacobianAdigator(f,g,avrc,X,U,P,T,b,x0,xf,u0,uf,p,t0,tf,fx_adigator
 
 
 e=data.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
 vdat=data.data;
@@ -123,5 +123,5 @@ end
 % Map derivatives to the jacobian
 %---------------------------------
 
-jac=[[zeros(n,nt) zeros(n,np) eye(n), zeros(n,(M-1)*n+N*m)]*data.cx0;data.map.A*data.map.Vx+data.map.B*fz;gz;rcz;bz];
+jac=[[zeros(n,nt) zeros(n,np) eye(n), zeros(n,(M-1)*n+N*m)]*data.cx0;data.map.A*data.map.Vx+data.map.B*fz;gz(data.gAllidx,:);rcz;bz];
 

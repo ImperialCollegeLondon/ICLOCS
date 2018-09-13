@@ -22,12 +22,13 @@ clear all;close all;format compact;
 global sol;  
 sol=[];                             % Initialize solution structure
 
-options= settings_hp(1,4);                  % Get options and solver settings 
+options= settings_hp(1,5);                  % Get options and solver settings 
 [problem,guess]=BangBang;          % Fetch the problem definition
 errorHistory=zeros(2,length(problem.states.x0));
 npsegmentHistory=zeros(2,1);
 ConstraintErrorHistory=zeros(2,length(problem.constraintErrorTol));
 timeHistory=zeros(1,2);
+iterHistory=zeros(1,2);
 solutionHistory=cell(1,2);
 
 maxAbsError=1e9;
@@ -36,12 +37,13 @@ minItervalScale=1;
 while (any(maxAbsError>problem.states.xErrorTol) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax
    
     [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
-    [solution,infoNLP1,data] = solveNLP(infoNLP,data);      % Solve the NLP
+    [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
     [solution]=output(problem,solution,options,data,4);         % Output solutions
     
     maxAbsError=max(abs(solution.Error));
     maxAbsConstraintError=max(solution.ConstraintError);
     errorHistory(i,:)=maxAbsError;
+    iterHistory(i)=status.iter;
     ConstraintErrorHistory(i,:)=maxAbsConstraintError;
     timeHistory(i)=solution.computation_time;
     solutionHistory{i}=solution;
@@ -54,6 +56,7 @@ end
 
 MeshRefinementHistory.errorHistory=errorHistory;
 MeshRefinementHistory.timeHistory=timeHistory;
+MeshRefinementHistory.iterHistory=iterHistory;
 MeshRefinementHistory.ConstraintErrorHistory=ConstraintErrorHistory;
 
 %%

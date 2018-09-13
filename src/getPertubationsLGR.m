@@ -24,7 +24,7 @@ function [vector,index,Jac_templete]=getPertubationsLGR(sparsity,sizes,data)
 %------------- BEGIN CODE --------------
 disp('Generate finite-difference pertubation vectors')
 % Get dimensions
-[nt,np,n,m,ng,nb,M,N,~,~,~,~,~,nrcl,nrcu,nrce]=deal(sizes{:});
+[nt,np,n,m,ng,nb,M,N,~,~,~,~,~,nrcl,nrcu,nrce,~]=deal(sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;
 
@@ -104,7 +104,7 @@ for k=1:size(idx0,2)
  if k==3                    % Pertubation of p
     for local_i=1:size(idx0{1, k},2)
         ep{i}=sparse(e0,local_i,1,M,np);
-        idx(:,i)=((M+1)*n+M*m+1+(local_i-1)*M):((M+1)*n+M*m+local_i);
+        idx(:,i)=((M+1)*n+M*m+1+(local_i-1)):((M+1)*n+M*m+local_i);
         i=i+1;
     end
  end

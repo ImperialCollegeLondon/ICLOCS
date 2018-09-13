@@ -21,6 +21,8 @@ function [ options, guess] = doMeshRefinement( options, problem, guess, data, so
 % 1 May 2018
 % iclocs@imperial.ac.uk
 
+options_old=options;
+
 minItervalScale=0.9^(mriteration-1);
 xu=problem.states.xu;xu(isinf(xu))=500;
 xl=problem.states.xl;xl(isinf(xl))=-500;
@@ -43,13 +45,14 @@ if isfield(options,'AutoDirect')
     end
     if fcn_smoothness<=10 && max(error_ratio)<=10 && ~isfield(problem.inputs,'url')
         options= settings_hp(1,40);
-        options.resultRep='default';
-    elseif const_active_ratio<=0.2 && fcn_smoothness<=10 && ~isfield(problem.inputs,'url')
+%         options.resultRep='default';
+    elseif const_active_ratio<=0.2 && ~isfield(problem.inputs,'url')
         options= settings_hp(1,8);
-        options.resultRep='default';
+%         options.resultRep='default';
     else
         options= settings_h(40);
-        options.resultRep='default';
+        options.transcription='hermite';
+        options.resultRep=options_old.resultRep;
         options.discErrorTol=discErrorTol;
         options.constraintErrorTol=problem.constraintErrorTol;
         options.discErrorTol_Scaled= discErrorTol_Scaled;
@@ -117,8 +120,15 @@ end
     else
         options.start='Hot';
     end
+    
+    
     guess.states=solution.X;
+    guess.Xp=solution.Xp;
     guess.inputs=solution.U;
+    guess.Up=solution.Up;
+    if isfield(solution,'TSeg_Bar')
+        guess.TSeg_Bar=solution.TSeg_Bar;
+    end
     guess.time=solution.T;
     guess.tf=solution.tf;
     guess.multipliers.lambda=solution.multipliers.lambda_1toN;
@@ -136,6 +146,11 @@ end
     if nb
         guess.multipliers.lambda_b=solution.multipliers.lambda_b;
     end
+    
+%     maxAbsConstraintError=max(solution.ConstraintError);
+%     if any(maxAbsConstraintError(1:ng*2)>problem.constraintErrorTol(1:ng*2))
+%         [ guess ] = solveFeasibilityProblem( problem, options, data, guess);
+%     end
 
 % end
 

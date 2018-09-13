@@ -49,7 +49,7 @@ t=(tf-data.t0)*T+data.k0;
 
 
 % Define some useful variables
-[nt,np,n,m,ng,nb,M,N]=deal(data.sizes{1:8});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{:});
 nz=nt+np+M*n+N*m;                           % Length of the primal variable
 
 
@@ -116,14 +116,17 @@ gzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));
 % is exploited
 
 if ng
-  adjoint_g=reshape(lambda(n*M+1:n*M+ng*M)',ng,M)';
+    adjoint_g=zeros(ng,M);
+    adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
+    adjoint_g=adjoint_g';
   idx=data.FD.index.g; 
   nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
   if ~isempty(Hg)
   Tj=kron(T,ones(1,ng));
     if nt
       gt=(Hg{1,1}).*(Tj.^2).*adjoint_g;  
-      gzz=gzz+sparse(idx(:,1),idx(:,1),reshape(gt',M*ng,1),nz,nz);
+      g_vect=reshape(gt',M*ng,1);
+      gzz=gzz+sparse(idx(data.gAllidx,1),idx(data.gAllidx,1),g_vect(data.gAllidx),nz,nz);
     end    
     for i=1+nt:nfd
     for j=1:i
@@ -132,7 +135,8 @@ if ng
      else   
       gt=Hg{j,i}.*adjoint_g;
      end
-     gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt',M*ng,1),nz,nz);
+     g_vect=reshape(gt',M*ng,1);
+     gzz=gzz+sparse(idx(data.gAllidx,i),idx(data.gAllidx,j),g_vect(data.gAllidx),nz,nz);
     end
    end
   else    
@@ -153,7 +157,8 @@ if ng
         (DT+etf(i)+etf(j)).*T+data.k0,vdat);
     
     gt=(gpp-gp2+go-gp1).*adjoint_g/e2; 
-    gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt',M*ng,1),nz,nz);
+    g_vect=reshape(gt',M*ng,1);
+    gzz=gzz+sparse(idx(data.gAllidx,i),idx(data.gAllidx,j),g_vect(data.gAllidx),nz,nz);
     end
    end
 

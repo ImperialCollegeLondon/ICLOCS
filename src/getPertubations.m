@@ -23,7 +23,7 @@ function [vector,index]=getPertubations(sparsity,sizes,data)
 %------------- BEGIN CODE --------------
 disp('Generate finite-difference pertubation vectors')
 % Get dimensions
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
 

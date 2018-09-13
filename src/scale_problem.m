@@ -2,15 +2,18 @@ function [ problem,guess ] = scale_problem( problem,guess )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
- xl=problem.states.xl;xl(isinf(xl))=-500;
- xu=problem.states.xu;xu(isinf(xu))=500;
- 
- idxeq=xl==xu;
- xl(idxeq)=xl(idxeq)-0.1;
- xu(idxeq)=xu(idxeq)+0.1;
- 
- problem.states.scales=1./(xu-xl);
- problem.states.shifts=0.5-xu./(xu-xl);
+
+if ~isfield(problem.states,'scales')
+     xl=problem.states.xl;xl(isinf(xl))=-500;
+     xu=problem.states.xu;xu(isinf(xu))=500;
+
+     idxeq=xl==xu;
+     xl(idxeq)=xl(idxeq)-0.1;
+     xu(idxeq)=xu(idxeq)+0.1;
+
+     problem.states.scales=1./(xu-xl);
+     problem.states.shifts=0.5-xu./(xu-xl);
+end
  
  problem.states.x0 = scale_variables( problem.states.x0, problem.states.scales, problem.states.shifts );
  problem.states.x0l = scale_variables( problem.states.x0l, problem.states.scales, problem.states.shifts );
@@ -32,15 +35,17 @@ function [ problem,guess ] = scale_problem( problem,guess )
  end
 
  
- uu=problem.inputs.uu;uu(isinf(uu))=500;
- ul=problem.inputs.ul;ul(isinf(ul))=-500;
- 
- idxeq=ul==uu;
- ul(idxeq)=ul(idxeq)-0.1;
- uu(idxeq)=uu(idxeq)+0.1;
- 
- problem.inputs.scales=1./(uu-ul);
- problem.inputs.shifts=0.5-uu./(uu-ul);
+ if ~isfield(problem.inputs,'scales')
+     uu=problem.inputs.uu;uu(isinf(uu))=500;
+     ul=problem.inputs.ul;ul(isinf(ul))=-500;
+
+     idxeq=ul==uu;
+     ul(idxeq)=ul(idxeq)-0.1;
+     uu(idxeq)=uu(idxeq)+0.1;
+
+     problem.inputs.scales=1./(uu-ul);
+     problem.inputs.shifts=0.5-uu./(uu-ul);
+ end
 
  problem.inputs.ul=scale_variables( problem.inputs.ul, problem.inputs.scales, problem.inputs.shifts );
  problem.inputs.uu=scale_variables( problem.inputs.uu, problem.inputs.scales, problem.inputs.shifts );
@@ -59,15 +64,18 @@ function [ problem,guess ] = scale_problem( problem,guess )
  end
 
  if ~isempty(guess.parameters)
-     pu=problem.parameters.pu;pu(isinf(pu))=500;
-     pl=problem.parameters.pl;pl(isinf(pl))=-500;
      
-     idxeq=pl==pu;
-     pl(idxeq)=pl(idxeq)-0.1;
-     pu(idxeq)=pu(idxeq)+0.1;
-     
-     problem.parameters.scales=1./(pu-pl);
-     problem.parameters.shifts=0.5-pu./(pu-pl);
+     if ~isfield(problem.parameters,'scales')
+         pu=problem.parameters.pu;pu(isinf(pu))=500;
+         pl=problem.parameters.pl;pl(isinf(pl))=-500;
+
+         idxeq=pl==pu;
+         pl(idxeq)=pl(idxeq)-0.1;
+         pu(idxeq)=pu(idxeq)+0.1;
+
+         problem.parameters.scales=1./(pu-pl);
+         problem.parameters.shifts=0.5-pu./(pu-pl);
+     end
      problem.parameters.pu = scale_variables( problem.parameters.pu, problem.parameters.scales, problem.parameters.shifts );
      problem.parameters.pl = scale_variables( problem.parameters.pl, problem.parameters.scales, problem.parameters.shifts );
      guess.parameters = scale_variables( guess.parameters, problem.parameters.scales, problem.parameters.shifts );

@@ -1,4 +1,4 @@
-function [jac,Jf]=jacConstz(df,dg,g,f,X,U,P,T,db,b,x0,xf,u0,uf,p,t0,tf,data)
+function [jac,Jf]=jacConstz(df,dg,g,f,avrc,X,U,P,T,db,b,x0,xf,u0,uf,p,t0,tf,data)
 
 %JACCONSTZ - Return the Jacobian of the Constraints with respect to the 
 %            variable z  when the analytic option has been selected
@@ -28,7 +28,7 @@ function [jac,Jf]=jacConstz(df,dg,g,f,X,U,P,T,db,b,x0,xf,u0,uf,p,t0,tf,data)
 
 
 e=data.options.perturbation.J;                                % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce]=deal(data.sizes{:});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(data.sizes{:});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
 vdat=data.data;
@@ -134,7 +134,7 @@ if nrc
         if ~any(ex{i}(:)) && ~any(eu{i}(:))
             rcp=avrc(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(tf+etf(i)-t0).*T+data.k0,data);
             rcm=avrc(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(tf-etf(i)-t0).*T+data.k0,data);
-            rcz=rcz+sparse(1:nrc,idx(1:M:end,i),(rcp-rcm)/(2*e),nrc,nz);
+            rcz=rcz+sparse(1:nrc,idx(:,i),(rcp-rcm)/(2*e),nrc,nz);
         end
     end
     rcz=rcz+[data.map.Acl;data.map.Ae;data.map.Acu];

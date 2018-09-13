@@ -31,7 +31,7 @@ function [solution,data]=directCollocationLGR(required,z,data)
 global sol ro_time;
 
 % Define some useful variables
-[nt,np,n,m,ng,~,M,~,~,npd,~,npduidx,nps,~,~,~]=deal(data.sizes{:});
+[nt,np,n,m,ng,~,M,~,~,npd,~,npduidx,nps,~,~,~,~]=deal(data.sizes{:});
 
 % Reorder for alternative LGR formulation with timing
 tic;
@@ -181,8 +181,9 @@ switch required
         end
         
     case{'const'} 
+        g_vect=reshape(g(X,U,P,t,vdat),M*ng,1);
         sol.const=[reshape(D_structure*X_Np1-diag(t_segment_end)*f(X,U,P,t,vdat),M*n,1);
-           reshape(g(X,U,P,t,vdat),M*ng,1);
+           g_vect(data.gAllidx);
            avrc(X_Np1,U,P,[t;tf],data)';
            b(x0,xf,u0,uf,p,t0,tf,vdat,data.options,t_segment)];
         if data.options.reorderLGR
@@ -203,6 +204,8 @@ switch required
         if data.options.reorderLGR
             sol.jacConst=sol.jacConst(data.reorder.vert_idx,data.reorder.z_idx);
         end
+        
+        
         if strcmp(data.options.NLPsolver,'worhp')
             solution=sol.jacConst(sub2ind(size(sol.jacConst),data.jacStruct_GRow,data.jacStruct_GCol));
         else
@@ -234,6 +237,7 @@ switch required
       if data.options.reorderLGR
           sol.hessian=sol.hessian(data.reorder.z_idx,data.reorder.z_idx);
       end    
+      
       sol.hessian=tril(sol.hessian);
       if strcmp(data.options.NLPsolver,'worhp')
           solution=sol.hessian(sub2ind(size(sol.hessian),data.jacStruct_HMRow,data.jacStruct_HMCol));

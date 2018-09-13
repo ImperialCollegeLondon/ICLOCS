@@ -34,14 +34,13 @@ function options = settings_h(N)
 % Hermite-Simpson method    ('hermite')
 %globalLGR
 
-% options.transcription='globalLGR';
 options.transcription='hermite';
 
 % Result Representation:
 %---------------------------------------
 % In correspondence with the transcription method       ('default')
 % Manually select       ('manual')
-options.resultRep='default';
+options.resultRep='manual';
 
 % Maunal selection of result representation method:
 %---------------------------------------
@@ -51,7 +50,7 @@ options.resultRep='default';
 %   - Piecewise cubic           ('cubic'), available for Hermite-Simpson transcription method  
 %   - Legendre polynomials      ('Legendre'), available for LGR transcription method  
 %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
-options.stateRep='cubic';
+options.stateRep='pchip';
 % Input representation
 %   - Piecewise constant        ('constant'), available for all transcription methods
 %   - Piecewise linear          ('linear'), available for all transcription methods
@@ -105,9 +104,9 @@ options.NLPsolver='ipopt';
 % options.NLPsolver='fmincon';
 
 % IPOPT settings (if required)
-options.ipopt.tol=1e-4;                        % Desired convergence tolerance (relative). The default value is  1e-8. 
+options.ipopt.tol=1e-7;                        % Desired convergence tolerance (relative). The default value is  1e-8. 
 options.ipopt.print_level=5;                   % Print level. The valid range for this integer option is [0,12] and its default value is 5.
-options.ipopt.max_iter=5000;                   % Maximum number of iterations. The default value is 3000.
+options.ipopt.max_iter=3000;                   % Maximum number of iterations. The default value is 3000.
 
 options.ipopt.warm_start_init_point ='no'; 
 options.ipopt.warm_start_bound_push  =1e-6; 
@@ -186,7 +185,7 @@ options.nodes=N;
 
 % Adaptively spaced segments
 options.adaptseg=0; 
-options.mintimeinterval=0.01; 
+options.mintimeinterval=0.001; 
 
 
 % Distribution of integration steps. Set tau=0 for equispaced steps.
@@ -215,21 +214,21 @@ options.ODEsolver='cvodes';
 
 % CVODES settings (if required)
 
-Method='Adams';  % Method: Adams, BDF
-Solver='Newton'; % Solver: Newton, Functional (requires dfdx)
-
-
-% Options for forward integratio nwhen cvodes is enabled
-options.cvodes = CVodeSetOptions('RelTol',1.e-4,...
-                          'AbsTol',1.e-6,...
-                          'LinearSolver','Dense',...
-                          'MaxNumSteps',10000,...
-                          'LMM',Method,...
-                          'NonlinearSolver',Solver); 
-                 
-% Forward sensitivity options when cvodes is enabled 
-
-options.cvodesf=CVodeSensSetOptions('ErrControl',true,'method','Staggered'); % FSA initialization
+% Method='Adams';  % Method: Adams, BDF
+% Solver='Newton'; % Solver: Newton, Functional (requires dfdx)
+% 
+% 
+% % Options for forward integratio nwhen cvodes is enabled
+% options.cvodes = CVodeSetOptions('RelTol',1.e-4,...
+%                           'AbsTol',1.e-6,...
+%                           'LinearSolver','Dense',...
+%                           'MaxNumSteps',10000,...
+%                           'LMM',Method,...
+%                           'NonlinearSolver',Solver); 
+%                  
+% % Forward sensitivity options when cvodes is enabled 
+% 
+% options.cvodesf=CVodeSensSetOptions('ErrControl',true,'method','Staggered'); % FSA initialization
                
 
 
