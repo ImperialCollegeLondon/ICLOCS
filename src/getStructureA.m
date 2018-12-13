@@ -141,7 +141,7 @@ if nrc
         drcdt=ones(nrc/((M-1)/ns),nt);
     end
 else
-    if strcmp(method,'globalLGR') || strcmp(method,'hpLGR')
+    if strcmp(data.options.transcription,'globalLGR') || strcmp(data.options.transcription,'hpLGR')
         M=sum(npd);
         drcdx=zeros(nrc/M,n);
         drcdu=zeros(nrc/M,m);
