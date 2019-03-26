@@ -62,8 +62,8 @@ if (strcmp(options.transcription,'globalLGR')) || (strcmp(options.transcription,
 
     % Extract design parameters
     if np
-        p=solution.p';
-        P=repmat(p,M,1);
+        p=solution.p;
+        P=repmat(p',M,1);
     else
         P=[];
         p=[];
@@ -319,8 +319,8 @@ else
 
     % Extract design parameters
     if np
-        p=solution.p';
-        P=repmat(p,M,1);
+        p=solution.p;
+        P=repmat(p',M,1);
     else
         P=[];
         p=[];
