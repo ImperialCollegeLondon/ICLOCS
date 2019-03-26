@@ -319,7 +319,7 @@ else
 
     % Extract design parameters
     if np
-        p=solution.p;
+        p=solution.p';
         P=repmat(p,M,1);
     else
         P=[];
