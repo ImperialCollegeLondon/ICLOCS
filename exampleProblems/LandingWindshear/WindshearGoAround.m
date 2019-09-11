@@ -17,19 +17,16 @@ function [problem,guess] = WindshearGoAround
 % Other m-files required: none
 % MAT-files required: none
 %
-% Copyright (C) 2018 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
+% Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
-% This code is published under the BSD License.
+% This code is published under the MIT License.
 % Department of Aeronautics and Department of Electrical and Electronic Engineering,
 % Imperial College London London  England, UK 
-% ICLOCS (Imperial College London Optimal Control) Version 2.0 
-% 1 May 2018
+% ICLOCS (Imperial College London Optimal Control) Version 2.5 
+% 1 Aug 2019
 % iclocs@imperial.ac.uk
-
+% 
 %------------- BEGIN CODE --------------
-% Plant model name, used for Adigator
-problem.data.plantmodel = 'WindshearGoAroundPlant';
-
 % Aerodynamic coefficients and the fitting of look-up tables
 a=6e-8;
 b_var=-4e-11;
@@ -143,8 +140,24 @@ alphamin = -alpha_max; alphamax = alpha_max;
 umin = -0.05236; umax = 0.05236;
 
 %%
+
+%------------- BEGIN CODE --------------
+% Plant model name
+InternalDynamics=@WindshearGoAround_Dynamics_Internal;
+SimDynamics=@WindshearGoAround_Dynamics_Sim;
+
+% Analytic derivative files (optional)
+problem.analyticDeriv.gradCost=[];
+problem.analyticDeriv.hessianLagrangian=[];
+problem.analyticDeriv.jacConst=[];
+
+% Settings file
+problem.settings=@settings_WindshearGoAround;
+
 %Initial Time. t0<tf
-problem.time.t0=0;
+problem.time.t0_min=0;
+problem.time.t0_max=0;
+guess.t0=0;
 
 % Final time. Let tf_min=tf_max if tf is fixed.
 problem.time.tf_min=40;     
@@ -172,7 +185,8 @@ problem.states.xrl=[-inf -inf -inf -inf];
 problem.states.xru=[inf inf inf inf]; 
 
 % State error bounds
-problem.states.xErrorTol=[1 0.5 0.1 deg2rad(0.5)];
+problem.states.xErrorTol_local=[1 0.5 0.1 deg2rad(0.5)];
+problem.states.xErrorTol_integral=[1 0.5 0.1 deg2rad(0.5)];
 
 % State constraint error bounds
 problem.states.xConstraintTol=[1 0.5 0.1 deg2rad(0.5)];
@@ -217,21 +231,31 @@ problem.setpoints.states=[];
 problem.setpoints.inputs=[];
 
 % Bounds for path constraint function gl =< g(x,u,p,t) =< gu
+problem.constraints.ng_eq=0;
+problem.constraints.gTol_eq=[];
+
 problem.constraints.gl=[0];
 problem.constraints.gu=[inf];
-problem.constraints.gTol=[0.00001];
+problem.constraints.gTol_neq=[1e-2];
 
 % Bounds for boundary constraints bl =< b(x0,xf,u0,uf,p,t0,tf) =< bu
 problem.constraints.bl=[];
 problem.constraints.bu=[];
+problem.constraints.bTol=[];
 
 % store the necessary problem parameters used in the functions
 problem.data.auxdata=auxdata;
 
 % Get function handles and return to Main.m
+problem.data.InternalDynamics=InternalDynamics;
+problem.data.functionfg=@fg;
+problem.data.plantmodel = func2str(InternalDynamics);
 problem.functions={@L,@E,@f,@g,@avrc,@b};
-problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc_unscaled,@b_unscaled};
-problem.constraintErrorTol=[problem.constraints.gTol,problem.constraints.gTol,problem.states.xConstraintTol,problem.states.xConstraintTol,problem.inputs.uConstraintTol,problem.inputs.uConstraintTol];
+problem.sim.functions=SimDynamics;
+problem.sim.inputX=[];
+problem.sim.inputU=1:length(problem.inputs.ul);
+problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc,@b_unscaled};
+problem.constraintErrorTol=[problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.states.xConstraintTol,problem.states.xConstraintTol,problem.inputs.uConstraintTol,problem.inputs.uConstraintTol];
 
 %------------- END OF CODE --------------
 
@@ -295,87 +319,6 @@ boundaryCost=-p(1);
 %------------- END OF CODE --------------
 
 
-function dx = f_unscaled(x,u,p,t,data)
-% f_unscaled - Returns the ODE right hand side where x'= f(x,u,p,t)
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% state corresponds to one column of dx.
-% 
-% 
-% Syntax:  dx = f(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%    data-structured variable containing the values of additional data used inside
-%          the function 
-%
-% Output:
-%    dx - time derivative of x
-%
-%  Remark: If the i-th ODE right hand side does not depend on variables it is necessary to multiply
-%          the assigned value by a vector of ones with the same length  of t  in order 
-%          to have  a vector with the right dimesion  when called for the optimization. 
-%          Example: dx(:,i)= 0*ones(size(t,1)); 
-%
-%------------- BEGIN CODE --------------
-
-auxdata = data.auxdata;
-
-pos = x(:,1);
-h = x(:,2);
-v = x(:,3);
-fpa = x(:,4);
-alpha = u(:,1);
-
-T=ppval(auxdata.beta_poly,t).*(auxdata.A_0+auxdata.A_1.*v+auxdata.A_2.*v.^2);
-D=0.5*(auxdata.B_0+auxdata.B_1.*alpha+auxdata.B_2.*alpha.^2).*auxdata.rho.*auxdata.S.*v.^2;
-L=0.5*ppval(auxdata.C_L_poly,alpha).*auxdata.rho.*auxdata.S.*v.^2;
-
-posdot=v.*cos(fpa)+ppval(auxdata.W1_poly,pos);
-hdot=v.*sin(fpa)+ppval(auxdata.W2_poly,pos).*h/1000;
-
-W1_dot=ppval(auxdata.W1_poly,pos+posdot)-ppval(auxdata.W1_poly,pos);
-W2_dot=ppval(auxdata.W2_poly,pos+posdot).*(h+hdot)/1000-ppval(auxdata.W2_poly,pos).*h/1000;
-vdot=T./auxdata.m.*cos(alpha+auxdata.delta)-D./auxdata.m-auxdata.g*sin(fpa)-(W1_dot.*cos(fpa)+W2_dot.*sin(fpa));
-fpadot=T./auxdata.m./v.*sin(alpha+auxdata.delta)+L./auxdata.m./v-auxdata.g./v.*cos(fpa)+(W1_dot.*sin(fpa)-W2_dot.*cos(fpa))./v;
-
-dx = [posdot, hdot, vdot, fpadot];
-
-%------------- END OF CODE --------------
-
-
-function c=g_unscaled(x,u,p,t,data)
-
-% g_unscaled - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
-% The function must be vectorized and
-% xi, ui, pi are column vectors taken as x(:,i), u(:,i) and p(:,i). Each
-% constraint corresponds to one column of c
-% 
-% Syntax:  c=g(x,u,p,t,data)
-%
-% Inputs:
-%    x  - state vector
-%    u  - input
-%    p  - parameter
-%    t  - time
-%   data- structured variable containing the values of additional data used inside
-%          the function
-%
-% Output:
-%    c - constraint function
-%
-%
-%------------- BEGIN CODE --------------
-h = x(:,2);
-c=h-p(1);
-
-%------------- END OF CODE --------------
-
-
-
 function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 
 % b_unscaled - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
@@ -405,7 +348,7 @@ bc=[];
 if length(varargin)==2
     options=varargin{1};
     t_segment=varargin{2};
-    if ((strcmp(options.transcription,'hpLGR')) || (strcmp(options.transcription,'globalLGR')))  && options.adaptseg==1 
+    if ((strcmp(options.discretization,'hpLGR')) || (strcmp(options.discretization,'globalLGR')))  && options.adaptseg==1 
         if size(t_segment,1)>size(t_segment,2)
             bc=[bc;diff(t_segment)];
         else
@@ -488,7 +431,7 @@ function dx = f(x,u,p,t,vdat)
 % f - Returns the ODE right hand side where x'= f(x,u,p,t)
 % Warp function
 %------------- BEGIN CODE --------------
-
+f_unscaled=vdat.InternalDynamics;
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
@@ -496,7 +439,7 @@ if isfield(vdat,'Xscale')
         p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
     end
     dx = f_unscaled(x,u,p,t,vdat);
-    dx= scale_variables( dx, vdat.Xscale, 0 );
+    dx = scale_variables( dx, vdat.Xscale, 0 );
 else
     dx = f_unscaled(x,u,p,t,vdat);
 end
@@ -508,16 +451,23 @@ function c=g(x,u,p,t,vdat)
 % g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
 % Warp function
 %------------- BEGIN CODE --------------
-
+g_unscaled=vdat.InternalDynamics;
+ng_group=nargout(g_unscaled);
 if isfield(vdat,'Xscale')
     x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
     u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
     if isfield(vdat,'Pscale')
         p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
     end
-    c = g_unscaled(x,u,p,t,vdat);
+end
+
+if ng_group==1
+    c=[];
+elseif ng_group==2
+    [~,c] = g_unscaled(x,u,p,t,vdat);
 else
-    c = g_unscaled(x,u,p,t,vdat);
+    [~,ceq,cneq] = g_unscaled(x,u,p,t,vdat);
+    c=[ceq cneq];
 end
 
 if isfield(vdat,'gFilter')
@@ -527,6 +477,46 @@ end
 if strcmp(vdat.mode.currentMode,'Feasibility')
     c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
 end
+
+
+function [dx,c] = fg(x,u,p,t,vdat)
+% fg - Returns the ODE right hand side where x'= f(x,u,p,t) and the path constraint function where gl =< g(x,u,p,t) =< gu
+% Warp function
+%------------- BEGIN CODE --------------
+fg_unscaled=vdat.InternalDynamics;
+ng_group=nargout(fg_unscaled);
+
+if isfield(vdat,'Xscale')
+    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
+    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    if isfield(vdat,'Pscale')
+        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+    end
+end
+
+if ng_group==1
+    c=[];
+elseif ng_group==2
+    [dx,c]=fg_unscaled(x,u,p,t,vdat);
+else
+    [dx,ceq,cneq]=fg_unscaled(x,u,p,t,vdat);
+    c=[ceq cneq];
+end
+
+if isfield(vdat,'Xscale')
+    dx = scale_variables( dx, vdat.Xscale, 0 );
+end
+
+if isfield(vdat,'gFilter')
+    c(:,vdat.gFilter)=[];
+end
+
+if strcmp(vdat.mode.currentMode,'Feasibility')
+    c=[c-p(:,end-vdat.mode.np*2+1:end-vdat.mode.np) c+p(:,end-vdat.mode.np+1:end)];
+end
+
+%------------- END OF CODE --------------
+
 
 %------------- END OF CODE --------------
 
@@ -574,6 +564,35 @@ if isfield(vdat,'Xscale')
         end
         bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin);
     end
+end
+
+
+%------------- END OF CODE ---------------------
+
+function dx = f_unscaled(x,u,p,t,vdat)
+% f - Returns the ODE right hand side where x'= f(x,u,p,t)
+% Warp function
+%------------- BEGIN CODE --------------
+Dynamics=vdat.InternalDynamics;
+dx = Dynamics(x,u,p,t,vdat);
+
+%------------- END OF CODE --------------
+
+function c=g_unscaled(x,u,p,t,vdat)
+
+% g - Returns the path constraint function where gl =< g(x,u,p,t) =< gu
+% Warp function
+%------------- BEGIN CODE --------------
+Dynamics=vdat.InternalDynamics;
+ng_group=nargout(Dynamics);
+
+if ng_group==1
+    c=[];
+elseif ng_group==2
+    [~,c] = Dynamics(x,u,p,t,vdat);
+else
+    [~,ceq,cneq] = Dynamics(x,u,p,t,vdat);
+    c=[ceq cneq];
 end
 
 
