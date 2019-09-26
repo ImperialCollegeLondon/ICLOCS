@@ -1,13 +1,9 @@
 % Main script to solve the Optimal Control Problem
 %
-% Supersonic Aircraft Minimum Time-to-climb 
+% Low Thrust Orbit Transfer Problem
 %
-% The problem was adapted from the supersonic aircraft minimum time-to-climb problem originally presented by
-% A. E. Bryson, M. N. Desai, and W. C. Hoffman, "Energy-State Approximation in Performance Optimization of Supersonic Aircraft," Journal of Aircraft, Vol. 6, No. 6, November-December, 1969, pp. 481-488. 
-% This example was formulated originally by:
+% The problem was adapted from Example 6.3 from
 % J. Betts, "Practical Methods for Optimal Control and Estimation Using Nonlinear Programming: Second Edition," Advances in Design and Control, Society for Industrial and Applied Mathematics, 2010.
-% With aerodynamic data and modifications to thrust data by:
-% M.A. Patterson and A.V. Rao, User's Manual, "GPOPS-II: A General Purpose MATLAB Software for Solving Multiple-Phase Optimal Control Problems, 2.3 edition", 2016
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.

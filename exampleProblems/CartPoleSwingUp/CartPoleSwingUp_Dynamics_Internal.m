@@ -1,6 +1,6 @@
 
 function [dx] = CartPoleSwingUp_Dynamics_Internal(x,u,p,t,vdat)
-% Fed-batch fermentor Dynamics - Internal
+% Cart Pole Swing-up Problem Dynamics - Internal
 %
 % Syntax:  
 %          [dx] = Dynamics(x,u,p,t,vdat)	(Dynamics Only)

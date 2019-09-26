@@ -1,5 +1,4 @@
 function dx=odeInitialGuess(t,x,f,data)
-% u=cellfun(@(Up)speval(Up,1,t),Up);%;+ppval(K,t)'*(x-ppval(xr,t));
 
 theta=0;
 phi=30;
@@ -12,7 +11,6 @@ p=[-8];
 
 
 % Evaluate ODE right-hand side
-% f=problem.sim.functions;
 dx=f(x',u,p,t,data)';
 
 end

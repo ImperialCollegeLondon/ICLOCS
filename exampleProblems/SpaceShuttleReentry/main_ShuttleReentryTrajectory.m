@@ -1,8 +1,8 @@
 % main_h_MeshRefinement - Main script to solve the Optimal Control Problem with h-typed mesh and refinement
 %
-% BangBang Control (Double Integrator Minimum Time Repositioning) Problem
+% Space Shuttle Re-entry Trajectory Problem
 %
-% The problem was adapted from Example 4.11 from
+% The problem was adapted from Example 6.1 from
 % J. Betts, "Practical Methods for Optimal Control and Estimation Using Nonlinear Programming: Second Edition," Advances in Design and Control, Society for Industrial and Applied Mathematics, 2010.
 %
 % Copyright (C) 2018 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
@@ -21,8 +21,8 @@ clear all;close all;format compact;
 
 
 [problem,guess]=ShuttleReentryTrajectory;          % Fetch the problem definition
-options= problem.settings(6,4);
-% options= problem.settings(30);                  % Get options and solver settings 
+% options= problem.settings(6,4);
+options= problem.settings(30);                  % Get options and solver settings 
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 [ tv, xv, uv ] = simulateSolution( problem, solution, 'ode113', 0.1 );
 

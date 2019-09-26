@@ -25,9 +25,9 @@ InternalDynamics=@myProblem_Dynamics_Internal;
 SimDynamics=@myProblem_Dynamics_Sim;
 
 % Analytic derivative files (optional), provide in the format of function handle
-problem.analyticDeriv.gradCost=@gradCost;
-problem.analyticDeriv.hessianLagrangian=@hessianLagrangian;
-problem.analyticDeriv.jacConst=@jacConst;
+problem.analyticDeriv.gradCost=@gradCost_myProblem;
+problem.analyticDeriv.hessianLagrangian=@hessianLagrangian_myProblem;
+problem.analyticDeriv.jacConst=@jacConst_myProblem;
 
 % Settings file
 problem.settings=@settings_myProblem;

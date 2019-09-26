@@ -30,11 +30,11 @@ options= problem.settings(40);                  % for h method
 xx=linspace(solution.T(1,1),solution.tf,1000);
 
 figure
-plot(solution.T,speval(solution,'X',1,solution.T),'ro' )
+% plot(solution.T,speval(solution,'X',1,solution.T),'ro' )
 hold on
-plot(solution.T,speval(solution,'X',2,solution.T),'bo' )
-plot(solution.T,speval(solution,'X',3,solution.T),'mo' )
-plot(solution.T,speval(solution,'X',4,solution.T),'go' )
+% plot(solution.T,speval(solution,'X',2,solution.T),'bo' )
+% plot(solution.T,speval(solution,'X',3,solution.T),'mo' )
+% plot(solution.T,speval(solution,'X',4,solution.T),'go' )
 plot(xx,speval(solution,'X',1,xx),'r-' )
 plot(xx,speval(solution,'X',2,xx),'b-' )
 plot(xx,speval(solution,'X',3,xx),'m-' )
@@ -51,14 +51,15 @@ grid on
 
 
 figure
-plot(solution.T(:,1),speval(solution,'U',1,solution.T),'ro' )
+% plot(solution.T(:,1),speval(solution,'U',1,solution.T),'ro' )
 hold on
-plot(solution.T(:,1),speval(solution,'U',2,solution.T),'bo' )
+% plot(solution.T(:,1),speval(solution,'U',2,solution.T),'bo' )
 plot(xx,speval(solution,'U',1,xx),'r-' )
 plot(xx,speval(solution,'U',2,xx),'b-' )
 plot(tv,uv(:,1),'k-.')
 plot(tv,uv(:,2),'k-.')
 xlabel('Time')
+ylim([-1 1])
 grid on
 ylabel('Control Inputs')
 legend('u1','u2')

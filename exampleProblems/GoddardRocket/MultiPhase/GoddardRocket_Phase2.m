@@ -249,7 +249,6 @@ varargin=varargin{1};
 ht0 = x0(1);
 vt0 = x0(2);
 mt0 = x0(3);
-% Tt0 = u0(1);
 H = vdat.H; 
 D0 = vdat.D0; 
 grav = vdat.grav; 

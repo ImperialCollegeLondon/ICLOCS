@@ -1,5 +1,5 @@
 function [dx,g_eq] = LTOT_Dynamics_Internal(x,u,p,t,vdat)
-%Supersonic Aircraft Minimum Fuel Climb Problem - Dynamics - Internal
+%Low Thrust Orbit Transfer Problem - Dynamics - Internal
 %
 % Syntax:  
 %          [dx] = Dynamics(x,u,p,t,vdat)	(Dynamics Only)

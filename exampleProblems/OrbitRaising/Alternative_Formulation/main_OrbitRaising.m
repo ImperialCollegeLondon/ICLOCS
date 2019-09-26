@@ -29,10 +29,10 @@ options= problem.settings(40);                  % for h method
 xx=linspace(solution.T(1,1),solution.tf,10000);
 
 figure
-plot(solution.T,speval(solution,'X',1,solution.T),'ro' )
+% plot(solution.T,speval(solution,'X',1,solution.T),'ro' )
 hold on
-plot(solution.T,speval(solution,'X',2,solution.T),'bo' )
-plot(solution.T,speval(solution,'X',3,solution.T),'mo' )
+% plot(solution.T,speval(solution,'X',2,solution.T),'bo' )
+% plot(solution.T,speval(solution,'X',3,solution.T),'mo' )
 plot(xx,speval(solution,'X',1,xx),'r-' )
 plot(xx,speval(solution,'X',2,xx),'b-' )
 plot(xx,speval(solution,'X',3,xx),'m-' )
@@ -47,7 +47,7 @@ legend('r','theta','V')
 
 
 figure
-plot(solution.T(:,1),speval(solution,'U',1,solution.T)*180/pi,'bo' )
+% plot(solution.T(:,1),speval(solution,'U',1,solution.T)*180/pi,'bo' )
 hold on
 plot(xx,speval(solution,'U',1,xx)*180/pi,'b-' )
 plot(tv,uv(:,1)*180/pi,'k-.')

@@ -25,7 +25,6 @@ clear all;close all;format compact;
 options= settings_GoddardRocket(100);                  % Get options and solver settings 
 [problem,guess]=GoddardRocket;          % Fetch the problem definition
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
-genSolutionPlots(options, solution);
 
 %% Generate Figures
 xx=linspace(solution.T(1,1),solution.tf,100000);
@@ -34,21 +33,21 @@ figure(100)
 hold on
 plot(xx,speval(solution,'X',1,xx))
 xlabel('Time [s]')
-ylabel('Altitude [km]')
+ylabel('Altitude [ft]')
 grid on
 
 figure(101)
 hold on
 plot(xx,speval(solution,'X',2,xx))
 xlabel('Time [s]')
-ylabel('Velocity [m/s]')
+ylabel('Velocity [ft/s]')
 grid on
 
 figure(102)
 hold on
 plot(xx,speval(solution,'X',3,xx))
 xlabel('Time [s]')
-ylabel('Mass [kg]')
+ylabel('Mass [lbm]')
 grid on
 
 figure(103)
@@ -59,4 +58,4 @@ plot(xx,speval(solution,'U',1,xx))
 ylim([problem.inputs.ul problem.inputs.uu])
 xlabel('Time [s]')
 grid on
-ylabel('Control Input')
+ylabel('Control Input (Thrust) [lbf]')

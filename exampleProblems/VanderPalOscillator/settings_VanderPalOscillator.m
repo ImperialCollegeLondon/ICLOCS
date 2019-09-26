@@ -34,7 +34,7 @@ function options = settings_VanderPalOscillator(varargin)
 %---------------------------------------
 % - Direct collocation method ('direct_collocation')
 % - Integral residual minimization method ('integral_res_min')
-options.transcription='direct_collocation';
+options.transcription='integral_res_min';
 
 % Solution method for integrated residual minimization
 %---------------------------------------

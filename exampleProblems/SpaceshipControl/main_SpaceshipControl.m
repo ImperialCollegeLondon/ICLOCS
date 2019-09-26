@@ -5,7 +5,7 @@
 % The problem was originally presented by: 
 % Battin, R.H.: An Introduction to the Mathematics and Methods of Astrodynamics, Revised Edition. AIAA Education Series (1999)
 % This implementation was adapted from
-% Knauer M., Büskens C. (2019) Real-Time Optimal Control Using TransWORHP and WORHP Zen. In: Fasano G., Pintér J. (eds) Modeling and Optimization in Space Engineering. Springer Optimization and Its Applications, vol 144. Springer, Cham
+% Knauer M., Buekens C. (2019) Real-Time Optimal Control Using TransWORHP and WORHP Zen. In: Fasano G., Pinter J. (eds) Modeling and Optimization in Space Engineering. Springer Optimization and Its Applications, vol 144. Springer, Cham
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
@@ -20,8 +20,7 @@
 
 clear all;close all;format compact;
 
-options= settings_SpaceshipControl(6,3);
-% options= settings_SpaceshipControl(20);                  % Get options and solver settings 
+options= settings_SpaceshipControl(20);                  % Get options and solver settings 
 [problem,guess]=SpaceshipControl;          % Fetch the problem definition
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 [ tv, xv, uv ] = simulateSolution( problem, solution, 'ode113', 0.01 );

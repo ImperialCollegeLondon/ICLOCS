@@ -57,12 +57,9 @@ guess.parameters=guess_mp.parameters;
 problem.states.x0l=[0 -200]; 
 problem.states.x0u=[300 200]; 
 
-
-
 % State bounds. xl=< x <=xu
 problem.states.xl=[0 -200];
 problem.states.xu=[310 200];
-
 
 % State error bounds
 problem.states.xErrorTol_local=[1e-3 1e-3];

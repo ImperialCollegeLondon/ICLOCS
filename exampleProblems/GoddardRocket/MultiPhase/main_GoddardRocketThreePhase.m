@@ -22,8 +22,8 @@ clear all;close all;format compact;
 options.mp= settings_GoddardRocketThreePhase;                  % Get options and solver settings 
 [problem,guess,options.phaseoptions]=GoddardRocketThreePhase;          % Fetch the problem definition
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
-genSolutionPlots(options, solution);
 
+%%
 for i=1:length(solution.phaseSol)
     sol=solution.phaseSol{i};
     xx=linspace(sol.t0,sol.tf,1000);
@@ -31,31 +31,32 @@ for i=1:length(solution.phaseSol)
     
     figure(100)
     hold on
-    plot(xx,speval(sol,'X',1,xx))
+    plot(xx,speval(sol,'X',1,xx),'linewidth',2)
     xlabel('Time [s]')
-    ylabel('Altitude [km]')
+    ylabel('Altitude [ft]')
     grid on
     
     figure(101)
     hold on
-    plot(xx,speval(sol,'X',2,xx))
+    plot(xx,speval(sol,'X',2,xx),'linewidth',2)
     xlabel('Time [s]')
-    ylabel('Velocity [m/s]')
+    ylabel('Velocity [ft/s]')
     grid on
     
     figure(102)
     hold on
-    plot(xx,speval(sol,'X',3,xx))
+    plot(xx,speval(sol,'X',3,xx),'linewidth',2)
     xlabel('Time [s]')
-    ylabel('Mass [kg]')
+    ylabel('Mass [lbm]')
     grid on
     
     figure(103)
     hold on
-    plot(xx,speval(sol,'U',1,xx))    
+    plot(xx,speval(sol,'U',1,xx),'linewidth',2)
+    ylim([problem.phases{3}.inputs.ul problem.phases{1}.inputs.uu])
     xlabel('Time [s]')
     grid on
-    ylabel('Control Input')
+    ylabel('Control Input (Thrust) [lbf]')
 
 end
 

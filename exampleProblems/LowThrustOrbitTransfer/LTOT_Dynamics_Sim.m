@@ -1,5 +1,5 @@
 function dx = LTOT_Dynamics_Sim(x,u,p,t,vdat)
-% Supersonic Aircraft Minimum Fuel Climb Problem - Dynamics - simulation
+% Low Thrust Orbit Transfer Problem - Dynamics - simulation
 %
 % Syntax:  
 %          [dx] = Dynamics(x,u,p,t,vdat)

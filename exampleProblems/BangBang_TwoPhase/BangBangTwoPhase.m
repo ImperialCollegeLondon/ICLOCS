@@ -49,8 +49,8 @@ problem.mp.data = [];
 % Define different phases of OCP
 [problem.phases{1},guess.phases{1}] = BangBangTwoPhase_Phase1(problem.mp, guess.mp);
 [problem.phases{2},guess.phases{2}] = BangBangTwoPhase_Phase2(problem.mp, guess.mp);
-phaseoptions{1}=problem.phases{1}.settings(4);
-phaseoptions{2}=problem.phases{2}.settings(4);
+phaseoptions{1}=problem.phases{1}.settings(20);
+phaseoptions{2}=problem.phases{2}.settings(20);
 %------------- END OF CODE --------------
 
 

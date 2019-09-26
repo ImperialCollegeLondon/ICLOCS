@@ -1,8 +1,8 @@
 function [problem,guess] = CartPoleSwingUp
-%BatchFermentor - Fed-batch fermentor optimal control problem
+%CartPoleSwingUp - Cart Pole Swing-up Problem
 %
-% The problem was originally presented by
-% J.E. Cuthrell and L. T. Biegler. Simultaneous optimization and solution methods for batch reactor control profiles. Computers and Chemical Engineering, 13:49-62, 1989.
+% The problem was adapted from Section 6 of
+% Kelly M. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review. 2017 Nov 6;59(4):849-904.
 %
 % Outputs:
 %    problem - Structure with information on the optimal control problem
