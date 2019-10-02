@@ -219,19 +219,15 @@ end
 %          varibles (>2)
 t0l=problem.time.t0_min; t0u=problem.time.t0_max;
 tfl=problem.time.tf_min; tfu=problem.time.tf_max;
-% if tfl==tfu&&~strcmp(options.discretization,'globalLGR')&&~strcmp(options.discretization,'hpLGR')
-%     data.tf=tfl; nt=0;tfl=[];tfu=[];
-% else
-    if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
-        if options.adaptseg==1
-            nt=nps+1;
-        else
-            nt=2;
-        end
+if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
+    if options.adaptseg==1
+        nt=nps+1;
     else
-        nt=2; 
+        nt=2;
     end
-% end
+else
+    nt=2; 
+end
 
 
 
@@ -239,9 +235,13 @@ tfl=problem.time.tf_min; tfu=problem.time.tf_max;
 % scale
 % data.t0=problem.time.t0;
 if (strcmp(options.discretization,'discrete'))
-     data.k0=problem.time.t0;
-     problem.time.t0=0;
-     data.Nm=N;
+     if problem.time.t0_min~=problem.time.t0_max
+        error('Error: for discrete problems, currently only support fixed t0. Please set t0_min to equal to t0_max to precede.')
+     else
+         data.k0=problem.time.t0_min;
+         problem.time.t0=0;
+         data.Nm=N;
+     end
 else
      data.Nm=1;
 end
@@ -453,6 +453,7 @@ if ~isfield(problem.states,'x0') || isempty(problem.states.x0)
   data.x0=x0l;
   data.x0t=(x0_l+(x0_u-x0_l).*rand(n,1));
   data.x0t(isinf(data.x0t))=0;
+  data.x0t(isnan(data.x0t))=0;
 else  
   cx0=1;
   data.x0t=problem.states.x0.';

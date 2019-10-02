@@ -35,6 +35,9 @@ if nargin==3
         if any(npd<2)
             error('Do not supported polynomial order less than 2.')
         end
+        if strcmp(options.discretization,'discrete') && ~strcmp(options.meshstrategy,'fixed')
+            error('Discrete discretization only support fixed mesh')
+        end
     end
 else
     options=varargin{1};
