@@ -172,7 +172,7 @@ end
 
 % Compute Ezz
 % ------------
-Ezz=zeros(nz,nz);
+Ezz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
 idx=data.FD.index.Ey;nfd=size(idx,2);                               
 et0=data.FD.vector.Ey.et0;etf=data.FD.vector.Ey.etf;ep=data.FD.vector.Ey.ep;
 ex0=data.FD.vector.Ey.ex0;eu0=data.FD.vector.Ey.eu0;
@@ -200,7 +200,7 @@ for i=1:nfd
     end
   end
 end
-Ezz=sparse(Ezz);
+% Ezz=sparse(Ezz);
 
 % Compute bzz
 % ------------
