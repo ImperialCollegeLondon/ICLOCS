@@ -54,7 +54,7 @@ function printSolveInfo(solution,options)
             disp('Maximum absolute local error:');disp(solution.MaxAbsError);
             disp('Maximum relative local error:');disp(solution.MaxRelError);
                 if isfield(options.print,'residual_error') && options.print.residual_error
-                    disp('Squared ODE residual:');disp(solution.phaseSol{i}.residuals.r');
+                    disp('Squared ODE residual:');disp(solution.residuals.r');
                 end
             disp('Maximum absolute constraint violation:');disp(solution.MaxConstVioError);
             disp('Number of active constraints:');disp(solution.NumActiveConstraint);
