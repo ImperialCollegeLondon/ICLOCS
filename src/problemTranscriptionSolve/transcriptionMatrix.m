@@ -31,7 +31,7 @@ if strcmp(method,'globalLGR') || strcmp(method,'hpLGR')
     Vx(1:nx,1:nx)=speye(nx);
     xV=Vx';
 
-    Vx_LGRpts = zeros(nx-n,nz);
+    Vx_LGRpts = spalloc(nx-n,nz,M*2);
     for i=1:n
         Vx_LGRpts(((i-1)*M+1):((i-1)*M+M),((i-1)*M+i):((M+1)*i-1))=speye(M);
     end
