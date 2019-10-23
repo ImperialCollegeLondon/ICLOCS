@@ -41,7 +41,7 @@ if isfield(options,'mp')
             iterHistory=zeros(1,1);
             solutionHistory=cell(1,1);
             statusHistory=cell(1,1);
-            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+            if isfield(options.print,'residual_error') && options.print.residual_error
                 resErrorHistory=cell(1,nphase);
             end
 
@@ -77,9 +77,9 @@ if isfield(options,'mp')
                 for j=1:nphase
                     errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
                     ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
-                    if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                    if isfield(options.print,'residual_error') && options.print.residual_error
                         resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
-                    end
+            end
                     
                 end
                 timeHistory(i)=solution.mp.computation_time;
@@ -98,9 +98,8 @@ if isfield(options,'mp')
                             [solution] = runPostSolveTasks(problem,solution,options,data);         % Output solutions
                             errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
                             ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
-                            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                                resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
-                            end
+                            
+                            resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
                         end
                         timeHistory(i)=solution.mp.computation_time;
                         solutionHistory{i}=solution;
@@ -137,9 +136,7 @@ if isfield(options,'mp')
                         for k=1:nphase
                             errorHistory{i,k}=max(abs(solution.phaseSol{k}.Error));
                             ConstraintErrorHistory{i,k}=max(solution.phaseSol{k}.ConstraintError);
-                            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                                resErrorHistory{i,k}=solution.phaseSol{k}.residuals.r;
-                            end
+                            resErrorHistory{i,k}=solution.phaseSol{k}.residuals.r;
                         end
                         timeHistory(i)=solution.mp.computation_time;
                         solutionHistory{i}=solution;

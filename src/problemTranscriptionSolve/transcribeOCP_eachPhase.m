@@ -90,7 +90,7 @@ N=problem.inputs.N;                        % Number of control actions
 
 
 
-if ~isfield(problem.data,'resNormCusWeight')
+if ~isfield(problem.states,'resNormCusWeight')
     problem.data.resNormCusWeight=ones(1,n);
 else
     problem.data.resNormCusWeight=problem.states.resNormCusWeight;
@@ -549,42 +549,42 @@ if options.scaling
     
     if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
         XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
-        data.scaling.XunscaleMat=sparse(diag(XunscaleMat(:)));
+        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M,M);
         XscaleMat=repmat( data.data.Xscale, M, 1 );
-        data.scaling.XscaleMat=sparse(diag(XscaleMat(:)));
+        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M,M);
         data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
         
         UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=sparse(diag(UunscaleMat(:)));
+        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M,M);
         UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=sparse(diag(UscaleMat(:)));
+        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M,M);
         data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
         if isfield(data.data,'Pscale')
             PscaleMat=repmat( data.data.Pscale, M, 1 );
             PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
             data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=sparse(diag(PunscaleMat(:)));
-            data.scaling.PscaleMat=sparse(diag(PscaleMat(:)));
+            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M,M);
+            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M,M);
         end
     else
         XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
-        data.scaling.XunscaleMat=sparse(diag(XunscaleMat(:)));
+        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M,M);
         XscaleMat=repmat( data.data.Xscale, M, 1 );
-        data.scaling.XscaleMat=sparse(diag(XscaleMat(:)));
+        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M,M);
         data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
         
         UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=sparse(diag(UunscaleMat(:)));
+        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M,M);
         UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=sparse(diag(UscaleMat(:)));
+        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M,M);
         data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
         
         if isfield(data.data,'Pscale')
             PscaleMat=repmat( data.data.Pscale, M, 1 );
             PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
             data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=sparse(diag(PunscaleMat(:)));
-            data.scaling.PscaleMat=sparse(diag(PscaleMat(:)));
+            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M,M);
+            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M,M);
         end
     end
 
@@ -1364,7 +1364,9 @@ end
         t_list=[0;data.tau_inc(2:ns:end)]/ns;
     end
     
-    data.resmin = transcribeResErrorAnalysis( t_list,options,data );
+    if isfield(options.print,'residual_error') && options.print.residual_error
+        data.resmin = transcribeResErrorAnalysis( t_list,options,data );
+    end
   end
 
   

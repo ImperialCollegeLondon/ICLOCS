@@ -30,7 +30,9 @@ function printSolveInfo(solution,options)
                 disp(['Phase' num2str(i) ':']);
                 disp('Maximum absolute local error:');disp(solution.phaseSol{i}.MaxAbsError);
                 disp('Maximum relative local error:');disp(solution.phaseSol{i}.MaxRelError);
-                disp('Squared ODE residual:');disp(solution.phaseSol{i}.residuals.r');
+                if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                    disp('Squared ODE residual:');disp(solution.phaseSol{i}.residuals.r');
+                end
                 disp('Maximum absolute constraint violation:');disp(solution.phaseSol{i}.MaxConstVioError);
                 disp('Number of active constraints:');disp(solution.phaseSol{i}.NumActiveConstraint);
             end
@@ -51,7 +53,9 @@ function printSolveInfo(solution,options)
         if options.print.relative_local_error
             disp('Maximum absolute local error:');disp(solution.MaxAbsError);
             disp('Maximum relative local error:');disp(solution.MaxRelError);
-            disp('Squared ODE residual:');disp(solution.residuals.r');
+                if isfield(options.print,'residual_error') && options.print.residual_error
+                    disp('Squared ODE residual:');disp(solution.residuals.r');
+                end
             disp('Maximum absolute constraint violation:');disp(solution.MaxConstVioError);
             disp('Number of active constraints:');disp(solution.NumActiveConstraint);
         end

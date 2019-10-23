@@ -307,7 +307,6 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     % constraints
     [ solution ] = getVariableRate( solution,dataNLP );
     [Error, ErrorRelative]=estimateError_LGR(solution,p,T,n,m,f,M,dataNLP);
-    [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data);
     [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation_LGR(p,t0,tf,n,m,solution,problem,dataNLP,1);
             
     % Save results
@@ -322,8 +321,12 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     solution.MaxRelError=max(solution.ErrorRelative);
     solution.MaxConstVioError=max(solution.ConstraintError);
 
-    solution.residuals.r=r;
-    solution.residuals.r_seg=r_seg;
+    if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
+        [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data);
+        solution.residuals.r=r;
+        solution.residuals.r_seg=r_seg;
+    end
+
     
 else
     % Define some variables
@@ -544,12 +547,7 @@ else
     
     [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation(p,t0,tf,n,m,solution,problem,dataNLP,1);
     
-    if strcmp(dataNLP.options.discretization,'hermite')
-        [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data);
-    else
-        r_seg=Error';
-        r=sum(r_seg,2);
-    end
+
 
     % Obtain multipliers
     if ~strcmp(dataNLP.options.transcription,'integral_res_min') && ~strcmp(dataNLP.options.NLPsolver,'NOMAD')
@@ -594,8 +592,16 @@ else
     solution.MaxRelError=max(solution.ErrorRelative);
     solution.MaxConstVioError=max(solution.ConstraintError);
 
-    solution.residuals.r=r;
-    solution.residuals.r_seg=r_seg;
+    if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
+        if strcmp(dataNLP.options.discretization,'hermite')
+            [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data);
+        else
+            r_seg=Error';
+            r=sum(r_seg,2);
+        end
+        solution.residuals.r=r;
+        solution.residuals.r_seg=r_seg;
+    end
 end
 %------------- END OF CODE --------------
 
