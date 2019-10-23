@@ -138,7 +138,7 @@ switch dataNLP.options.discretization
         InterpH=sparse(InterpH);
         auxdata.InterpH=InterpH;
         auxdata.sumInterpH=sumInterpH;
-        auxdata.sumInterpHMat=sparse(diag(1./sumInterpH));
+        auxdata.sumInterpHMat=spdiags(1./sumInterpH,0,M_quad,M_quad);
         auxdata.interp_fixi=interp_fixi;
         auxdata.interp_fixj=interp_fixj;
         auxdata.D_mat=sparse(D_mat);
@@ -175,17 +175,23 @@ switch dataNLP.options.discretization
     case{'hermite'} 
         DT=(tf_list-t0_list);
         DT_seg_quad=repelem(DT',npd_quad+1,1);
-        DxHS1=sparse(diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2));
+        DxHS1=spdiags([-3*ones(M,1) 4*ones(M,1) -ones(M,1)],[0 1 2],M,M);
+%         DxHS1=sparse(diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2));
         DxHS1([2:2:end,end],:)=[];
-        DxHS2=sparse(diag(-ones(M,1))+diag(ones(M-2,1),2));
+        DxHS2=spdiags([-ones(M,1) ones(M,1)],[0 2],M,M);
+%         DxHS2=sparse(diag(-ones(M,1))+diag(ones(M-2,1),2));
         DxHS2([2:2:end,end],:)=[];
-        DxHS3=sparse(diag(1*ones(M,1))+diag(-4*ones(M-1,1),1)+diag(3*ones(M-2,1),2));
+        DxHS3=spdiags([ones(M,1) -4*ones(M,1) 3*ones(M,1)],[0 1 2],M,M);
+%         DxHS3=sparse(diag(1*ones(M,1))+diag(-4*ones(M-1,1),1)+diag(3*ones(M-2,1),2));
         DxHS3([2:2:end,end],:)=[];
         
-        DxHS_hf=sparse(diag(-5/2*ones(M,1))+diag(2*ones(M-1,1),1)+diag(0.5*ones(M-2,1),2));
+        DxHS_hf=spdiags([-5/2*ones(M,1) 2*ones(M,1) 0.5*ones(M,1)],[0 1 2],M,M);
+%         DxHS_hf=sparse(diag(-5/2*ones(M,1))+diag(2*ones(M-1,1),1)+diag(0.5*ones(M-2,1),2));
         DxHS_hf([2:2:end,end],:)=[];
         DxHS_hf=DxHS_hf./DT';
-        DxHS_p1=sparse(diag(4*ones(M,1))+diag(-8*ones(M-1,1),1)+diag(4*ones(M-2,1),2));
+        
+        DxHS_p1=spdiags([4*ones(M,1) -8*ones(M,1) 4*ones(M,1)],[0 1 2],M,M);
+%         DxHS_p1=sparse(diag(4*ones(M,1))+diag(-8*ones(M-1,1),1)+diag(4*ones(M-2,1),2));
         DxHS_p1([2:2:end,end],:)=[];
         DxHS_p1=DxHS_p1./DT';
         

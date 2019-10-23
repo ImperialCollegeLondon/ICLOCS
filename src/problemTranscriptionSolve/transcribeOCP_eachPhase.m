@@ -90,7 +90,7 @@ N=problem.inputs.N;                        % Number of control actions
 
 
 
-if ~isfield(problem.data,'resNormCusWeight')
+if ~isfield(problem.states,'resNormCusWeight')
     problem.data.resNormCusWeight=ones(1,n);
 else
     problem.data.resNormCusWeight=problem.states.resNormCusWeight;
@@ -1364,7 +1364,9 @@ end
         t_list=[0;data.tau_inc(2:ns:end)]/ns;
     end
     
-    data.resmin = transcribeResErrorAnalysis( t_list,options,data );
+    if isfield(options.print,'residual_error') && options.print.residual_error
+        data.resmin = transcribeResErrorAnalysis( t_list,options,data );
+    end
   end
 
   
