@@ -163,7 +163,39 @@ data.map.ez=map_ez;
 data.map.phases=cell(length(problem.phases),1);
 data.map.et0=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt+1):data.mpsizes.nxupt0f-1,:);
 data.map.etf=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt+2):data.mpsizes.nxupt0f,:);
-data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:);
+if options.mp.scaling
+    if strcmp(options.mp.transcription,'integral_res_min')
+        if isfield(phasedata{1}.dataNLP.data,'Pscale')
+            data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:)./phasedata{1}.dataNLP.data.Pscale';
+            infoNLP_P.zl=scale_variables( problem.mp.parameters.pl, phasedata{1}.dataNLP.data.Pscale, phasedata{1}.dataNLP.data.Pshift )';
+            infoNLP_P.zu=scale_variables( problem.mp.parameters.pu, phasedata{1}.dataNLP.data.Pscale, phasedata{1}.dataNLP.data.Pshift )';
+            infoNLP_P.z0=scale_variables( guess.mp.parameters, phasedata{1}.dataNLP.data.Pscale, phasedata{1}.dataNLP.data.Pshift )';
+        else
+            data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:);
+            infoNLP_P.zl=[];
+            infoNLP_P.zu=[];
+            infoNLP_P.z0=[];
+        end
+    else
+        if isfield(phasedata{1}.data,'Pscale')
+            data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:)./phasedata{1}.data.Pscale';
+            infoNLP_P.zl=scale_variables( problem.mp.parameters.pl, phasedata{1}.data.Pscale, phasedata{1}.data.Pshift )';
+            infoNLP_P.zu=scale_variables( problem.mp.parameters.pu, phasedata{1}.data.Pscale, phasedata{1}.data.Pshift )';
+            infoNLP_P.z0=scale_variables( guess.mp.parameters, phasedata{1}.data.Pscale, phasedata{1}.data.Pshift )';
+        else
+            data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:);
+            infoNLP_P.zl=[];
+            infoNLP_P.zu=[];
+            infoNLP_P.z0=[];
+        end
+    end
+else
+    data.map.ep=map_ez((data.mpsizes.nxupt0f-data.mpsizes.nt-data.mpsizes.np+1):(data.mpsizes.nxupt0f-data.mpsizes.nt),:);
+    infoNLP_P.zl=problem.mp.parameters.pl';
+    infoNLP_P.zu=problem.mp.parameters.pu';
+    infoNLP_P.z0=guess.mp.parameters';
+end
+
 
 nxupt0f=cumsum([0 data.mpsizes.nxu0f]);
 nbmp=0;
@@ -317,9 +349,9 @@ data.linkConst.all.idx=repmat([data.linkConst.xu0f.idx data.linkConst.p.idx data
 infoNLP_T.zl=problem.mp.time.t_min';
 infoNLP_T.zu=problem.mp.time.t_max';
 infoNLP_T.z0=guess.mp.time';
-mpinfoNLP.zl=[infoNLP_XU.zl;problem.mp.parameters.pl';infoNLP_T.zl];
-mpinfoNLP.zu=[infoNLP_XU.zu;problem.mp.parameters.pu';infoNLP_T.zu];
-mpinfoNLP.z0=[infoNLP_XU.z0;guess.mp.parameters';infoNLP_T.z0];
+mpinfoNLP.zl=[infoNLP_XU.zl;infoNLP_P.zl;infoNLP_T.zl];
+mpinfoNLP.zu=[infoNLP_XU.zu;infoNLP_P.zu;infoNLP_T.zu];
+mpinfoNLP.z0=[infoNLP_XU.z0;infoNLP_P.z0;infoNLP_T.z0];
 mpinfoNLP.cl=[infoNLP_XUg.cl;infoNLP_b.cl;problem.mp.constraints.bll.linear';problem.mp.constraints.bll.nonlinear'];
 mpinfoNLP.cu=[infoNLP_XUg.cu;infoNLP_b.cu;problem.mp.constraints.blu.linear';problem.mp.constraints.blu.nonlinear'];
 

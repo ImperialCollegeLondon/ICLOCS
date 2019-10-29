@@ -96,6 +96,9 @@ linkfunctions=auxdata.mpdata.linkfunctions;
 t0=z_mp(end-auxdata.mpdata.mpsizes.nt+1:end-1);
 tf=z_mp(end-auxdata.mpdata.mpsizes.nt+2:end);
 p=z_mp(end-auxdata.mpdata.mpsizes.nt-auxdata.mpdata.mpsizes.np+1:end-auxdata.mpdata.mpsizes.nt);
+if isfield(data.data,'Pscale')
+   p=scale_variables_back( p', data.data.Pscale, data.data.Pshift )';
+end
 
 [blink_l,blink_nl]=linkfunctions(x0,xf,u0,uf,p,t0,tf,auxdata.mpdata.data);
 

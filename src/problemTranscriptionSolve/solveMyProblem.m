@@ -161,7 +161,7 @@ if isfield(options,'mp')
             MeshRefinementHistory.timeHistory=timeHistory;
             MeshRefinementHistory.iterHistory=iterHistory;
             MeshRefinementHistory.ConstraintErrorHistory=ConstraintErrorHistory;
-            if isfield(options.print,'residual_error') && options.print.residual_error
+            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
                 MeshRefinementHistory.resErrorHistory=resErrorHistory;
             end
             MeshRefinementHistory.statusHistory=statusHistory;

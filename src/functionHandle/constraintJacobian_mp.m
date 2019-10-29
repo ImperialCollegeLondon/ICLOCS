@@ -97,6 +97,9 @@ mpdata=auxdata.mpdata;
 t0=z_mp(end-mpdata.mpsizes.nt+1:end-1);
 tf=z_mp(end-mpdata.mpsizes.nt+2:end);
 p=z_mp(end-mpdata.mpsizes.nt-mpdata.mpsizes.np+1:end-mpdata.mpsizes.nt);
+if isfield(data.data,'Pscale')
+   p=scale_variables_back( p', data.data.Pscale, data.data.Pshift )';
+end
 
 blz=spalloc(nbl,auxdata.mpdata.mpsizes.nz,(auxdata.mpdata.mpsizes.nxu0f_inc(end)+auxdata.mpdata.mpsizes.nt+auxdata.mpdata.mpsizes.np)*nbl);
 if nbl
