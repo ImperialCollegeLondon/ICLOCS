@@ -556,36 +556,36 @@ if options.scaling
         data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
         
         UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
+        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M,M);
         UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
+        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M,M);
         data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
         if isfield(data.data,'Pscale')
             PscaleMat=repmat( data.data.Pscale, M, 1 );
             PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
             data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
-            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
+            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M,M);
+            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M,M);
         end
     else
         XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
-        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M*n,M*n);
+        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M,M);
         XscaleMat=repmat( data.data.Xscale, M, 1 );
-        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M*n,M*n);
+        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M,M);
         data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
         
         UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
+        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M,M);
         UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
+        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M,M);
         data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
         
         if isfield(data.data,'Pscale')
             PscaleMat=repmat( data.data.Pscale, M, 1 );
             PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
             data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
-            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
+            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M,M);
+            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M,M);
         end
     end
 

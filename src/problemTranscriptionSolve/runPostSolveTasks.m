@@ -24,8 +24,10 @@ if isfield(solution,'mp')
     solution.mp.cost=solution.mp.cost+solution.phaseSol{i}.cost;
     printSolveInfo(solution,options);
 else
-    [solution]=postSolveAnalysis(problem,solution,options,data);
-    printSolveInfo(solution,options);
+    if ~strcmp(options.discretization,'discrete')
+        [solution]=postSolveAnalysis(problem,solution,options,data);
+        printSolveInfo(solution,options);
+    end
 end
 
 end

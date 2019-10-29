@@ -88,8 +88,12 @@ u0=z(nt+np+(M)/N*n+1:nt+np+(M)/N*n+m);
 xf=z(end-m-n+1:end-m);
 uf=z(end-m+1:end);
 
-if strcmp(data.options.derivatives,'adigator')
-    [const_vec_Adigator] = getAdigator4ICLOCS( X, U, t, p, data );
+if strcmp(data.options.derivatives,'adigator') 
+    if strcmp(data.options.discretization,'discrete') 
+        [const_vec_Adigator] = getAdigator4ICLOCS( X, U, linspace(0,1,length(t)), p, data );
+    else
+        [const_vec_Adigator] = getAdigator4ICLOCS( X, U, t, p, data );
+    end
 end
 
 % Format reference inputs and states if applicable
