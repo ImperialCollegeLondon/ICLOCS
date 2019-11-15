@@ -1,4 +1,4 @@
-function  structure=getStructureA(data)
+function  [structure, data]=getStructureA(structure, data)
 
 %GETSTRUCTUREA - Generate sparsity templates when the analytic option has been selected
 %
@@ -46,6 +46,8 @@ structure.df.flag=df.flag;
 structure.dg.flag=dg.flag;
 structure.db.flag=db.flag;
 
+
+
 if dE.flag==1
     if (nt~=0)&&(~isempty(dE.dtf))
       structure.dEdtf = 1;
@@ -82,28 +84,87 @@ if dE.flag==1
     else
      structure.dEdxf=zeros(1,n);
     end
-else
-    if (nt>=2)
-        structure.dEdt0=spones(1*ones(1,1));
-        structure.dEdtf=spones(1*ones(1,1));
-    else
-        structure.dEdtf=spones(nt*ones(1,nt));
-    end
-    structure.dEdp=spones(np*ones(1,np));
-    structure.dEdu0=ones(1,m); 
-    structure.dEdx0=ones(1,n);
-    structure.dEduf=ones(1,m);
-    structure.dEdxf=ones(1,n);
 end    
 
+data.FD.vindex.E=[];
+if dE.flag==1
+    if strcmp(data.options.discretization,'globalLGR') || strcmp(data.options.discretization,'hpLGR')
+        if ~isempty(dE.dx0)
+          data.FD.vindex.E = [data.FD.vindex.E, 1:n];
+        end
+        if ~isempty(dE.dxf)  
+          data.FD.vindex.E = [data.FD.vindex.E, n+1:2*n];
+        end
+        if ~isempty(dE.du0)
+          data.FD.vindex.E = [data.FD.vindex.E, n*2+1:2*n+m];
+        end
+        if ~isempty(dE.duf)
+          data.FD.vindex.E = [data.FD.vindex.E, n*2+m+1:2*n+2*m];
+        end    
+        if np&&(~isempty(dE.dp))
+          data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+1:2*n+2*m+np];
+        end
+        if (nt>=2)&&(~isempty(dE.dt0))
+          data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+np+1];
+        end
+        if (nt~=0)&&(~isempty(dE.dtf))
+          data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+np+1+1];
+        end
+    else
+        if (nt~=0)&&(~isempty(dE.dtf))
+          data.FD.vindex.E = [data.FD.vindex.E, 1];
+        end
+        if (nt>=2)&&(~isempty(dE.dt0))
+          data.FD.vindex.E = [data.FD.vindex.E, 2];
+        end
+        if np&&(~isempty(dE.dp))
+          data.FD.vindex.E = [data.FD.vindex.E, nt+1:nt+np];
+        end
+        if ~isempty(dE.dx0)
+          data.FD.vindex.E = [data.FD.vindex.E, nt+np+1:nt+np+n];
+        end
+        if ~isempty(dE.du0)
+          data.FD.vindex.E = [data.FD.vindex.E, nt+np+n+1:nt+np+n+m];
+        end
+        if ~isempty(dE.dxf)  
+          data.FD.vindex.E = [data.FD.vindex.E, nt+np+n+m+1:nt+np+n*2+m];
+        end
+        if ~isempty(dE.duf)
+          data.FD.vindex.E = [data.FD.vindex.E, nt+np+n*2+m+1:nt+np+n*2+m*2];
+        end   
+    end
+end    
 
 % Preallocate memory
-dLdx=ones(1,n);dfdx=ones(n);
-dLdu=ones(1,m);dfdu=ones(n,m);
+if dL.flag
+    dLdx=ones(1,n);
+    dLdu=ones(1,m);
+    dLdt=ones(1,nt);
+    if np
+      dLdp=ones(1,np);
+    else  
+      dLdp=zeros(1,np);
+    end   
+    structure.dLdx=spones(dLdx);
+    structure.dLdu=spones(dLdu);
+    structure.dLdp=spones(dLdp);
+    structure.dLdt=spones(dLdt);
+end
 
-dLdt=ones(1,nt);
+if df.flag
+    dfdx=ones(n);
+    dfdu=ones(n,m);
+    if np
+      dfdp=ones(n,np);
+    else  
+      dfdp=zeros(n,np);
+    end   
+    structure.dfdx=spones(dfdx);
+    structure.dfdu=spones(dfdu);
+    structure.dfdp=spones(dfdp);
+end
 
-if ng
+if ng && dg.flag
  dgdx=ones(ng,n);
  dgdu=ones(ng,m);
  if np
@@ -112,130 +173,63 @@ if ng
   dgdp=zeros(ng,np);  
  end
  dgdt=ones(ng,nt);
-else
- dgdx=zeros(ng,n);
- dgdu=zeros(ng,m);
- dgdp=zeros(ng,np);
- dgdt=zeros(ng,nt);
-end
-
-if nrc
-    if strcmp(data.options.discretization,'globalLGR') || strcmp(data.options.discretization,'hpLGR')
-        M=sum(npd);
-        drcdx=ones(nrc/M,n);
-        drcdu=ones(nrc/M,m);
-        drcdp=ones(nrc/M,np);  
-        drcdt=ones(nrc/M,nt);
-    else
-        drcdx=ones(nrc/((M-1)/ns),n);
-        drcdu=ones(nrc/((M-1)/ns),m);
-        drcdp=ones(nrc/((M-1)/ns),np);  
-        drcdt=ones(nrc/((M-1)/ns),nt);
-    end
-else
-    if strcmp(data.options.discretization,'globalLGR') || strcmp(data.options.discretization,'hpLGR')
-        M=sum(npd);
-        drcdx=zeros(nrc/M,n);
-        drcdu=zeros(nrc/M,m);
-        drcdp=zeros(nrc/M,np);  
-        drcdt=zeros(nrc/M,nt);
-    else
-        drcdx=zeros(nrc/((M-1)/ns),n);
-        drcdu=zeros(nrc/((M-1)/ns),m);
-        drcdp=zeros(nrc/((M-1)/ns),np);  
-        drcdt=zeros(nrc/((M-1)/ns),nt);
-    end
+ structure.dgdx=spones(dgdx);structure.dgdu=spones(dgdu);
+ structure.dgdp=spones(dgdp);structure.dgdt=spones(dgdt);
+ structure.dgdt=spones(dgdt);
 end
 
 
-
-if nb
-   %%%%%%%%%%%%%%%%%%%%%% 
-    
-     if db.flag==1
-          if (nt==1)&&(~isempty(db.dtf))
-            structure.dbdtf =ones(nb,1);
-          elseif (nt>=2)
-              if (~isempty(db.dtf))&&(~isempty(db.dt0))
-                    structure.dbdt0 =ones(nb,1);
-                    structure.dbdtf =ones(nb,1);
-              elseif (isempty(db.dtf))&&(~isempty(db.dt0))
-                    structure.dbdt0 =ones(nb,1);
-                    structure.dbdtf =zeros(nb,1);
-              elseif (~isempty(db.dtf))&&(isempty(db.dt0))
-                    structure.dbdt0 =zeros(nb,1);
-                    structure.dbdtf =ones(nb,1);
-              else
-                    structure.dbdt0 =zeros(nb,1);
-                    structure.dbdtf =zeros(nb,1);
-              end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nb && db.flag==1
+      if (nt==1)&&(~isempty(db.dtf))
+        structure.dbdtf =ones(nb,1);
+      elseif (nt>=2)
+          if (~isempty(db.dtf))&&(~isempty(db.dt0))
+                structure.dbdt0 =ones(nb,1);
+                structure.dbdtf =ones(nb,1);
+          elseif (isempty(db.dtf))&&(~isempty(db.dt0))
+                structure.dbdt0 =ones(nb,1);
+                structure.dbdtf =zeros(nb,1);
+          elseif (~isempty(db.dtf))&&(isempty(db.dt0))
+                structure.dbdt0 =zeros(nb,1);
+                structure.dbdtf =ones(nb,1);
           else
-            structure.dbdtf=zeros(nb,nt);  
+                structure.dbdt0 =zeros(nb,1);
+                structure.dbdtf =zeros(nb,1);
           end
-          if np&&(~isempty(db.dp))
-             structure.dbdp=ones(nb,np);
-          else   
-             structure.dbdp=zeros(nb,np);  
-          end
-          if ~isempty(db.dx0)
-            structure.dbdx0=ones(nb,n);
-          else
-            structure.dbdx0=zeros(nb,n);  
-          end
-          if ~isempty(db.du0)
-            structure.dbdu0=ones(nb,m);
-          else
-            structure.dbdu0=zeros(nb,m);
-          end
-          if ~isempty(db.duf)
-           structure.dbduf=ones(nb,m);
-          else 
-            structure.dbduf=zeros(nb,m);
-          end    
-          if ~isempty(db.dxf)  
-           structure.dbdxf=ones(nb,n);
-          else
-           structure.dbdxf=zeros(nb,n);
-          end
-    else
-        if (nt>=2)
-           structure.dbdt0=spones(1*ones(nb,1));
-           structure.dbdtf=spones(1*ones(nb,1));
-        else
-           structure.dbdtf=spones(nt*ones(nb,nt)); 
-        end
-        
-        structure.dbdp=spones(np*ones(nb,np));
-        structure.dbdu0=ones(nb,m); 
-        structure.dbdx0=ones(nb,n);
-        structure.dbduf=ones(nb,m);
-        structure.dbdxf=ones(nb,n);
-    end    
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%
-else
-      structure.dbdx0=zeros(nb,n);
-      structure.dbdxf=zeros(nb,n);
-      structure.dbdu0=zeros(nb,m);
-      structure.dbduf=zeros(nb,m);
-      structure.dbdp=zeros(nb,np);
-      if (nt>=2)
-        structure.dbdt0=zeros(nb,1);  
-        structure.dbdtf=zeros(nb,1);
       else
-        structure.dbdtf=zeros(nb,nt);
+        structure.dbdtf=zeros(nb,nt);  
       end
-        
-end
-    
+      if np&&(~isempty(db.dp))
+         structure.dbdp=ones(nb,np);
+      else   
+         structure.dbdp=zeros(nb,np);  
+      end
+      if ~isempty(db.dx0)
+        structure.dbdx0=ones(nb,n);
+      else
+        structure.dbdx0=zeros(nb,n);  
+      end
+      if ~isempty(db.du0)
+        structure.dbdu0=ones(nb,m);
+      else
+        structure.dbdu0=zeros(nb,m);
+      end
+      if ~isempty(db.duf)
+       structure.dbduf=ones(nb,m);
+      else 
+        structure.dbduf=zeros(nb,m);
+      end    
+      if ~isempty(db.dxf)  
+       structure.dbdxf=ones(nb,n);
+      else
+       structure.dbdxf=zeros(nb,n);
+      end
+end    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-if np
-  dLdp=ones(1,np);
-  dfdp=ones(n,np);
-else  
-  dLdp=zeros(1,np);
-  dfdp=zeros(n,np);
-end   
+
     
 
 
@@ -244,27 +238,17 @@ end
 %---------------------------------------
 
 
-structure.dfdx=spones(dfdx);
-structure.dLdx=spones(dLdx);
-
-
-structure.dfdu=spones(dfdu);
-structure.dLdu=spones(dLdu);
 
 
 
-  
-structure.dfdp=spones(dfdp);structure.dLdp=spones(dLdp);
-structure.dLdt=spones(dLdt);
-structure.dgdt=spones(dgdt);
-
-structure.drcdx=spones(drcdx);structure.drcdu=spones(drcdu);
-structure.drcdp=spones(drcdp);structure.drcdt=spones(drcdt);
 
 
 
-structure.dgdx=spones(dgdx);structure.dgdu=spones(dgdu);
-structure.dgdp=spones(dgdp);structure.dgdt=spones(dgdt);
+
+
+
+
+
 
 
 

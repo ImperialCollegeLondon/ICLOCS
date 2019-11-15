@@ -23,8 +23,8 @@
 clear all;close all;format compact;
 
 [problem,guess]=WindshearGoAround;          % Fetch the problem definition
-% options= problem.settings(5,8);                  % for hp method
-options= problem.settings(40);                  % for h method
+options= problem.settings(6,8);                  % for hp method
+% options= problem.settings(40);                  % for h method
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 [ tv, xv, uv ] = simulateSolution( problem, solution, 'ode113', 0.01 );
 

@@ -57,7 +57,7 @@ if ~isempty(HE) && h_method
     HE_new(1+nt+np+n:nt+np+n+m,1+nt+np+n+m:nt+np+n*2+m)=transpose(HE(1+n:n*2,1+n*2:n*2+m)); %u0 xf
     HE_new(1+nt+np+n:nt+np+n+m,1+nt+np+n*2+m:nt+np+n*2+m*2)=HE(1+n*2:n*2+m,1+n*2+m:n*2+m*2); %u0 uf
     
-    HE_new(1+nt+np+n+m:nt+np+n*2+m,1+nt+np+n*2+m:nt+np+n*2+m*2)=transpose(HE(1+n:n*2,1+n*2+m:n*2+m*2)); %xf uf
+    HE_new(1+nt+np+n+m:nt+np+n*2+m,1+nt+np+n*2+m:nt+np+n*2+m*2)=HE(1+n:n*2,1+n*2+m:n*2+m*2); %xf uf
 else
     HE_new=HE;
 end

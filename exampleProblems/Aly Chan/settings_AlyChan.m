@@ -293,6 +293,10 @@ options.print.time=1;
 %---------------------------------------
 options.print.relative_local_error=1;
 
+% Compute and display integrated residual error
+%---------------------------------------
+options.print.residual_error=1;
+
 % Display cost (objective) values
 %---------------------------------------
 options.print.cost=1;

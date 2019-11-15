@@ -757,15 +757,30 @@ data.nConst=length(infoNLP.cl);
 
 % Extract sparsity structures
 %---------------------------------------
-if ~strcmp(options.derivatives,'analytic')
-    sparsity=getStructure(data.sizes,options.discretization);
+% if ~strcmp(options.derivatives,'analytic')
+    
+    
+sparsity_num=getStructure(data.sizes,options.discretization);
+if ~strcmp(options.derivatives,'adigator') && (strcmp(options.resultRep,'default') || strcmp(options.resultRep,'manual')) && strcmp(options.transcription,'direct_collocation') && ~(isfield(options,'sysStructTest') && ~options.sysStructTest) && ~(strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR'))
+    try
+        sparsity=getStructure_NaNTest( problem, options, data, sparsity_num );
+    catch
+        sparsity=sparsity_num;
+    end
 else
+    sparsity=sparsity_num;
+end
+if strcmp(options.derivatives,'analytic')
+    [sparsity, data]=getStructureA(sparsity,data);
+end
+
+% else
     % The structure of the derivatives is determined only considering a
     % a fixed structure
-    sparsity=getStructureA(data);
-    sparsity_num=getStructure(data.sizes,options.discretization);
-end
-data.sparsity=sparsity; 
+    
+%     sparsity_num=getStructure(data.sizes,options.discretization);
+% end
+% data.sparsity=sparsity; 
 
 
 
@@ -789,14 +804,14 @@ if ~strcmp(options.transcription,'multiple_shooting')
         end
         data.map.LGR=LGR;
 
-        if ~strcmp(options.derivatives,'analytic')
-            [data.FD.vector,data.FD.index,Jac_templete,data.infoForLinkConst]=getPertubationsLGR(sparsity,data.sizes,data);
-        else
+%         if ~strcmp(options.derivatives,'analytic')
+%             [data.FD.vector,data.FD.index,Jac_templete,data.infoForLinkConst]=getPertubationsLGR(sparsity,data.sizes,data);
+%         else
             data_temp=data;
             [data.FD.vector,data.FD.index,Jac_templete]=getPertubationsLGR(sparsity,data.sizes,data);
             data_temp.options.derivatives='numeric';
             data.infoForLinkConst=getPertubationsLGR(sparsity_num,data.sizes,data_temp);
-        end
+%         end
 
         % Constaint Jacobian Structure
         dfz=[Jac_templete.dfxu repmat(sparsity.dfdp,M,1) repmat(ones(1,nt),M*n,1)]; %FD of variables
@@ -855,7 +870,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
         data.map.bTol=bTol;
 
         jS= [dfz;dgz(gAllidx,:);drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure
-        jS_noB=[dfz_noD;dgz(gAllidx,:);drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure excluding the Radau differentiation matrix
+        jS_noB=[dfz_noD;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
         data.jS_noB=spones(jS_noB);
         
@@ -983,14 +998,14 @@ if ~strcmp(options.transcription,'multiple_shooting')
 
     else % h methods
                 
-        if ~strcmp(options.derivatives,'analytic')
-            [data.FD.vector,data.FD.index,data.infoForLinkConst]=getPertubations(sparsity,data.sizes,data);
-        else
+%         if ~strcmp(options.derivatives,'analytic')
+%             [data.FD.vector,data.FD.index,data.infoForLinkConst]=getPertubations(sparsity,data.sizes,data);
+%         else
             data_temp=data;
             [data.FD.vector,data.FD.index]=getPertubations(sparsity,data.sizes,data);
             data_temp.options.derivatives='numeric';
             data.infoForLinkConst=getPertubations(sparsity_num,data.sizes,data_temp);
-        end
+%         end
         
         if nrc
             data = transcriptionMatrixRC( data );
@@ -1250,6 +1265,8 @@ end
      end
  end
 
+ 
+
 % Format initial guess/reference for NLP
 %---------------------------------------
 infoNLP.z0=zeros(nz,1);
@@ -1323,6 +1340,9 @@ end
   data.funcs.jacobian          = @constraintJacobian;
   data.funcs.jacobianstructure = @jacobianstructure;
 
+  
+  % Set function types 
+  [ data ] = setFunctionTypes( problem, data );
   
   %Alternative ordering of LGR method 
   if  ((strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR'))) && options.reorderLGR

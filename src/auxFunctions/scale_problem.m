@@ -14,7 +14,7 @@ function [ problem,guess ] = scale_problem( problem,guess )
 % 
 %------------- BEGIN CODE --------------
 
-if isfield(problem,'scaling')
+if isfield(problem,'scaling') && isfield(problem.scaling,'states')
      xl=problem.scaling.states.lb;
      xu=problem.scaling.states.ub;
 
@@ -59,7 +59,7 @@ end
     problem.setpoints.states=scale_variables( problem.setpoints.states, problem.states.scales, problem.states.shifts );
  end
 
- if isfield(problem,'scaling')
+ if isfield(problem,'scaling') && isfield(problem.scaling,'inputs')
      uu=problem.scaling.inputs.ub;
      ul=problem.scaling.inputs.lb;
 

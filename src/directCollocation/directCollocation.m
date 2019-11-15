@@ -145,6 +145,8 @@ switch required
         end
         solution=sol{phaseNo}.const;
         
+
+        
     case{'jacConst'}
         if strcmp(data.options.derivatives,'numeric')
             sol{phaseNo}.jacConst=jacobianFD(f,g,avrc,X,U,P,tau,b,x0,xf,u0,uf,p,t0,tf,data);

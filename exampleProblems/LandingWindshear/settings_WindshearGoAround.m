@@ -265,6 +265,10 @@ options.ECH.buffer_pct=0.1;
 % - Simultaneous ('simultaneous')               Perform mesh refinement and regulzarization paramter iterations simultaneously
 options.regstrategy='off';
 
+% Structure test
+%---------------------------------------
+options.sysStructTest=0;
+
 % Auto selection of h/hp method based on input formulation of the settings function call
 %---------------------------------------
 % LEAVE THIS PART UNCHANGED AND USE FUNCTION SYNTAX (AS DESCRIBED ON THE TOP) TO DEFINE THE ITEGRATION NODES

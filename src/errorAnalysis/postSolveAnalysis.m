@@ -533,20 +533,21 @@ else
     end
 
     % Calculate variable rates
-    if ~strcmp(dataNLP.options.transcription,'multiple_shooting')
+    if ~strcmp(dataNLP.options.transcription,'multiple_shooting') && ~strcmp(options.discretization,'discrete')
         [ solution ] = getVariableRate( solution,dataNLP );
     end
-    
+
     solution.Xp=Xp;
     solution.dXp=dXp;
     solution.Up=Up;
     
     % Display discretization error, constaint violation and number of active
     % constraints
-    [Error, ErrorRelative,T_error]=estimateError(solution,p,t0,tf,n,m,f,M,ns,dataNLP);
-    
-    [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation(p,t0,tf,n,m,solution,problem,dataNLP,1);
-    
+    if ~strcmp(options.discretization,'discrete')
+        [Error, ErrorRelative,T_error]=estimateError(solution,p,t0,tf,n,m,f,M,ns,dataNLP);
+
+        [ConstraintError,T_ConstraintError,ActiveConstraint,NumActiveConstraint]=estimateConstraintViolation(p,t0,tf,n,m,solution,problem,dataNLP,1);
+    end
 
 
     % Obtain multipliers
@@ -578,29 +579,31 @@ else
 
 
     % Save results
-    solution.Error=Error;
-    solution.T_error=T_error;
-    solution.ErrorRelative=ErrorRelative;
+    if ~strcmp(options.discretization,'discrete')
+        solution.Error=Error;
+        solution.T_error=T_error;
+        solution.ErrorRelative=ErrorRelative;
 
-    solution.ConstraintError=ConstraintError;
-    solution.T_ConstraintError=T_ConstraintError;
+        solution.ConstraintError=ConstraintError;
+        solution.T_ConstraintError=T_ConstraintError;
 
-    solution.ActiveConstraint=ActiveConstraint;
-    solution.NumActiveConstraint=NumActiveConstraint;
-         
-    solution.MaxAbsError=max(solution.Error);
-    solution.MaxRelError=max(solution.ErrorRelative);
-    solution.MaxConstVioError=max(solution.ConstraintError);
+        solution.ActiveConstraint=ActiveConstraint;
+        solution.NumActiveConstraint=NumActiveConstraint;
 
-    if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
-        if strcmp(dataNLP.options.discretization,'hermite')
-            [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data);
-        else
-            r_seg=Error';
-            r=sum(r_seg,2);
+        solution.MaxAbsError=max(solution.Error);
+        solution.MaxRelError=max(solution.ErrorRelative);
+        solution.MaxConstVioError=max(solution.ConstraintError);
+
+        if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
+            if strcmp(dataNLP.options.discretization,'hermite')
+                [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data);
+            else
+                r_seg=Error';
+                r=sum(r_seg,2);
+            end
+            solution.residuals.r=r;
+            solution.residuals.r_seg=r_seg;
         end
-        solution.residuals.r=r;
-        solution.residuals.r_seg=r_seg;
     end
 end
 %------------- END OF CODE --------------

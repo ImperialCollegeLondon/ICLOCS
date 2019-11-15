@@ -62,224 +62,59 @@ DT=tf-t0;
 DTLP=repmat(data.t_segment_end,1,n);
 alpha_j=kron(alpha,ones(1,n));
 beta_j=kron(beta,ones(1,n));
+DT_ratio_diff=repmat(data.tau_segment_ratio_diff,1,n);
 
-
-% Compute fzz
+% Compute fzz and gzz
 % ------------
 
 fzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));  % Allocate some memory
-
-
-if ~isempty(Hf)
-  idx=data.FD.index.f; 
-  nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
-  
-  if ~isempty(df{end})
-      for i=1:nfd
-       for j=1:i
-          if j==(nfd-nt+1) && length(df)==nfd
-             ft=(df{i}+DTLP.*Hf{j,i}.*alpha_j).*adjoint_f;
-          elseif j==(nfd) && length(df)==nfd
-             ft=(df{i}+DTLP.*Hf{j,i}.*beta_j).*adjoint_f;
-          else 
-            ft=DTLP.*Hf{j,i}.*adjoint_f;
-          end
-          fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft,M*n,1),nz,nz);
-        end
-      end
-  else
-      for i=1:nfd-nt
-       for j=1:i
-          ft=DTLP.*Hf{j,i}.*adjoint_f;
-          fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft,M*n,1),nz,nz);
-        end
-      end
-      
-        % numerical derivative w.r.t time
-        et0=e*data.FD.vector.f.et0;etf=e*data.FD.vector.f.etf;ep=data.FD.vector.f.ep;
-        ex=data.FD.vector.f.ex;eu=data.FD.vector.f.eu;
-
-        for i=nfd-nt+1:nfd
-           for j=1:i
-                 if j==i
-                     fp1=(DTLP-et0(i)/2+etf(i)/2).*f(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i))/2.*T+(k0+etf(i)+et0(i))/2,vdat);
-                     fp2=(DTLP+et0(i)/2-etf(i)/2).*f(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(DT-etf(i)+et0(i))/2.*T+(k0-etf(i)-et0(i))/2,vdat);
-                     fo=DTLP.*f(X,U,P,DT/2*T+k0/2,vdat);
-                     ft=(fp2-2*fo+fp1)/e2;
-                     fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft.*adjoint_f,M*n,1),nz,nz);
-                 else
-                     fpp=(DTLP-et0(i)/2-et0(j)/2+etf(i)/2+etf(j)/2).*f(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,(DT-et0(i)-et0(j)+etf(i)+etf(j))/2.*T+(k0+et0(i)+et0(j)+etf(i)+etf(j))/2,vdat);   
-                     fpm=(DTLP-et0(i)/2+et0(j)/2+etf(i)/2-etf(j)/2).*f(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,(DT-et0(i)+et0(j)+etf(i)-etf(j))/2.*T+(k0+et0(i)-et0(j)+etf(i)-etf(j))/2,vdat); 
-                     fmm=(DTLP+et0(i)/2+et0(j)/2-etf(i)/2-etf(j)/2).*f(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,(DT+et0(i)+et0(j)-etf(i)-etf(j))/2.*T+(k0-et0(i)-et0(j)-etf(i)-etf(j))/2,vdat);
-                     fmp=(DTLP+et0(i)/2-et0(j)/2-etf(i)/2+etf(j)/2).*f(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,(DT+et0(i)-et0(j)-etf(i)+etf(j))/2.*T+(k0-et0(i)+et0(j)-etf(i)+etf(j))/2,vdat); 
-                     ft=(fpp-fpm+fmm-fmp)/e2/4;
-                     fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft.*adjoint_f,M*n,1),nz,nz);
-                 end
-           end
-        end
-  end
-  
-
-else
-% If Hf is empty the hessian related to the dynamical system is computed numerically    
-    idx=data.FD.index.f;nfd=size(idx,2);
-    et0=e*data.FD.vector.f.et0;etf=e*data.FD.vector.f.etf;ep=data.FD.vector.f.ep;
-    ex=data.FD.vector.f.ex;eu=data.FD.vector.f.eu;
-
-    for i=1:nfd
-       for j=1:i
-             if j==i
-                 fp1=(DTLP-et0(i)/2+etf(i)/2).*f(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i))/2.*T+(k0+etf(i)+et0(i))/2,vdat);
-                 fp2=(DTLP+et0(i)/2-etf(i)/2).*f(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(DT-etf(i)+et0(i))/2.*T+(k0-etf(i)-et0(i))/2,vdat);
-                 fo=DTLP.*f(X,U,P,DT/2*T+k0/2,vdat);
-                 ft=(fp2-2*fo+fp1)/e2;
-                 fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft.*adjoint_f,M*n,1),nz,nz);
-             else
-                 fpp=(DTLP-et0(i)/2-et0(j)/2+etf(i)/2+etf(j)/2).*f(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,(DT-et0(i)-et0(j)+etf(i)+etf(j))/2.*T+(k0+et0(i)+et0(j)+etf(i)+etf(j))/2,vdat);   
-                 fpm=(DTLP-et0(i)/2+et0(j)/2+etf(i)/2-etf(j)/2).*f(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,(DT-et0(i)+et0(j)+etf(i)-etf(j))/2.*T+(k0+et0(i)-et0(j)+etf(i)-etf(j))/2,vdat); 
-                 fmm=(DTLP+et0(i)/2+et0(j)/2-etf(i)/2-etf(j)/2).*f(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,(DT+et0(i)+et0(j)-etf(i)-etf(j))/2.*T+(k0-et0(i)-et0(j)-etf(i)-etf(j))/2,vdat);
-                 fmp=(DTLP+et0(i)/2-et0(j)/2-etf(i)/2+etf(j)/2).*f(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,(DT+et0(i)-et0(j)-etf(i)+etf(j))/2.*T+(k0-et0(i)+et0(j)-etf(i)+etf(j))/2,vdat); 
-                 ft=(fpp-fpm+fmm-fmp)/e2/4;
-                 fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft.*adjoint_f,M*n,1),nz,nz);
-             end
-       end
-    end
-end
-
-
-
-% Compute gzz
-% ------------
-
 gzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));
 
-% If there are path constraints (ng=1), their hessian is computed
-% numerically whenever Hg is empty, otherwise the evaluation of the analytic espression 
-% is exploited
-
 if ng
-  idx=data.FD.index.g; 
-  nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
-  if ~isempty(Hg)
-    [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
-    if dg.flag && ~isempty(dg.dt)
-          for i=1:nfd
-            for j=1:i
-              if j==(nfd-nt+1) && length(df)==nfd
-                 gt=(Hg{j,i}).*(alpha_j).*adjoint_g;   
-              elseif j==(nfd) && length(df)==nfd
-                 gt=(Hg{j,i}).*(beta_j).*adjoint_g;  
-              else 
-                 gt=Hg{j,i}.*adjoint_g;
-              end
-             gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt,M*ng,1),nz,nz);
-            end
-          end
-    else
-        for i=1:nfd-nt
-          for j=1:i
-           gt=Hg{j,i}.*adjoint_g;
-           gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt,M*ng,1),nz,nz);
-          end
-        end
-      
-        idx=data.FD.index.g;nfd=size(idx,2);
-        et0=e*data.FD.vector.g.et0;etf=e*data.FD.vector.g.etf;ep=data.FD.vector.g.ep;
-        ex=data.FD.vector.g.ex;eu=data.FD.vector.g.eu;
-        for i=nfd-nt+1:nfd
-           for j=1:i
-            if j==i
-             go=g(X,U,P,DT/2*T+k0/2,vdat);
-             gp1=g(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i))/2.*T+(k0+etf(i)+et0(i))/2,vdat);
-             gp2=g(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(DT-etf(i)+et0(i))/2.*T+(k0-etf(i)-et0(i))/2,vdat);
-             gt=(gp2-2*go+gp1).*adjoint_g/e2;
-            else
-             gpp=g(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,...
-                (DT-et0(i)-et0(j)+etf(i)+etf(j))/2.*T+(k0+et0(i)+et0(j)+etf(i)+etf(j))/2,vdat);  
-             gpm=g(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,...
-                (DT-et0(i)+et0(j)+etf(i)-etf(j))/2.*T+(k0+et0(i)-et0(j)+etf(i)-etf(j))/2,vdat);
-             gmm=g(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,...
-                (DT+et0(i)+et0(j)-etf(i)-etf(j))/2.*T+(k0-et0(i)-et0(j)-etf(i)-etf(j))/2,vdat);
-             gmp=g(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,...
-                (DT+et0(i)-et0(j)-etf(i)+etf(j))/2.*T+(k0-et0(i)+et0(j)-etf(i)+etf(j))/2,vdat);
-             gt=(gpp-gpm+gmm-gmp).*adjoint_g/e2/4;
-            end
-             gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt,M*ng,1),nz,nz);
-           end
-        end
-    end
-  else    
-    idx=data.FD.index.g;nfd=size(idx,2);
-    et0=e*data.FD.vector.g.et0;etf=e*data.FD.vector.g.etf;ep=data.FD.vector.g.ep;
-    ex=data.FD.vector.g.ex;eu=data.FD.vector.g.eu;
-    for i=1:nfd
-       for j=1:i
-        if j==i
-         go=g(X,U,P,DT/2*T+k0/2,vdat);
-         gp1=g(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i))/2.*T+(k0+etf(i)+et0(i))/2,vdat);
-         gp2=g(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(DT-etf(i)+et0(i))/2.*T+(k0-etf(i)-et0(i))/2,vdat);
-         gt=(gp2-2*go+gp1).*adjoint_g/e2;
-        else
-         gpp=g(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,...
-            (DT-et0(i)-et0(j)+etf(i)+etf(j))/2.*T+(k0+et0(i)+et0(j)+etf(i)+etf(j))/2,vdat);  
-         gpm=g(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,...
-            (DT-et0(i)+et0(j)+etf(i)-etf(j))/2.*T+(k0+et0(i)-et0(j)+etf(i)-etf(j))/2,vdat);
-         gmm=g(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,...
-            (DT+et0(i)+et0(j)-etf(i)-etf(j))/2.*T+(k0-et0(i)-et0(j)-etf(i)-etf(j))/2,vdat);
-         gmp=g(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,...
-            (DT+et0(i)-et0(j)-etf(i)+etf(j))/2.*T+(k0-et0(i)+et0(j)-etf(i)+etf(j))/2,vdat);
-         gt=(gpp-gpm+gmm-gmp).*adjoint_g/e2/4;
-        end
-         gzz=gzz+sparse(idx(:,i),idx(:,j),reshape(gt,M*ng,1),nz,nz);
-       end
-    end
-  end
+    adjoint_g=zeros(ng,M);
+    adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
+    adjoint_g=adjoint_g';
 end
+
+if ~isempty(Hf) && ng && ~isempty(Hg)
+    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, adjoint_f, alpha_j, beta_j, vdat, data );
+    [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
+    [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+elseif isempty(Hf) && ng && isempty(Hg) && size(data.FD.index.f,2)==size(data.FD.index.g,2)
+    [ fzz,gzz ] = hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+elseif ~isempty(Hf)
+    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, adjoint_f, alpha_j, beta_j, vdat, data );
+    if ng
+        if ~isempty(Hg)
+            [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
+            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+        else
+            [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
+        end
+    end
+elseif isempty(Hf)
+    [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+    if ng
+        if ~isempty(Hg)
+            [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
+            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+        else
+            [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
+        end
+    end
+end
+
 
 % Compute (w'L)zz
 % ----------------
 
 Lzz=spalloc(nz,nz,M*((m+n)*(m+n+1)/2)+nt+np*np);
-idx=data.FD.index.Ly; 
-nfd=size(idx,2);  
+
 if (~isempty(HL))
-  for i=1:(nfd-nt)
-   for j=1:i
-        if j==(nfd-nt+1)
-            Lt=(dL{i}+data.t_segment_end.*HL{j,i}.*alpha_j).*data.map.w;
-        elseif j==(nfd)   
-            Lt=(dL{i}+data.t_segment_end.*HL{j,i}.*beta_j).*data.map.w;
-        else    
-            Lt=data.t_segment_end/2.*HL{j,i}.*data.map.w;
-        end
-     Lzz=Lzz+sparse(idx(:,i),idx(:,j),reshape(Lt,M,1),nz,nz);
-    end
-  end
-    
+    [ Lzz ] = hessian_LGR_AN_wL( dL, Lzz, HL, M, nt, nz, alpha_j, beta_j, data );
 else
-    
-% If HL is empty the hessian of the cost is computed numerically
-    et0=data.FD.vector.Ly.et0;etf=data.FD.vector.Ly.etf;ep=data.FD.vector.Ly.ep;
-    ex=data.FD.vector.Ly.ex;eu=data.FD.vector.Ly.eu;
-    for i=1:nfd
-    dt0_1=e*et0{i};dtf_1=e*etf{i};dp1=e*ep{i};dx1=e*ex{i}; du1=e*eu{i};
-        for j=1:i
-          if j==i;
-            Lo=DTLP*L(X,Xr,U,Ur,P,DT/2*T+k0/2,vdat);
-            Lp1=(DTLP+dtf_1-dt0_1)/2*L(X+dx1,Xr,U+du1,Ur,P+dp1,(DT+dtf_1-dt0_1)/2*T+(k0+dtf_1+dt0_1),vdat);
-            Lp2=(DTLP-dtf_1+dt0_1)/2*L(X-dx1,Xr,U-du1,Ur,P-dp1,(DT-dtf_1+dt0_1)/2*T+(k0-dtf_1-dt0_1),vdat);
-            Lt=(Lp2-2*Lo+Lp1).*data.map.w/e2;
-          else
-            dt0_2=e*et0{j};dtf_2=e*etf{j};dp2=e*ep{j};dx2=e*ex{j}; du2=e*eu{j};
-            Lpp=(DTLP+dtf_1-dt0_1+dtf_2-dt0_2)/2*L(X+dx1+dx2,Xr,U+du1+du2,Ur,P+dp1+dp2,(DT+dtf_1-dt0_1+dtf_2-dt0_2)/2*T+(k0+dtf_1+dt0_1+dtf_2+dt0_2)/2,vdat);
-            Lpm=(DTLP+dtf_1-dt0_1-dtf_2+dt0_2)/2*L(X+dx1-dx2,Xr,U+du1-du2,Ur,P+dp1-dp2,(DT+dtf_1-dt0_1-dtf_2+dt0_2)/2*T+(k0+dtf_1+dt0_1-dtf_2-dt0_2)/2,vdat);
-            Lmp=(DTLP-dtf_1+dt0_1+dtf_2-dt0_2)/2*L(X-dx1+dx2,Xr,U-du1+du2,Ur,P-dp1+dp2,(DT-dtf_1+dt0_1+dtf_2-dt0_2)/2*T+(k0-dtf_1-dt0_1+dtf_2+dt0_2)/2,vdat);
-            Lmm=(DTLP-dtf_1+dt0_1-dtf_2+dt0_2)/2*L(X-dx1-dx2,Xr,U-du1-du2,Ur,P-dp1-dp2,(DT-dtf_1+dt0_1-dtf_2+dt0_2)/2*T+(k0-dtf_1-dt0_1-dtf_2-dt0_2)/2,vdat);
-            Lt=(Lpp-Lmp+Lmm-Lpm).*data.map.w/e2/4;
-          end
-           Lzz=Lzz+sparse(idx(:,i),idx(:,j),reshape(Lt,M,1),nz,nz);
-        end
-    end
+    % If HL is empty the hessian of the cost is computed numerically
+    [ Lzz ] = hessian_LGR_CD_wL( Lzz, nz, L, X, Xr, U, Ur, P, k0, T, DT, e, e2, vdat, data );
 end
 
 
@@ -290,36 +125,9 @@ end
 Ezz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
 
 if ~isempty(HE)
-  idx=data.FD.index.Ey; 
-  nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
-  
-    for i=1:nfd
-        for j=1:i
-          Ezz=Ezz+sparse(idx(i),idx(j),HE{j,i},nz,nz);
-        end
-    end
-
+    [ Ezz ] = hessian_LGR_AN_E( Ezz, HE, nz, data );
 else    
-idx=data.FD.index.Ey;nfd=size(idx,2);                               
-et0=e*data.FD.vector.Ey.et0;etf=e*data.FD.vector.Ey.etf;ep=e*data.FD.vector.Ey.ep;
-ex0=e*data.FD.vector.Ey.ex0;eu0=e*data.FD.vector.Ey.eu0;
-exf=e*data.FD.vector.Ey.exf;euf=e*data.FD.vector.Ey.euf;
-Eo=E(x0,xf,u0,uf,p,t0,tf,vdat);
-for i=1:nfd
-    Ep1=E(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
-
-    for j=1:i
-    
-    if j==i;Ep2=Ep1;else
-    Ep2=E(x0+ex0(:,j),xf+exf(:,j),u0+eu0(:,j),uf+euf(:,j),p+ep(:,j),t0+et0(:,j),tf+etf(:,j),vdat);
-    end
-
-    Epp=E(x0+ex0(:,i)+ex0(:,j),xf+exf(:,i)+exf(:,j),u0+eu0(:,i)+eu0(:,j),...
-          uf+euf(:,i)+euf(:,j),p+ep(:,i)+ep(:,j),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
-    Ezz=Ezz+sparse(idx(i),idx(j),(Epp+Eo-Ep1-Ep2)/e2,nz,nz);
-    end
-end
-
+    [ Ezz ] = hessian_LGR_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
 end
 
 
@@ -327,35 +135,11 @@ end
 % ------------
 bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
 
-
 if nb
   if ~isempty(Hb)
-       idx=data.FD.index.b; 
-       nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
-       for i=1:nfd
-           for j=1:i 
-              bzz=bzz+sparse(idx(:,i),idx(:,j),Hb{j,i}.*adjoint_b,nz,nz);
-           end
-       end
+      [ bzz ] = hessian_LGR_AN_B( bzz, Hb, nz, adjoint_b, data );
   else   
-      idx=data.FD.index.b;nfd=size(idx,2);
-      et0=e*data.FD.vector.b.et0;etf=e*data.FD.vector.b.etf;ep=e*data.FD.vector.b.ep;
-      ex0=e*data.FD.vector.b.ex0;eu0=e*data.FD.vector.b.eu0;
-      exf=e*data.FD.vector.b.exf;euf=e*data.FD.vector.b.euf;
-      bo=b(x0,xf,u0,uf,p,tf,vdat);
-      for i=1:nfd
-        bp1=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
-        for j=1:i
-         if j==i;bp2=bp1;else
-         bp2=b(x0+ex0(:,j),xf+exf(:,j),u0+eu0(:,j),uf+euf(:,j),p+ep(:,j),t0+et0(:,j),tf+etf(:,j),vdat);
-         end
-         bpp=b(x0+ex0(:,i)+ex0(:,j),xf+exf(:,i)+exf(:,j),u0+eu0(:,i)+eu0(:,j),...
-              uf+euf(:,i)+euf(:,j),p+ep(:,i)+ep(:,j),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
-         bt=(bpp-bp2+bo-bp1).*adjoint_b/e2; 
-         bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz);
-        end
-      end
-
+      [ bzz ] = hessian_LGR_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
  end
 end
 

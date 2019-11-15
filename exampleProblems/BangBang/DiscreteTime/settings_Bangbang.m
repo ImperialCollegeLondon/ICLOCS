@@ -291,7 +291,7 @@ options.print.time=1;
 
 % Display relative local discretization error (recommended for direct transcription)
 %---------------------------------------
-options.print.relative_local_error=1;
+options.print.relative_local_error=0;
 
 % Display cost (objective) values
 %---------------------------------------
@@ -305,6 +305,6 @@ options.print.cost=1;
 % 2: Plot only the state and input trajectory
 % 3: Plot only the multipliers/costate values
 % 4: Plot only the error values (absolute local error, relative local error and absolute constraint violation error)
-options.plot=1;
+options.plot=2;
 
 

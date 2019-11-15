@@ -434,12 +434,12 @@ if nrc
     vector.rc.ex=cell(nrccol,1);vector.rc.eu=cell(nrccol,1);vector.rc.ep=cell(nrccol,1);vector.rc.et=cell(nt,1);
 
     
-    for i=1:ngcol
+    for i=1:nrccol
         extemp=reshape(ex(:,i)',M+1,n);
         vector.rc.ex{i}=extemp;
         ugs=reshape(eu(:,i)',M,m);
         vector.rc.eu{i}=ugs; % can be optimized
-        vector.rc.ep{i}=repmat(eg(end-nt-np+1:end-nt,i)',M,1);
+        vector.rc.ep{i}=repmat(erc(end-nt-np+1:end-nt,i)',M,1);
         if i>nrccol-nt
             vector.rc.et{i}=et(i-nrccol+nt,end-nt+1:end);
         else
