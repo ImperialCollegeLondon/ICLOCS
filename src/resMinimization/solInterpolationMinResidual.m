@@ -178,7 +178,7 @@ options.ipopt.tol         = dataNLP.options.ipopt.tol;
 %   options.ipopt.hessian_approximation='limited-memory';
 options.ipopt.hessian_approximation='exact';
   
-% The callback functions.
+
 auxdata.options.transcription='direct_collocation';
 auxdata.options.discretization='resMinInterpolationForSolution';
 
@@ -197,6 +197,7 @@ data.funcs.jacobianstructure = @(data) sparse(ones(n_const,length(z0)));
 data.funcs.hessian           = @computeHessian;
 data.funcs.hessianstructure  = @(data) sparse(tril(ones(length(z0),length(z0))));
 
+% The callback functions.
 if options.resminEarlyStop
     data.funcs.iterfunc=@callback_minres;
 end

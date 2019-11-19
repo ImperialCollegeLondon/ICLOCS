@@ -70,7 +70,7 @@ ezf_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1);ones(n,1);ones(m,1)];
 
 idx0=find([dLdt dLdp dLdx dLdu]);
 nfd=nnz(idx0);
-idx=zeros(M,nfd);
+idx=spalloc(M,nfd,M*nfd);
 
 et0=cell(1,nfd);etf=cell(1,nfd);et=cell(1,nfd);ep=cell(1,nfd);
 ex=cell(1,nfd);eu=cell(1,nfd);
@@ -115,7 +115,6 @@ for i=1:nfd
  end
 end
 
-idx=sparse(idx);
 
 vector.Ly.et0=et0;vector.Ly.etf=etf;vector.Ly.et=et;vector.Ly.ep=ep;
 vector.Ly.ex=ex;vector.Ly.eu=eu;vector.Ly.ez=ez_scaled;
@@ -135,9 +134,9 @@ dEdtf=sparsity.dEdtf;
 
  idx0=find([dEdt0 dEdtf dEdp dEdx0 dEdu0 dEdxf dEduf]);
  idx=idx0;nfd=nnz(idx);
- et0=zeros(1,nfd);etf=zeros(1,nfd);ep=zeros(np,nfd);                      % Allocate memory 
- ex0=zeros(n,nfd);eu0=zeros(m,nfd);
- exf=zeros(n,nfd);euf=zeros(m,nfd);
+ et0=spalloc(1,nfd,nfd);etf=spalloc(1,nfd,nfd);ep=spalloc(np,nfd,nfd);                      % Allocate memory 
+ ex0=spalloc(n,nfd,nfd);eu0=spalloc(m,nfd,nfd);
+ exf=spalloc(n,nfd,nfd);euf=spalloc(m,nfd,nfd);
 
  for i=1:nfd
     
@@ -198,13 +197,11 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(dfdp)+nt);...
          nt+dp+colFxu];ngcol=max(colgroup);                      
 
 
-% eg=spalloc(nz,ngcol,nz);
-eg=zeros(nz,ngcol);
-vector.f.et0=zeros(1,ngcol);vector.f.et0(1)=1;
-vector.f.etf=zeros(1,ngcol);vector.f.etf(2)=1;
+eg=spalloc(nz,ngcol,nz);
+vector.f.et0=spalloc(1,ngcol,nfd);vector.f.et0(1)=1;
+vector.f.etf=spalloc(1,ngcol,nfd);vector.f.etf(2)=1;
 vector.f.ep=eg;vector.f.ex=eg;vector.f.eu=eg;
-ixf=zeros(n*M,ngcol);
-% ixf=spalloc(n*M,ngcol,n*M*ngcol);
+ixf=spalloc(n*M,ngcol,n*M*ngcol);
 
 
 for i=1:ngcol
@@ -249,12 +246,11 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(dgdp)+nt);...
          nt+dp+colGxu];ngcol=max(colgroup);
 
 
-eg=zeros(nz,ngcol);
-vector.g.et0=zeros(1,ngcol);vector.g.et0(1)=1;
-vector.g.etf=zeros(1,ngcol);vector.g.etf(2)=1;
+eg=spalloc(nz,ngcol,ngcol*nz);
+vector.g.et0=spalloc(1,ngcol,ngcol);vector.g.et0(1)=1;
+vector.g.etf=spalloc(1,ngcol,ngcol);vector.g.etf(2)=1;
 vector.g.ep=eg;vector.g.ex=eg;vector.g.eu=eg;
-ig=zeros(ng*M,ngcol);
-
+ig=spalloc(ng*M,ngcol,ng*M*ngcol);
 
 for i=1:ngcol
     eg(colgroup==i,i)=1;
@@ -265,8 +261,8 @@ for i=1:ngcol
     ig(ig(:,i)==0,i)=1;
   
 end
-eg=sparse(eg);
-ig=sparse(ig);
+% eg=sparse(eg);
+% ig=sparse(ig);
 
 ex=data.map.Vx*eg;eu=data.map.Vu*eg;
 
@@ -298,11 +294,11 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(drcdp)+nt);...
          nt+dp+colRCxu];nrccol=max(colgroup);
 
 
-erc=zeros(nz,nrccol);
+erc=spalloc(nz,nrccol,nrccol*nz);
 vector.rc.et0=zeros(1,nrccol);vector.rc.et0(1)=1;
 vector.rc.etf=zeros(1,nrccol);vector.rc.etf(2)=1;
 vector.rc.ep=erc;vector.rc.ex=erc;vector.rc.eu=erc;
-irc=zeros(nrc,nrccol);
+irc=spalloc(nrc,nrccol,nrc*nz);
 
 for i=1:nrccol
     erc(colgroup==i,i)=1;
@@ -313,8 +309,7 @@ for i=1:nrccol
     irc(irc(:,i)==0,i)=1;
   
 end
-erc=sparse(erc);
-irc=sparse(irc);
+
 
 
 ex=data.map.Vx*erc;eu=data.map.Vu*erc;

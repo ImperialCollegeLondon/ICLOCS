@@ -31,6 +31,8 @@ function [solution,XU0f]=directCollocationLGR(required,z,data,phaseNo)
 %%
 global sol ro_time;
 
+sol{phaseNo}.z=z;
+
 % Define some useful variables
 [nt,np,n,m,ng,~,M,~,~,npd,~,npduidx,nps,~,~,~,~]=deal(data.sizes{1:17});
 

@@ -1339,7 +1339,10 @@ end
   data.funcs.constraints       = @constraintFunction;
   data.funcs.jacobian          = @constraintJacobian;
   data.funcs.jacobianstructure = @jacobianstructure;
-
+  
+  if isfield(problem,'callback') && ~isempty(problem.callback)
+      data.funcs.iterfunc=problem.callback;
+  end
   
   % Set function types 
   [ data ] = setFunctionTypes( problem, data );
