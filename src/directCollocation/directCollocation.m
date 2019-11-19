@@ -32,7 +32,7 @@ function [solution,XU0f]=directCollocation(required,z,data,phaseNo)
 %%
 global sol;
 
-
+sol{phaseNo}.z=z;
 
 % Define some useful variables
 [nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(data.sizes{1:13});
