@@ -61,7 +61,7 @@ else
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         [ gzz ] = hessian_CD_G( gzz, M, ng, nz, g, X, U, P, t0, T, DT, e, e2, adjoint_g, vdat, data );
     else
-        gzz=spare(nz,nz);
+        gzz=spares(nz,nz);
     end
 end
 
