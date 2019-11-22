@@ -26,8 +26,8 @@ fg=vdat.functionfg;
 % Compute fz and gz
 %------------
 
-fz=spalloc(n*M,nz,n*M*(n+m)+np+nt);
-gz=spalloc(ng*M,nz,ng*M*(n+m+np+nt));
+fz=spalloc(n*M,nz,data.map.spmatsize.jSf);
+gz=spalloc(ng*M,nz,data.map.spmatsize.jSg);
 
 if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
     [ fz,gz,~ ] = jacConst_LGR_FD_FG( fz, gz, M, n, ng, nz, fg, X, U, P, t0, tf, T, e, DT_ratio_diff, DTLP, vdat, data );
@@ -42,7 +42,7 @@ end
 % Compute rcz
 %------------
 
-rcz=spalloc(nrc,nz,nrc*(n+m+np+nt));
+rcz=spalloc(nrc,nz,data.map.spmatsize.jSrc);
 if nrc
     [ rcz ] = jacConst_LGR_RC( rcz, nrc, nz, avrc, X_Np1, U, P, t0, tf, T, e, data );
 end
@@ -50,7 +50,7 @@ end
 
 % Compute bz
 %------------
-bz=spalloc(nb,nz,(2*m+2*n+nt+np)*nb);
+bz=spalloc(nb,nz,data.map.spmatsize.jSb);
 if nb
     [ bz ] = jacConst_LGR_FD_B( bz, nb, nz, b, x0, xf, u0, uf, p, t0, tf, e, vdat, data );
 end

@@ -39,8 +39,8 @@ DT_ratio_diff=repmat(data.tau_segment_ratio_diff,1,n);
 % Compute fz and gz
 %------------
 
-fz=spalloc(n*M,nz,n*M*n+m*M*n+np+nt);
-gz=spalloc(ng*M,nz,ng*M*(n+m+np+nt));
+fz=spalloc(n*M,nz,data.map.spmatsize.jSf);
+gz=spalloc(ng*M,nz,data.map.spmatsize.jSg);
 Jaf=[];
 
 if df.flag && ng && dg.flag
@@ -72,7 +72,7 @@ end
 % Compute rcz
 %------------
 
-rcz=spalloc(nrc,nz,nrc*(n+m+np+nt));
+rcz=spalloc(nrc,nz,data.map.spmatsize.jSrc);
 if nrc
     [ rcz ] = jacConst_LGR_RC( rcz, nrc, nz, avrc, X_Np1, U, P, t0, tf, T, e, data );
 end
@@ -81,7 +81,7 @@ end
 % Compute bz
 %------------
 
-bz=spalloc(nb,nz,(2*m+2*n+nt+np)*nb);
+bz=spalloc(nb,nz,data.map.spmatsize.jSb);
 if nb
 
     if db.flag 

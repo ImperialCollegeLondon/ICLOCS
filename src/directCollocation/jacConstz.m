@@ -38,8 +38,8 @@ vdat=data.data;
 % Compute fz and gz
 %------------
 
-fz=spalloc(n*M,nz,n*M*(n+m)+np+nt);
-gz=spalloc(ng*M,nz,ng*M*(n+m+np+nt));
+fz=spalloc(n*M,nz,data.map.spmatsize.jSf);
+gz=spalloc(ng*M,nz,data.map.spmatsize.jSg);
 Jaf=[];
 
 if df.flag && ng && dg.flag
@@ -69,7 +69,7 @@ end
 
 % Compute rcz
 %------------
-rcz=spalloc(nrc,nz,nrc*(n+m+np+nt));
+rcz=spalloc(nrc,nz,data.map.spmatsize.jSrc);
 
 if nrc
     [ rcz ] = jacConst_RC( rcz, nrc, nz, avrc, X, U, P, t0, tf, T, e, data );
@@ -78,7 +78,7 @@ end
 % Compute bz
 %------------
 
-bz=spalloc(nb,nz,(2*m+2*n+nt+np)*nb);
+bz=spalloc(nb,nz,data.map.spmatsize.jSb);
 if nb
 
     if db.flag 

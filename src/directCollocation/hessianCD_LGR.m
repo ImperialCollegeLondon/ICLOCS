@@ -55,14 +55,15 @@ e2=e*e;                     % Pertubation size
 
 
 if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-    fzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));
-    gzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));
+    fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+    gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
     [ fzz,gzz ] =hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
 else
-    fzz=spalloc(nz,nz,M*((m+n)*(m+n)+nt+np));
+    fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
    [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
 
     if ng
+        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
     else
         gzz=spare(nz,nz);
@@ -72,7 +73,7 @@ end
 % Compute (w'L)zz
 % ----------------
 if data.FD.FcnTypes.Ltype
-    Lzz=spalloc(nz,nz,M*((m+n)*(m+n+1)/2)+nt+np*np);
+    Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
     [ Lzz ] = hessian_LGR_CD_wL( Lzz, nz, L, X, Xr, U, Ur, P, k0, T, DT, e, e2, vdat, data );
 else
     Lzz=spares(nz,nz);
@@ -81,7 +82,7 @@ end
 % Compute Ezz
 % ------------
 if data.FD.FcnTypes.Etype
-    Ezz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+    Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
     [ Ezz ] = hessian_LGR_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
 else
     Ezz=spares(nz,nz);

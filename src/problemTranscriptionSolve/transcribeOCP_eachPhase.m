@@ -1165,7 +1165,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.costStruct.E=Ez;
             data.costStruct.L=Lz;
 
-            data.hessianStruct=spalloc(M*(n+m),M*(n+m),M*(n+m)*(n+m));
+%             data.hessianStruct=spalloc(M*(n+m),M*(n+m),M*(n+m)*(n+m));
             
             data.map.spmatsize.hSL=nnz(Lz'*Lz);
             data.map.spmatsize.hSE=nnz(Ez'*Ez);
