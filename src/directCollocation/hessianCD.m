@@ -61,7 +61,7 @@ else
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         [ gzz ] = hessian_CD_G( gzz, M, ng, nz, g, X, U, P, t0, T, DT, e, e2, adjoint_g, vdat, data );
     else
-        gzz=spares(nz,nz);
+        gzz=sparse(nz,nz);
     end
 end
 
@@ -71,7 +71,7 @@ if data.FD.FcnTypes.Ltype
     Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
     [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
 else
-    Lzz=spares(nz,nz);
+    Lzz=sparse(nz,nz);
 end
 
 
@@ -81,7 +81,7 @@ if data.FD.FcnTypes.Etype
     Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
     [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
 else
-    Ezz=spares(nz,nz);
+    Ezz=sparse(nz,nz);
 end
 
 
