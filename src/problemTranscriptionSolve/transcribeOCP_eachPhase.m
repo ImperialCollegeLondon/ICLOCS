@@ -809,8 +809,12 @@ if ~strcmp(options.transcription,'multiple_shooting')
 %         else
             data_temp=data;
             [data.FD.vector,data.FD.index,Jac_templete]=getPertubationsLGR(sparsity,data.sizes,data);
+            
+       if isfield(problem,'mpflag')
             data_temp.options.derivatives='numeric';
             data.infoForLinkConst=getPertubationsLGR(sparsity_num,data.sizes,data_temp);
+       end
+            
 %         end
 
         % Constaint Jacobian Structure
@@ -869,6 +873,11 @@ if ~strcmp(options.transcription,'multiple_shooting')
         data.map.bu=bu;
         data.map.bTol=bTol;
 
+        data.map.spmatsize.jSf=nnz(dfz);
+        data.map.spmatsize.jSg=nnz(dgz(gAllidx,:));
+        data.map.spmatsize.jSrc=nnz([drcz_rcl;drcz_rcu;drcz_rce]);
+        data.map.spmatsize.jSb=nnz(dbz);
+            
         jS= [dfz;dgz(gAllidx,:);drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure
         jS_noB=[dfz_noD;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
@@ -950,7 +959,12 @@ if ~strcmp(options.transcription,'multiple_shooting')
 
         % Legrange Hessian Structure
         data.hessianStruct=spalloc((M+1)*n+M*m,(M+1)*n+M*m,M*(n+m)*(n+m));
-%         data.hessianStruct=Lz'*Lz+Rz'*Rz+Ez'*Ez+(jS_noB'*jS_noB);
+
+        data.map.spmatsize.hSL=nnz(Lz'*Lz);
+        data.map.spmatsize.hSE=nnz(Ez'*Ez);
+        data.map.spmatsize.hSf=nnz(jS_noB'*jS_noB);
+        data.map.spmatsize.hSg=nnz(jS_noB'*jS_noB);
+
         data.hessianStruct=Lz'*Lz+Ez'*Ez+(jS_noB'*jS_noB);
         if options.reorderLGR
              data.hessianStruct=data.hessianStruct(data.reorder.z_idx,data.reorder.z_idx);
@@ -1003,8 +1017,10 @@ if ~strcmp(options.transcription,'multiple_shooting')
 %         else
             data_temp=data;
             [data.FD.vector,data.FD.index]=getPertubations(sparsity,data.sizes,data);
+       if isfield(problem,'mpflag')
             data_temp.options.derivatives='numeric';
             data.infoForLinkConst=getPertubations(sparsity_num,data.sizes,data_temp);
+       end
 %         end
         
         if nrc
@@ -1046,20 +1062,34 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.map.bTol=bTol;
         
             if N==1
-                jS= [[zeros(n,nt), zeros(n,np), eye(n), zeros(n,nx+nu-n)]*cx0;...
+                data.map.spmatsize.jSf=nnz([[sparse(n,nt), sparse(n,np), speye(n), sparse(n,nx+nu-n)]*cx0;A*Vx+B*dfz]);
+                data.map.spmatsize.jSg=nnz(dgz(gAllidx,:));
+                data.map.spmatsize.jSrc=nnz([drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:)]);
+                data.map.spmatsize.jSb=nnz([sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 sparse(nb,(((M)/N-1))*n),...
+                sparsity.dbdu0 sparse(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
+                sparsity.dbdxf]);
+            
+                jS= [[sparse(n,nt), sparse(n,np), speye(n), sparse(n,nx+nu-n)]*cx0;...
                 A*Vx+B*dfz;...
                 dgz(gAllidx,:);...
                 drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:);...
-                [sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 zeros(nb,(((M)/N-1))*n),...
-                sparsity.dbdu0 zeros(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
+                [sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 sparse(nb,(((M)/N-1))*n),...
+                sparsity.dbdu0 sparse(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
                 sparsity.dbdxf]];
             else
-                jS=[[zeros(n,nt), zeros(n,np), eye(n) zeros(n,nx+nu-n)]*cx0;...
+                data.map.spmatsize.jSf=nnz([[sparse(n,nt), sparse(n,np), speye(n) sparse(n,nx+nu-n)]*cx0;A*Vx+B*dfz]);
+                data.map.spmatsize.jSg=nnz(dgz(gAllidx,:));
+                data.map.spmatsize.jSrc=nnz([drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:)]);
+                data.map.spmatsize.jSb=nnz([sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 sparse(nb,(((M)/N-1))*n),...
+                sparsity.dbdu0 sparse(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
+                sparsity.dbdxf, sparsity.dbduf]);
+                
+                jS=[[sparse(n,nt), sparse(n,np), speye(n) sparse(n,nx+nu-n)]*cx0;...
                 A*Vx+B*dfz;
                 dgz(gAllidx,:);...
                 drcz(idx_rcl,:);drcz(idx_rcu,:);drcz(idx_rce,:);...
-                [sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 zeros(nb,(((M)/N-1))*n),...
-                sparsity.dbdu0 zeros(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
+                [sparsity.dbdt0 sparsity.dbdtf sparsity.dbdp sparsity.dbdx0 sparse(nb,(((M)/N-1))*n),...
+                sparsity.dbdu0 sparse(nb,nx+nu-2*(n+m)-(((M)/N-1))*n),...
                 sparsity.dbdxf, sparsity.dbduf]]; 
             end
             
@@ -1136,6 +1166,12 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.costStruct.L=Lz;
 
             data.hessianStruct=spalloc(M*(n+m),M*(n+m),M*(n+m)*(n+m));
+            
+            data.map.spmatsize.hSL=nnz(Lz'*Lz);
+            data.map.spmatsize.hSE=nnz(Ez'*Ez);
+            data.map.spmatsize.hSf=nnz(data.jacStruct'*data.jacStruct);
+            data.map.spmatsize.hSg=nnz(data.jacStruct'*data.jacStruct);
+            
             data.hessianStruct=tril(Lz'*Lz+Ez'*Ez+(data.jacStruct'*data.jacStruct));
             data.funcs.hessianstructure  = @hessianstructure;
             data.funcs.hessian           = @computeHessian;

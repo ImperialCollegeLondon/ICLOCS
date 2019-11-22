@@ -18,9 +18,18 @@ if isfield(problem,'FcnTypes')
     else
         data.FD.FcnTypes.Etype=1;
     end
+    
+    if (strcmp(problem.FcnTypes.TerminalConst,'Constant')) || (strcmp(problem.FcnTypes.TerminalConst,'None'))
+        data.FD.FcnTypes.Btype=0;
+    elseif (strcmp(problem.FcnTypes.TerminalConst,'Linear'))
+        data.FD.FcnTypes.Btype=2;
+    else
+        data.FD.FcnTypes.Btype=1;
+    end
 else
     data.FD.FcnTypes.Ltype=1;
     data.FD.FcnTypes.Etype=1;
+    data.FD.FcnTypes.Btype=1;
 end
 
 % problem.FcnTypes.Dynamics='Nonlinear';

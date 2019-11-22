@@ -43,13 +43,16 @@ if data.FD.index.dE.flag==1 || data.FD.index.dL.flag==1
     [dL,dE]=gradCost(L,X,Xr,U,Ur,P,t,E,x0,xf,u0,uf,p,t0,tf,data);    
 end
 
-Lz=zeros(1,nz);
+
 
 if data.FD.index.dL.flag==1          %  data.FD.index.dE.flag==1 when the analytic expression  of the gradient for the stage cost L is supplied  
+    Lz=zeros(1,nz);
     [ Lz, JL ] = gradientCost_LGR_AN_L( dL, Lz,L,nt,np,n,m,nz,X,Xr,U,Ur,P,t,T,t0,tf,vdat,data );
 elseif data.FD.FcnTypes.Ltype   % Numerical evalution of the gradient of the stage cost
+    Lz=zeros(1,nz);
     [ Lz, JL ] = gradientCost_LGR_FD_L( Lz, L, M, nz, X, Xr, U, Ur, P, t0, tf, T, e, vdat, data );
 else 
+    Lz=zeros(1,nz);
     JL=0; 
 end
 
@@ -57,13 +60,17 @@ end
 
 % Compute contribution of E to the gradient
 
-Ez=spalloc(1,nz,nt+np+2*(n+m));
+
 
 
 if data.FD.index.dE.flag==1
-  [ Ez ] = gradientCost_LGR_AN_E( dE,Ez,data );
+    Ez=spalloc(1,nz,nt+np+2*(n+m));
+    [ Ez ] = gradientCost_LGR_AN_E( dE,Ez,data );
 elseif data.FD.FcnTypes.Etype    
-  [ Ez ] = gradientCost_LGR_FD_E( Ez, E, x0, xf, u0, uf, p, t0, tf, e, vdat, data );
+    Ez=spalloc(1,nz,nt+np+2*(n+m));
+    [ Ez ] = gradientCost_LGR_FD_E( Ez, E, x0, xf, u0, uf, p, t0, tf, e, vdat, data );
+else
+    Ez=sparse(1,nz);
 end
 
 

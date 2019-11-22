@@ -131,25 +131,29 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
                 u_guess=u_guess(:);
             end
         end
-        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
-            data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
-            data.multipliers.lambda=data.multipliers.lambda(:);
+        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1
+            data.multipliers.lambda=guess.multipliers.lambda;
         else
-            data.multipliers.lambda=[];
-        end
+            if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
+                data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                data.multipliers.lambda=data.multipliers.lambda(:);
+            else
+                data.multipliers.lambda=[];
+            end
 
-        if ng
-            lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
-            data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
-        end
-        if nb
-            data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-        end
-        if nrc
-            data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-        end
-        if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
-            data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+            if ng
+                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+                data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
+            end
+            if nb
+                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
+            end
+            if nrc
+                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
+            end
+            if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
+                data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+            end
         end
     end
 else
@@ -254,26 +258,31 @@ else
                 u_guess=reshape(u_guess',M*m,1);
             end
         end
-        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
-            data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
-            data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
+        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1
+            data.multipliers.lambda=guess.multipliers.lambda;
         else
-            data.multipliers.lambda=[];
+            if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
+                data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
+            else
+                data.multipliers.lambda=[];
+            end
+            if ng
+                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+                lambda_g=reshape(lambda_g',M*ng,1);
+                data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
+            end
+            if nb
+                data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
+            end
+            if nrc
+                data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
+            end
+            if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
+                data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+            end 
         end
-        if ng
-            lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
-            lambda_g=reshape(lambda_g',M*ng,1);
-            data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
-        end
-        if nb
-            data.multipliers.lambda=[data.multipliers.lambda;guess.multipliers.lambda_b(1:nb)];
-        end
-        if nrc
-            data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
-        end
-        if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
-            data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
-        end
+        
     end
 end
 

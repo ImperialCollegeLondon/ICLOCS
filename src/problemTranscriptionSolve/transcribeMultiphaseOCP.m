@@ -96,6 +96,7 @@ for i=1:data.mpsizes.nphase
     
     options.phaseoptions{i}.perturbation.J=options.mp.perturbation.J;
     options.phaseoptions{i}.perturbation.H=options.mp.perturbation.H;
+    problem.phases{i}.mpflag=1;
     [phaseinfoNLP{i},phasedata{i},options.phaseoptions{i}]=transcribeOCP_eachPhase(problem.phases{i},guess.phases{i},options.phaseoptions{i});
     
 

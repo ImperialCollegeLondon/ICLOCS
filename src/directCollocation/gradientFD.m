@@ -36,16 +36,22 @@ vdat=data.data;                       % Variables used in the functions
 % k0=data.k0;
 % Compute contribution of L to the gradient
 
-Lz=zeros(1,nz);
+
 if data.FD.FcnTypes.Ltype
+    Lz=zeros(1,nz);
     [ Lz, ~ ] = gradientCost_FD_L( Lz, L, M, nz, X, Xr, U, Ur, P, t0, tf, T, e, vdat, data );
+else
+    Lz=sparse(1,nz);
 end
 
 % Compute contribution of E to the gradient
 
-Ez=spalloc(1,nz,nt+np+2*(n+m));
+
 if data.FD.FcnTypes.Etype    
+  Ez=spalloc(1,nz,nt+np+2*(n+m));
   [ Ez ] = gradientCost_FD_E( Ez, E, x0, xf, u0, uf, p, t0, tf, e, vdat, data );
+else
+   Ez=sparse(1,nz,nt+np+2*(n+m));
 end
 
 

@@ -23,7 +23,7 @@ if iscell(HE)
                 elseif j==2
                     Ezz(idx(i),idx(j))=HE{idxv(j),idxv(i)};
                 end
-            else   
+            elseif HE{idxv(j),idxv(i)}~=0
                 Ezz(idx(i),idx(j))=HE{idxv(j),idxv(i)};
             end
         end
@@ -49,7 +49,7 @@ else
                 elseif j==2
                     Ezz(idx(i),idx(j))=HE(idxv(j),idxv(i));
                 end
-            else   
+            elseif (HE(idxv(j),idxv(i)))~=0
                 Ezz(idx(i),idx(j))=HE(idxv(j),idxv(i));
             end
         end
