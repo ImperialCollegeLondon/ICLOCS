@@ -54,6 +54,9 @@ try
     % Extract states and inputs from z and reshape for function evaluations
     X=reshape(mp.Vx*z,n,M)';
     U=reshape(mp.Vu*z,m,N)';
+    if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
+        U(end,:)=U(end-1,:);
+    end
 
 
     %%

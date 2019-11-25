@@ -383,6 +383,9 @@ else
             X=scale_variables_back( X, dataNLP.data.Xscale, dataNLP.data.Xshift );
             U=scale_variables_back( U, dataNLP.data.Uscale, dataNLP.data.Ushift );
         end
+        if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
+            U(end,:)=U(end-1,:);
+        end
         if nt==1
             solution.z_orgscale=[tf;p;zeros(n*M+m*N,1)]+dataNLP.map.xV*reshape(X',M*n,1)+dataNLP.map.uV*reshape(U',m*N,1);
         elseif nt==2

@@ -33,7 +33,7 @@ if any(u>uu)
 end
 
 % Evaluate ODE right-hand side
-p=repmat(solution.p,length(t),1);
+p=repmat(solution.p',length(t),1);
 
 f=problem.sim.functions;
 dx=f(x',u,p,t,problem.data)';
