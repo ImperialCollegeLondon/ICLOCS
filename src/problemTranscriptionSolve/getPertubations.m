@@ -186,8 +186,8 @@ end
 
 % dfdz where z=[tf p x0 ...u0... xf uf];
 % -------------------------------------
-Fxu=[kron(speye((M)/N),dfdx),repmat(dfdu,(M)/N,1)];
-df=[repmat(ones(n,nt),M,1) repmat(dfdp,M,1) kron(speye(N),Fxu)];
+Fxu=[spkroneye(M/N, dfdx),repmat(dfdu,(M)/N,1)];
+df=[repmat(ones(n,nt),M,1) repmat(dfdp,M,1) spkroneye( N,Fxu )];
 
 colFxu=repmat(overlapping(Fxu),N,1);
 if isempty(dfdp); dp=0;else dp=max(overlapping(dfdp));end
@@ -231,9 +231,11 @@ index.f=ixf;
 % dgdz where z=[tf p x0 ...u0...  uf xf]; 
 
 if ng
-Gxu=[kron(speye(M/N),sparse(sparsity.dgdx)),repmat(sparse(sparsity.dgdu),M/N,1)];
+%     Gxu=[kron(speye(M/N),sparse(sparsity.dgdx)),repmat(sparse(sparsity.dgdu),M/N,1)];
 
-dg=[repmat(dgdt,M,1) repmat(dgdp,M,1) kron(speye(N),Gxu)];
+Gxu=[spkroneye(M/N,sparse(sparsity.dgdx)),repmat(sparse(sparsity.dgdu),M/N,1)];
+
+dg=[repmat(dgdt,M,1) repmat(dgdp,M,1) spkroneye(N,Gxu)];
 
    
 cGxu=overlapping(Gxu);   
@@ -281,9 +283,9 @@ end
 
 
 if nrc
-RCxu=[kron(speye(M/N),sparse(sparsity.drcdx)),repmat(sparse(sparsity.drcdu),M/N,1)];
+RCxu=[spkroneye(M/N,sparse(sparsity.drcdx)),repmat(sparse(sparsity.drcdu),M/N,1)];
 
-drc=[repmat(drcdt,M,1) repmat(drcdp,M,1) kron(speye(M),RCxu)];
+drc=[repmat(drcdt,M,1) repmat(drcdp,M,1) spkroneye(M,RCxu)];
    
 cRCxu=overlapping(RCxu);   
 colRCxu=repmat(cRCxu,N,1);
