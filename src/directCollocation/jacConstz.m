@@ -44,14 +44,14 @@ Jaf=[];
 
 if df.flag && ng && dg.flag
     [ fz,Jf ] = jacConst_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0, tf, T, e, vdat, data );
-    [ gz ] = jacConst_AN_G( gz, M, nt, np, ng, nz, T, data );
+    [ gz ] = jacConst_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
 elseif ~df.flag && ng && ~dg.flag
     [ fz,gz,Jf ] = jacConst_FD_FG( fz, gz, M, n, ng, nz, fg, X, U, P, t0, tf, T, e, vdat, data );
 elseif df.flag 
     [ fz,Jf ] = jacConst_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0, tf, T, e, vdat, data );
     if ng
         if dg.flag
-            [ gz ] = jacConst_AN_G( gz, M, nt, np, ng, nz, T, data );
+            [ gz ] = jacConst_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
         else
             [ gz ] = jacConst_FD_G( gz, M, ng, nz, g, X, U, P, t0, tf, T, e, vdat, data );
         end
@@ -60,7 +60,7 @@ elseif ~df.flag
     [ fz,Jf ] = jacConst_FD_F( fz, M, n, nz, f, X, U, P, t0, tf, T, e, vdat, data );
     if ng
         if dg.flag
-            [ gz ] = jacConst_AN_G( gz, M, nt, np, ng, nz, T, data );
+            [ gz ] = jacConst_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
         else
             [ gz ] = jacConst_FD_G( gz, M, ng, nz, g, X, U, P, t0, tf, T, e, vdat, data );
         end

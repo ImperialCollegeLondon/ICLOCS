@@ -55,7 +55,7 @@ adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)';
 vdat=data.data;
 DT=tf-t0;
 Tj=kron(T,ones(1,n));
-
+fg=vdat.functionfg;
 
 % Compute fzz and gzz
 % ------------
