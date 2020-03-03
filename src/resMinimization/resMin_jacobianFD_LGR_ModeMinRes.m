@@ -19,7 +19,7 @@ function jac=resMin_jacobianFD_LGR_ModeMinRes(L,E,g,avrc,X_Np1,Xr,U_Np1,Ur,P,T_N
 dataNLP=data.dataNLP;
 
 e=dataNLP.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,~]=deal(dataNLP.sizes{1:17});
+[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:19});
 nrc=nrcl+nrcu+nrce;
 nx=(M+1)*n;                               % Number of unknown states
 nu=M*m;                               % Number of unknown controls
@@ -310,7 +310,7 @@ else
     nz=nx+nu+np;                       % Length of the optimization variable 
 end
 
-Resz=zeros(n,nz);
+Resz=sparse(n+ng_eq,nz);
 tau_seg_idx=[dataNLP.tau_seg_idx;dataNLP.tau_seg_idx(end)];
 idx_state=[idx(:,1:n);idx(end,1:n)+1];
 for i=i_st:i_end
@@ -329,39 +329,39 @@ for i=i_st:i_end
                  if mod(data.nps,2)
                     dRes=[dRes(:,1) dRes(:,2:2:end)+dRes(:,3:2:end)];
                  else
-                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n,1)]];
+                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n+ng_eq,1)]];
                  end
                  if i<=n
                     idxl=idx_state(logical(data.idx_perturb(:,j)),i);
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
                  else
                     idxl=idx(logical(data.idx_perturb(1:end-1,j)),i);
                     dResl=dRes(:,1:length(idxl));
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dResl(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dResl(:),n+ng_eq,nz);
                  end
             elseif j==2
                  if mod(data.nps,2)
-                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n,1)];
+                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_eqn,1)];
                  else
                     dRes=dRes(:,1:2:end)+dRes(:,2:2:end);
                  end
                  if i<=n
                     idxl=idx_state(logical(data.idx_perturb(:,j)),i);
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
                  else
                     idxl=idx(logical(data.idx_perturb(1:end-1,j)),i);
                     dResl=dRes(:,1:length(idxl));
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dResl(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dResl(:),n+ng_eq,nz);
                  end
             else
                  dRes=dRes(:,tau_seg_idx(logical(data.idx_perturb(:,j))));
                  if i<=n
                     idxl=idx_state(logical(data.idx_perturb(:,j)),i);
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
                  else
                     idxl=idx(logical(data.idx_perturb(1:end-1,j)),i);
                     dResl=dRes(:,1:length(idxl));
-                    Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dResl(:),n,nz);
+                    Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dResl(:),n+ng_eq,nz);
                  end
             end
         end
@@ -370,7 +370,7 @@ for i=i_st:i_end
         [~,ResCost_m]=costResidualMin_ModeMinRes( X_Np1,U_Np1,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
         dRes=sum((ResCost_p-ResCost_m)/(2*e),2);
         idxl=idx(1,i);
-        Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+        Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
     end
 end
 

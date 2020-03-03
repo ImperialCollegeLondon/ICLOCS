@@ -20,7 +20,7 @@ dataNLP=data.dataNLP;
 
 e=dataNLP.options.perturbation.J;                                 % Pertubation size
 [nt,np,n,m,ng,nb,M,N]=deal(dataNLP.sizes{1:8});
-
+[ng_eq,ng_neq]=deal(dataNLP.sizes{15:16});
 % Compute contribution to the gradient
 idx=dataNLP.FD.index.Ly;
 nfd=size(idx,2);                               

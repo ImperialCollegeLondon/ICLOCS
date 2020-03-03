@@ -19,7 +19,7 @@ function jac=resMin_jacobianFD_ModeMinCost(g,avrc,X,U,P,T,b,x0,xf,u0,uf,p,t0,tf,
 
 dataNLP=data.dataNLP;
 e=dataNLP.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(dataNLP.sizes{1:13});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:16});
 nrc=nrcl+nrcu+nrce;
 % 
 if nt
@@ -144,7 +144,8 @@ else
     idx=idx-nt;
     nz=np+nx+nu;                       % Length of the optimization variable 
 end
-Resz=zeros(1,nz);
+n_res=n+ng_eq;
+Resz=sparse(n_res,nz);
 
  for i=i_st:i_end
     if (nt && i>(nt+np)) || (~nt)
@@ -156,21 +157,21 @@ Resz=zeros(1,nz);
                  if mod(data.nps,2)
                     dRes=[dRes(:,1) dRes(:,2:2:end)+dRes(:,3:2:end)];
                  else
-                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n,1)]];
+                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n_res,1)]];
                  end
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n_res,1,length(idxl)),repelem(idxl,n_res,1),dRes(:),n_res,nz);
             elseif j==2
                  if mod(data.nps,2)
-                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n,1)];
+                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n_res,1)];
                  else
                     dRes=dRes(:,1:2:end)+dRes(:,2:2:end);
                  end
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n_res,1,length(idxl)),repelem(idxl,n_res,1),dRes(:),n_res,nz);
             else
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n_res,1,length(idxl)),repelem(idxl,n_res,1),dRes(:),n_res,nz);
             end
         end
     else
@@ -178,7 +179,7 @@ Resz=zeros(1,nz);
         [~,ResCost_m]=constResidualMin_ModeMinCost( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data,1);
         dRes=sum((ResCost_p-ResCost_m)/(2*e),2);
         idxl=idx(1,i);
-        Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+        Resz=Resz+sparse(repmat(1:n_res,1,length(idxl)),repelem(idxl,n_res,1),dRes(:),n_res,nz);
     end
 end
 

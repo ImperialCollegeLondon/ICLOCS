@@ -41,7 +41,7 @@ uf=U(end,:)';
 switch dataNLP.options.discretization
     
     case{'globalLGR','hpLGR'} % p/hp Transcription Method
-        [~,~,~,~,ng,~,M,~,~,~,~,~,~,~,~,~,~]=deal(dataNLP.sizes{1:17});
+        [~,~,~,~,ng,~,M,~,~,~,~,~,~,~,~,~,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:19});
         
         X_quad=(data.InterpH*X)./data.sumInterpH;
         U_quad=(data.InterpH*U)./data.sumInterpH;
@@ -51,17 +51,29 @@ switch dataNLP.options.discretization
         P_quad=repelem(P(1,:),length(data.tau_quad),1);
         
         Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
+        if ng_eq
+            Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
+            Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+        else
+            Gp_eq=[];
+        end
         Res=dX_quad-Fp;
         Res=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res.^2));
-        Res=scale_variables( Res', data.dataNLP.data.discErrorConstScaling, 0 )';
+        Res=scale_variables( [Res;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
         
         if mode==1
             X_mesh=X(1:end-1,:);
             U_mesh=U(1:end-1,:);
             T_mesh=T(1:end-1,:);
             X_mesh_Np1=X;
-
-            g_vect=reshape(g(X_mesh,U_mesh,P,T_mesh,data.dataNLP.data)',M*ng,1);
+            
+            if ng_neq
+                Gc=g(X_mesh,U_mesh,P,T_mesh,data.dataNLP.data);
+                Gc_neq=Gc(:,ng_eq+1:ng);
+            else
+                Gc_neq=[];
+            end
+            g_vect=reshape(Gc_neq',M*ng,1);
             if isfield(data.dataNLP.data,'Xscale')
                 cr=avrc(X_s,U_s,P_s,T,data.dataNLP)';
             else
@@ -77,7 +89,7 @@ switch dataNLP.options.discretization
         end
                 
     otherwise
-        [~,~,n,~,ng,~,M,~,~,~,~,~,~]=deal(dataNLP.sizes{1:13});
+        [~,~,n,~,ng,~,M,~,~,~,~,~,~,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:16});
         
         F_k=f(X(1:2:end,:),U(1:2:end,:),P,data.tau(1:2:end)*(tf-t0),data.dataNLP.data);
         F_kph=data.DxHS_hf*X/(tf-t0)-F_k(1:end-1,:)/2;
@@ -92,13 +104,24 @@ switch dataNLP.options.discretization
         P_quad=repelem(P(1,:),length(data.tau_quad),1);
         
         Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
-
+        if ng_eq
+            Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
+            Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+        else
+            Gp_eq=[];
+        end
         Res=dX_quad-Fp;
         Res=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res.^2));
-        Res=scale_variables( Res', data.dataNLP.data.discErrorConstScaling, 0 )';
+        Res=scale_variables( [Res;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
         
         if mode==1
-            g_vect=reshape(g(X,U,P,T,data.dataNLP.data)',M*ng,1);
+            if ng_neq
+                Gc=g(X,U,P,T,data.dataNLP.data);
+                Gc_neq=Gc(:,ng_eq+1:ng);
+            else
+                Gc_neq=[];
+            end
+            g_vect=reshape(Gc_neq',M*ng,1);
             if isfield(data.dataNLP.data,'Xscale')
                 cr=avrc(X_s,U_s,P_s,T,data.dataNLP)';
             else

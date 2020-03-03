@@ -383,7 +383,7 @@ else
             X=scale_variables_back( X, dataNLP.data.Xscale, dataNLP.data.Xshift );
             U=scale_variables_back( U, dataNLP.data.Uscale, dataNLP.data.Ushift );
         end
-        if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
+        if strcmp(dataNLP.options.discretization,'discrete') || strcmp(dataNLP.options.discretization,'euler')
             U(end,:)=U(end-1,:);
         end
         if nt==1

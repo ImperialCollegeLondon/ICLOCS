@@ -18,7 +18,7 @@ function jac=resMin_jacobianFD_ModeMinRes(L,E,g,avrc,X,Xr,U,Ur,P,T,b,x0,xf,u0,uf
 
 dataNLP=data.dataNLP;
 e=dataNLP.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(dataNLP.sizes{1:13});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:16});
 nrc=nrcl+nrcu+nrce;
 % 
 if nt
@@ -240,21 +240,21 @@ Resz=zeros(1,nz);
                  if mod(data.nps,2)
                     dRes=[dRes(:,1) dRes(:,2:2:end)+dRes(:,3:2:end)];
                  else
-                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n,1)]];
+                    dRes=[dRes(:,1) dRes(:,2:2:end)+[dRes(:,3:2:end) zeros(n+ng_eq,1)]];
                  end
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
             elseif j==2
                  if mod(data.nps,2)
-                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n,1)];
+                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_eq,1)];
                  else
                     dRes=dRes(:,1:2:end)+dRes(:,2:2:end);
                  end
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
             else
                  idxl=idx(logical(data.idx_perturb(:,j)),i);
-                 Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+                 Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
             end
         end
     else
@@ -262,7 +262,7 @@ Resz=zeros(1,nz);
         [~,ResCost_m]=costResidualMin_ModeMinRes( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data);
         dRes=sum((ResCost_p-ResCost_m)/(2*e),2);
         idxl=idx(1,i);
-        Resz=Resz+sparse(repmat(1:n,1,length(idxl)),repelem(idxl,n,1),dRes(:),n,nz);
+        Resz=Resz+sparse(repmat(1:n+ng_eq,1,length(idxl)),repelem(idxl,n+ng_eq,1),dRes(:),n+ng_eq,nz);
     end
  end
 

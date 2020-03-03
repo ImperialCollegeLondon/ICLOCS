@@ -42,7 +42,7 @@ end
 % Discretization Error Tol
 options.discErrorTol=problem.states.xErrorTol_local;
 if strcmp(options.transcription,'integral_res_min')
-    discErrorTol_Full=problem.states.xErrorTol_integral;
+    discErrorTol_Full=[problem.states.xErrorTol_integral problem.constraints.gTol_eq];
     global mode_min_res
     mode_min_res=1;
 end
@@ -90,12 +90,24 @@ N=problem.inputs.N;                        % Number of control actions
 
 
 
-if ~isfield(problem.states,'resNormCusWeight')
-    problem.data.resNormCusWeight=ones(1,n);
+if ~isfield(problem.states,'resNormCusWeight') && ~isfield(problem.constraints,'resNormCusWeight_eq')
+    problem.data.resNormCusWeight=ones(1,n+ng_eq);
+elseif isfield(problem.states,'resNormCusWeight') && isfield(problem.constraints,'resNormCusWeight_eq')
+    problem.data.resNormCusWeight=[problem.states.resNormCusWeight problem.constraints,resNormCusWeight_eq];
+elseif ~isfield(problem.states,'resNormCusWeight') && isfield(problem.constraints,'resNormCusWeight_eq')
+    problem.data.resNormCusWeight=[ones(1,n) problem.constraints,resNormCusWeight_eq];
+elseif isfield(problem.states,'resNormCusWeight') && ~isfield(problem.constraints,'resNormCusWeight_eq')
+    problem.data.resNormCusWeight=[problem.states.resNormCusWeight ones(1,ng_eq)];
 else
-    problem.data.resNormCusWeight=problem.states.resNormCusWeight;
+    error('Customized weighting for residual norm not properly configured! Please assign the relative weighting with problem.states.resNormCusWeight and problem.constraints,resNormCusWeight_eq accordingly')
 end
+
 data.data=problem.data;
+if ~isfield(problem, 'analyticDeriv')
+    problem.analyticDeriv.gradCost=[];
+    problem.analyticDeriv.hessianLagrangian=[];
+    problem.analyticDeriv.jacConst=[];
+end
 data.analyticDeriv = problem.analyticDeriv;
 data.data.transcription=options.transcription;
 data.data.discretization=options.discretization;
@@ -407,7 +419,7 @@ else
     ngActive=0;
 end
 
-if strcmp(options.transcription,'integral_res_min')
+if strcmp(options.transcription,'integral_res_min') 
     ng=ng_neq;
     problem.constraints.gTol=[problem.constraints.gTol_neq];
 else
@@ -481,6 +493,12 @@ if ng
         glAll=repelem(gl,M);
         guAll=repelem(gu,M);
         g_tolAll=repelem(g_tol,M);
+        if ng_eq
+            g_tolEq=problem.constraints.gTol_eq(:);
+            g_tolEq=repelem(g_tolEq,M);
+        else
+            g_tolEq=[];
+        end
         gAllidx=logical(gActiveIdx(:));
     elseif strcmp(options.transcription,'multiple_shooting')
         glAll=kron(ones(M-1,1),gl(:));
@@ -492,6 +510,12 @@ if ng
         glAll=kron(ones(M,1),gl(:));
         guAll=kron(ones(M,1),gu(:));
         g_tolAll=kron(ones(M,1),g_tol(:));
+        if ng_eq
+            g_tolEq=problem.constraints.gTol_eq(:);
+            g_tolEq=kron(ones(M,1),g_tolEq(:));
+        else
+            g_tolEq=[];
+        end
         gAllidx=logical(reshape(gActiveIdx',size(gActiveIdx,1)*size(gActiveIdx,2),1));
     end
     data.gActiveIdx=gActiveIdx;
@@ -502,12 +526,14 @@ else
     guAll=[];
     gAllidx=[];
     g_tolAll=[];
+    g_tolEq=[];
     data.gActiveIdx=gActiveIdx;
 
 end
 data.glAll=glAll;
 data.guAll=guAll;
 data.g_tolAll=g_tolAll;
+data.g_tolEq=g_tolEq;
 data.gAllidx=find(gAllidx);
 
 
@@ -741,13 +767,13 @@ else
             infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n,1)];
             infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;ones(n,1)];
         else
-            discErrorConst=inf*ones(n,1);
-            data.data.discErrorConstScaling=ones(1,n);
+            discErrorConst=inf*ones(n+ng_eq,1);
+            data.data.discErrorConstScaling=ones(1,n+ng_eq);
             data.data.discErrorTol_FullScaling=discErrorTol_Full;
-            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n,1)];
+            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
             infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;discErrorConst(:)];
         end
-        infoNLP.c_Tol=[g_tolAll(gAllidx);zeros(size(rcu(:)));bTol(:);0;zeros(n,1)];
+        infoNLP.c_Tol=[g_tolAll(gAllidx);zeros(size(rcu(:)));bTol(:);0;zeros(n+ng_eq,1)];
         
         
     end
@@ -1290,18 +1316,22 @@ end
 %Offline generation of adigator files
  if strcmp(options.derivatives,'adigator') 
      if adigatorGen==1
-        data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
+        if ~strcmp(options.transcription,'integral_res_min')
+            data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
+        end
      else
         currentFolder = pwd;
         cd(options.adigatorPath);
         startupadigator;
         cd(currentFolder);
-        data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
+        if ~strcmp(options.transcription,'integral_res_min')
+            data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
+        end
         adigatorGen=1;
      end
  end
 
- 
+
 
 % Format initial guess/reference for NLP
 %---------------------------------------
@@ -1401,6 +1431,7 @@ end
     else
         t_list=[0;data.tau_inc(2:ns:end)]/ns;
     end
+    data.data.resmin=1;
     data = transcribeResMin( t_list,options,data );
     
     data.funcs=data.dataNLP.funcs;
@@ -1422,6 +1453,11 @@ end
         t_list=(data.tau_segment'+1)/2;
     else
         t_list=[0;data.tau_inc(2:ns:end)]/ns;
+    end
+    if strcmp(options.transcription,'direct_collocation') && strcmp(options.discretization,'resMinInterpolationForSolution')
+        data.data.resmin=1;
+    else
+        data.data.resmin=0;
     end
     
     if isfield(options.print,'residual_error') && options.print.residual_error

@@ -19,7 +19,7 @@ lambda=data.lambda(:);sigma=data.sigma;
 dataNLP=data.dataNLP;
 
 % Define some useful variables
-[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive]=deal(dataNLP.sizes{1:17});
+[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive,ng_eq,ng_neq]=deal(dataNLP.sizes{1:19});
 nrc=nrcl+nrcu+nrce;
 if data.free_time
     nz=nt+np+(M+1)*n+M*m;                              % Length of the primal variable
@@ -222,8 +222,8 @@ idx=dataNLP.FD.index.Ly;
 nfd=size(idx,2);                  
 i_st=1;
 i_end=nfd;
-
-adjoint_Res=lambda(end-n+1:end);
+n_res=n+ng_eq;
+adjoint_Res=lambda(end-n_res+1:end);
 
 idx_state=[idx(:,1:n);idx(end,1:n)+1];
 idx_pert_end=size(data.idx_perturb_hes,1);
@@ -292,12 +292,12 @@ for i=i_st:i_end
                             idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          else
-                            Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n,1)]];
+                            Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n_res,1)]];
                             idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          end
                          Restl=Rest(:,ia);
-                         Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Restl(:),nz,nz);
+                         Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Restl(:),nz,nz);
                          
                   elseif (k1==2 && k2==2) 
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
@@ -306,7 +306,7 @@ for i=i_st:i_end
                              case {0,2}
                                 Rest=Rest(:,1:3:end)+Rest(:,2:3:end);
                              case 1
-                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n,1)];
+                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n_res,1)];
                                 if length(idx1)~=length(Rest)
                                     if length(idx1)~=length(idx2)
                                         idx2(end)=[];Rest(:,end)=[];
@@ -315,7 +315,7 @@ for i=i_st:i_end
                                     end
                                 end
                         end
-                         Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                         Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                   elseif (k1==3 && k2==3) 
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
@@ -325,7 +325,7 @@ for i=i_st:i_end
                              case {0,1}
                                 Rest=Rest(:,2:3:end)+Rest(:,3:3:end);
                              case 2
-                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n,1)];
+                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
                                 if length(idx1)~=length(Rest)
                                     if length(idx1)~=length(idx2)
                                         idx2(end)=[];Rest(:,end)=[];
@@ -334,7 +334,7 @@ for i=i_st:i_end
                                     end
                                 end
                         end
-                         Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                         Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                   elseif (k1>=4 && k1<=3+(max(npd)-1) && k2==1) || (k2>=4 && k2<=3+(max(npd)-1) && k1==1) %4&1
                          [idx_rest, ia, ib]=intersect(tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1))),tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2))));
@@ -348,7 +348,7 @@ for i=i_st:i_end
                             idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          else
-                            Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n,1)]];
+                            Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n_res,1)]];
                             idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          end
@@ -357,10 +357,10 @@ for i=i_st:i_end
                          end
                          if k2==1
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Restl(:),nz,nz);
                          else
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Restl(:),nz,nz);
                          end
                   elseif (k1>=4 && k1<=3+(max(npd)-1) && k2==2) || (k2>=4 && k2<=3+(max(npd)-1) && k1==2) %4&2
                          if k2==2
@@ -377,16 +377,16 @@ for i=i_st:i_end
                              case {0,2}
                                 Rest=Rest(:,1:3:end)+Rest(:,2:3:end);
                              case 1
-                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n,1)];
+                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n_res,1)];
                          end
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                         if k2==2
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         else
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         end               
                   elseif (k1>=3+max(npd) && k1<=3+(max(npd)-1)*2 && k2==2) || (k2>=3+max(npd) && k2<=3+(max(npd)-1)*2 && k1==2) %(5&2)
                          [idx_rest, ia, ib]=intersect(tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1))),tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2))));
@@ -398,16 +398,16 @@ for i=i_st:i_end
                              case {0,2}
                                 Rest=Rest(:,1:3:end)+Rest(:,2:3:end);
                              case 1
-                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n,1)];
+                                Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n_res,1)];
                          end
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                         if k2==2
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Restl(:),nz,nz);
                         else
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Restl(:),nz,nz);
                         end     
 
                   elseif (k1>=3+max(npd) && k1<=3+(max(npd)-1)*2 && k2==3) || (k2>=3+max(npd) && k2<=3+(max(npd)-1)*2 && k1==3) %5&3
@@ -425,16 +425,16 @@ for i=i_st:i_end
                              case {0,1}
                                 Rest=Rest(:,2:3:end)+Rest(:,3:3:end);
                              case 2
-                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n,1)];
+                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
                          end
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                         if k2==3
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         else
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         end                    
                   elseif (k1>=3+(max(npd)-1)*2+1 && k1<=3+(max(npd)-1)*3 && k2==3) || (k2>=3+(max(npd)-1)*2+1 && k2<=3+(max(npd)-1)*3 && k1==3) %(6&3)
                          [idx_rest, ia, ib]=intersect(tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1))),tau_seg_idx_state(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2))));
@@ -446,7 +446,7 @@ for i=i_st:i_end
                              case {0,1}
                                 Rest=Rest(:,2:3:end)+Rest(:,3:3:end);
                              case 2
-                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n,1)];
+                                Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
                                 if (k1==6 && k2==3)
                                     Rest(end)=[];
                                     idx2(end)=[];
@@ -456,10 +456,10 @@ for i=i_st:i_end
                          idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          if k2==3
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                          else
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                          end     
 
                   elseif k1>=4 && k1<=3+(max(npd)-1) && k2>=4 && k2<=3+(max(npd)-1) %4
@@ -467,21 +467,21 @@ for i=i_st:i_end
                         Rest=Rest(:,idx_rest);
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
-                        Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Rest(:),nz,nz);
+                        Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Rest(:),nz,nz);
                          
                   elseif k1>=3+max(npd) && k1<=3+(max(npd)-1)*2 && k2>=3+max(npd) && k2<=3+(max(npd)-1)*2 %5
                         [idx_rest, ia, ib]=intersect(dataNLP.tau_seg_idx(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1))),dataNLP.tau_seg_idx(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2))));
                         Rest=Rest(:,idx_rest);
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
-                        Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Rest(:),nz,nz);
+                        Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Rest(:),nz,nz);
 
                   elseif k1>=3+(max(npd)-1)*2+1 && k1<=3+(max(npd)-1)*3 && k2>=3+(max(npd)-1)*2+1 && k2<=3+(max(npd)-1)*3 %6
                         [idx_rest, ia, ib]=intersect(dataNLP.tau_seg_idx(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1))),dataNLP.tau_seg_idx(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2))));
                         Rest=Rest(:,idx_rest);
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
-                        Resz=Resz+sparse(repelem(idx1(ia),n,1),repelem(idx2(ib),n,1),Rest(:),nz,nz);
+                        Resz=Resz+sparse(repelem(idx1(ia),n_res,1),repelem(idx2(ib),n_res,1),Rest(:),nz,nz);
 
                   elseif (k1==2 && k2==1) || (k1==1 && k2==2) 
                         idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
@@ -495,7 +495,7 @@ for i=i_st:i_end
                                     idx1(end)=[];
                                 end
                              case 1
-                                Rest=[Rest(:,1)+Rest(:,2) Rest(:,3:3:end)+Rest(:,4:3:end)+[Rest(:,5:3:end) zeros(n,1)]];
+                                Rest=[Rest(:,1)+Rest(:,2) Rest(:,3:3:end)+Rest(:,4:3:end)+[Rest(:,5:3:end) zeros(n_res,1)]];
                                 if k2==1 && length(idx1)~=length(idx2)
                                     idx2(end)=[];Rest(:,end)=[];
                                 elseif k1==1 && length(idx1)~=length(idx2)
@@ -504,7 +504,7 @@ for i=i_st:i_end
                              case 2
                                 Rest=[Rest(:,1)+Rest(:,2) Rest(:,3:3:end)+Rest(:,4:3:end)+Rest(:,5:3:end)];
                          end
-                         Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                         Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                   elseif (k1==3 && k2==2) || (k1==2 && k2==3) 
                          idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
@@ -520,14 +520,14 @@ for i=i_st:i_end
                                     idx1(end)=[];
                                 end
                              case 2
-                                Rest=Rest(:,1:3:end)+Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n,1)];
+                                Rest=Rest(:,1:3:end)+Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
                                 if k1==3 && length(idx1)~=length(idx2)
                                     idx2(end)=[];Rest(:,end)=[];
                                 elseif k2==3 && length(idx1)~=length(idx2)
                                     idx1(end)=[];Rest(:,end)=[];
                                 end
                          end
-                         Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                         Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
 
                   elseif (k1==3 && k2==1) || (k1==1 && k2==3) 
@@ -535,7 +535,7 @@ for i=i_st:i_end
                          idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          switch mod(data.nps,3)
                              case 0
-                                Rest=Rest(:,2:3:end-1)+Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n,1)];
+                                Rest=Rest(:,2:3:end-1)+Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n_res,1)];
                                 if k2==1 
                                     if (i~=j && i>n) || i<=n
                                         idx2(1)=[];
@@ -565,7 +565,7 @@ for i=i_st:i_end
                                     end
                                 end 
                          end
-                         Resz=Resz+sparse(repelem(max(idx1,idx2),n,1),repelem(min(idx1,idx2),n,1),Rest(:),nz,nz);
+                         Resz=Resz+sparse(repelem(max(idx1,idx2),n_res,1),repelem(min(idx1,idx2),n_res,1),Rest(:),nz,nz);
 
                   elseif (k1>=3+(max(npd)-1)*2+1 && k1<=3+(max(npd)-1)*3 && k2==1) || (k2>=3+(max(npd)-1)*2+1 && k2<=3+(max(npd)-1)*3 && k1==1) %6&1
                          if k2==1
@@ -580,7 +580,7 @@ for i=i_st:i_end
                          Rest(:,~idx_rest)=0;
                          switch mod(data.nps,3)
                              case 0
-                                Rest=Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n,1)];
+                                Rest=Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n_res,1)];
                              case {1,2}
                                 Rest=Rest(:,3:3:end)+Rest(:,4:3:end);
                          end
@@ -588,10 +588,10 @@ for i=i_st:i_end
                         idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                         if k2==1
                             Restl=Rest(:,ia);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         else
                             Restl=Rest(:,ib);
-                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n,1),repelem(min(idx1(ia),idx2(ib)),n,1),Restl(:),nz,nz);
+                            Resz=Resz+sparse(repelem(max(idx1(ia),idx2(ib)),n_res,1),repelem(min(idx1(ia),idx2(ib)),n_res,1),Restl(:),nz,nz);
                         end
 
                   end
@@ -601,7 +601,7 @@ for i=i_st:i_end
                           Rest=sum(Rest,2);
                           idx1=idx(1,i);
                           idx2=idx(1,j);
-                          Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                          Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
                       end
                   else
                       if k2==1
@@ -609,27 +609,27 @@ for i=i_st:i_end
                                 Rest=[Rest(:,1) Rest(:,3:3:end)+Rest(:,4:3:end)];
                                 idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                              else
-                                Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n,1)]];
+                                Rest=[Rest(:,1) Rest(:,3:3:end)+[Rest(:,4:3:end) zeros(n_res,1)]];
                                 idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                                 if length(idx2)~=size(Rest,2)
                                     Rest(:,end)=[];
                                 end
                              end
                              idx1=idx1(1,i)*ones(length(idx2),1);
-                             Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                             Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
                       elseif k2==2
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                             switch mod(data.nps,3)
                                  case {0,2}
                                     Rest=Rest(:,1:3:end)+Rest(:,2:3:end);
                                  case 1
-                                    Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n,1)];
+                                    Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n_res,1)];
                                     if length(idx2)~=size(Rest,2)
                                         Rest(:,end)=[];
                                     end
                             end
                             idx1=idx1(1,i)*ones(length(idx2),1);
-                            Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                       elseif k2==3
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
@@ -637,31 +637,31 @@ for i=i_st:i_end
                                  case {0,1}
                                     Rest=Rest(:,2:3:end)+Rest(:,3:3:end);
                                  case 2
-                                    Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n,1)];
+                                    Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
                                     if length(idx2)~=size(Rest,2)
                                        Rest(:,end)=[];
                                     end
                             end
                             idx1=idx1(1,i)*ones(length(idx2),1);
-                            Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
                             
                       elseif k2>=4 && k2<=3+(max(npd)-1) %4
                             Rest=Rest(:,1:3:end);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                             idx1=idx1(1,i)*ones(length(idx2),1);
-                            Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                       elseif k2>=3+max(npd) && k2<=3+(max(npd)-1)*2 %5
                             Rest=Rest(:,2:3:end);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                             idx1=idx1(1,i)*ones(length(idx2),1);
-                            Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                       elseif k2>=3+(max(npd)-1)*2+1 && k2<=3+(max(npd)-1)*3 %6
                             Rest=Rest(:,3:3:end);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                             idx1=idx1(1,i)*ones(length(idx2),1);
-                            Resz=Resz+sparse(repelem(idx1,n,1),repelem(idx2,n,1),Rest(:),nz,nz);
+                            Resz=Resz+sparse(repelem(idx1,n_res,1),repelem(idx2,n_res,1),Rest(:),nz,nz);
 
                       end
                   end

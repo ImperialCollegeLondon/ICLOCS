@@ -87,7 +87,7 @@ try
     % t=(tf-t0)*tau+k0;
 
     % Extract x0,u0,xf,uf,p
-    p=z(nt+1:nt+np)';
+    p=z(nt+1:nt+np);
     x0=z(nt+np+1:nt+np+n);
     u0=z(nt+np+(M)/N*n+1:nt+np+(M)/N*n+m);
     xf=z(end-m-n+1:end-m);

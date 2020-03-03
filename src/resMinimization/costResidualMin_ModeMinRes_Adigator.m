@@ -20,6 +20,7 @@ dyn_data=data.dataNLP.data;
 if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.discretization,'hpLGR')
 	 % p/hp Transcription Method
         n=dataNLP.sizes{3};
+        ng_eq=dataNLP.sizes{18};
         
         t_0=T(1);
         t_f=T(end);
@@ -44,7 +45,7 @@ else
         n=dataNLP.sizes{3};
         nt=dataNLP.sizes{1};
         M=dataNLP.sizes{7};
-        
+        ng_eq=dataNLP.sizes{15};
         if nt % time as optimization variable
             t_0=T(1);
             t_f=T(end);
@@ -69,8 +70,9 @@ else
             P_quad=repmat(p,data.M_quad,1);
             T_quad=data.tau_quad*delta_t;
             
-            Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
-            Res=(dX_quad-Fp).^2;
+            [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
+            Gp=Gp(:,1:ng_eq);
+            Res=[(dX_quad-Fp).^2 Gp.^2];
             Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
         else % fixed start and end time
             t0=dataNLP.t0;
@@ -96,20 +98,21 @@ else
             P_quad=repmat(p,data.M_quad,1);
             T_quad=data.tau_quad*deltat;
             
-            Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
-            Res=(dX_quad-Fp).^2;
+            [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
+            Gp=Gp(:,1:ng_eq);
+            Res=[(dX_quad-Fp).^2 Gp.^2];
             Res_int=1/(deltat.^2).*data.sum_nps_quad*Res;
         end
 end
 
 % Compuation of integrated residual for each dynamics equation
 Res_int_Const=data.ResConstScaleMat*Res_int(:);
-Res_int_Const=reshape(Res_int_Const,data.nps,n);
+Res_int_Const=reshape(Res_int_Const,data.nps,n+ng_eq);
 Res_intsum=sum(Res_int_Const)';
 
 % Compuation of integrated residual norm
 Res_int_Norm=data.ResNormScaleMat*Res_int(:);
-Res_int_Norm=reshape(Res_int_Norm,data.nps,n);
+Res_int_Norm=reshape(Res_int_Norm,data.nps,n+ng_eq);
 ResNorm_intsum=sum(sum(Res_int_Norm));
 
 end

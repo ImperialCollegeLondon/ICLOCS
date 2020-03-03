@@ -156,7 +156,7 @@ ResConstScaleMat=repmat(auxdata.dataNLP.data.discErrorConstScaling, auxdata.nps,
 auxdata.ResConstScaleMat=diag(ResConstScaleMat(:));
 
         
-discErrorTol_Full=problem.states.xErrorTol_integral.^2;
+discErrorTol_Full=[problem.states.xErrorTol_integral problem.constraints.gTol_eq].^2;
 if any(discErrorTol_Full<eps)
     error('Integral of the residual errors allowed must be strictly larger than machine precision');
 else

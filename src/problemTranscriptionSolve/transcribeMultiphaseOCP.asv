@@ -338,12 +338,12 @@ for i=1:data.mpsizes.nphase
     data.hessianStruct(data_phase.hSidx.mp.TT.row,data_phase.hSidx.mp.TT.col)=data.hessianStruct(data_phase.hSidx.mp.TT.row,data_phase.hSidx.mp.TT.col)+data_phase.hessianStruct(data_phase.hSidx.org.TT.row,data_phase.hSidx.org.TT.col);
     
 %     data.jacStruct(data_phase.jSidx.mp.all.row,data_phase.jSidx.mp.all.col)=data.jacStruct(data_phase.jSidx.mp.all.row,data_phase.jSidx.mp.all.col)+data_phase.jacStruct(data_phase.jSidx.org.all.row,data_phase.jSidx.org.all.col);
-    data.jacStruct(data_phase.jSidx.mp.XUg.row,data_phase.jSidx.mp.XUg.col)=data.jacStruct(data_phase.jSidx.mp.XUg.row,data_phase.jSidx.mp.XUg.col)+data_phase.jacStruct(data_phase.jSidx.org.XUg.row,data_phase.jSidx.org.XUg.col);
-    data.jacStruct(data_phase.jSidx.mp.P.row,data_phase.jSidx.mp.P.col)=data.jacStruct(data_phase.jSidx.mp.P.row,data_phase.jSidx.mp.P.col)+data_phase.jacStruct(data_phase.jSidx.org.P.row,data_phase.jSidx.org.P.col);
-    data.jacStruct(data_phase.jSidx.mp.T.row,data_phase.jSidx.mp.T.col)=data.jacStruct(data_phase.jSidx.mp.T.row,data_phase.jSidx.mp.T.col)+data_phase.jacStruct(data_phase.jSidx.org.T.row,data_phase.jSidx.org.T.col);
-    data.jacStruct(data_phase.jSidx.mp.B_XUg.row,data_phase.jSidx.mp.B_XUg.col)=data.jacStruct(data_phase.jSidx.mp.B_XUg.row,data_phase.jSidx.mp.B_XUg.col)+data_phase.jacStruct(data_phase.jSidx.org.B_XUg.row,data_phase.jSidx.org.B_XUg.col);
-    data.jacStruct(data_phase.jSidx.mp.B_P.row,data_phase.jSidx.mp.B_P.col)=data.jacStruct(data_phase.jSidx.mp.B_P.row,data_phase.jSidx.mp.B_P.col)+data_phase.jacStruct(data_phase.jSidx.org.B_P.row,data_phase.jSidx.org.B_P.col);
-    data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)=data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)+data_phase.jacStruct(data_phase.jSidx.org.B_T.row,data_phase.jSidx.org.B_T.col);
+    data.jacStruct(data_phase.jSidx.mp.XUg.row,data_phase.jSidx.mp.XUg.col)=data.jacStruct(data_phase.jSidx.mp.XUg.row,data_phase.jSidx.mp.XUg.col)+data_phase.jacConst(data_phase.jSidx.org.XUg.row,data_phase.jSidx.org.XUg.col);
+    data.jacStruct(data_phase.jSidx.mp.P.row,data_phase.jSidx.mp.P.col)=data.jacStruct(data_phase.jSidx.mp.P.row,data_phase.jSidx.mp.P.col)+data_phase.jacConst(data_phase.jSidx.org.P.row,data_phase.jSidx.org.P.col);
+    data.jacStruct(data_phase.jSidx.mp.T.row,data_phase.jSidx.mp.T.col)=data.jacStruct(data_phase.jSidx.mp.T.row,data_phase.jSidx.mp.T.col)+data_phase.jacConst(data_phase.jSidx.org.T.row,data.jSidx.org.T.col);
+    data.jacStruct(data_phase.jSidx.mp.B_XUg.row,data_phase.jSidx.mp.B_XUg.col)=data.jacStruct(data_phase.jSidx.mp.B_XUg.row,data_phase.jSidx.mp.B_XUg.col)+data_phase.jacConst(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col);
+    data.jacStruct(data_phase.jSidx.mp.B_P.row,data_phase.jSidx.mp.B_P.col)=data.jacStruct(data_phase.jSidx.mp.B_P.row,data_phase.jSidx.mp.B_P.col)+data_phase.jacConst(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col);
+    data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)=data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)+data_phase.jacConst(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col);
 end
 data.jacStruct(end-data.mpsizes.nbl+1:end,[data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx])=1;
 data.hessianStruct([data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx],[data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx])=1;

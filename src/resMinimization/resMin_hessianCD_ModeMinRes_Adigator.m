@@ -20,6 +20,7 @@ dataNLP=data.dataNLP;
 
 % Define some useful variables
 [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(dataNLP.sizes{1:13});
+ng_eq=dataNLP.sizes{15};
 nrc=nrcl+nrcu+nrce;
 if nt
     nz=M*n+N*m+np+nt;                           % Length of the primal variable
@@ -221,7 +222,7 @@ end
 
 % Compute Res_zz
 % ----------------
-adjoint_Res=lambda(ngActive+nrc+nb+2:ngActive+nrc+nb+1+n);
+adjoint_Res=lambda(ngActive+nrc+nb+2:ngActive+nrc+nb+1+n+ng_eq);
 adjoint_Res_vec=adjoint_Res(Res_vec.dYdY_location(:,1));
 Resz=sparse(Res_vec.dYdY_location(:,2),Res_vec.dYdY_location(:,3),Res_vec.dYdY.*adjoint_Res_vec,Res_vec.dYdY_size(2),Res_vec.dYdY_size(3));
 ResNormz=sparse(ResNorm_vec.dYdY_location(:,1),ResNorm_vec.dYdY_location(:,2),ResNorm_vec.dYdY,ResNorm_vec.dYdY_size(1),ResNorm_vec.dYdY_size(2));

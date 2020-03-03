@@ -88,8 +88,13 @@ for i=1:length(auxdata.phasedata)
              uf{i}=XU0f.uf;
     end
     
-    jacConst_mp(data.jSidx.mp.all.row,data.jSidx.mp.all.col)=jacConst_mp(data.jSidx.mp.all.row,data.jSidx.mp.all.col)+jacConst(data.jSidx.org.all.row,data.jSidx.org.all.col);
-
+%     jacConst_mp(data.jSidx.mp.all.row,data.jSidx.mp.all.col)=jacConst_mp(data.jSidx.mp.all.row,data.jSidx.mp.all.col)+jacConst(data.jSidx.org.all.row,data.jSidx.org.all.col);
+    jacConst_mp(data.jSidx.mp.XUg.row,data.jSidx.mp.XUg.col)=jacConst_mp(data.jSidx.mp.XUg.row,data.jSidx.mp.XUg.col)+jacConst(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col);
+    jacConst_mp(data.jSidx.mp.P.row,data.jSidx.mp.P.col)=jacConst_mp(data.jSidx.mp.P.row,data.jSidx.mp.P.col)+jacConst(data.jSidx.org.P.row,data.jSidx.org.P.col);
+    jacConst_mp(data.jSidx.mp.T.row,data.jSidx.mp.T.col)=jacConst_mp(data.jSidx.mp.T.row,data.jSidx.mp.T.col)+jacConst(data.jSidx.org.T.row,data.jSidx.org.T.col);
+    jacConst_mp(data.jSidx.mp.B_XUg.row,data.jSidx.mp.B_XUg.col)=jacConst_mp(data.jSidx.mp.B_XUg.row,data.jSidx.mp.B_XUg.col)+jacConst(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col);
+    jacConst_mp(data.jSidx.mp.B_P.row,data.jSidx.mp.B_P.col)=jacConst_mp(data.jSidx.mp.B_P.row,data.jSidx.mp.B_P.col)+jacConst(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col);
+    jacConst_mp(data.jSidx.mp.B_T.row,data.jSidx.mp.B_T.col)=jacConst_mp(data.jSidx.mp.B_T.row,data.jSidx.mp.B_T.col)+jacConst(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col);
 end
 
 linkfunctions=auxdata.mpdata.linkfunctions;
@@ -103,30 +108,30 @@ end
 
 blz=spalloc(nbl,auxdata.mpdata.mpsizes.nz,(auxdata.mpdata.mpsizes.nxu0f_inc(end)+auxdata.mpdata.mpsizes.nt+auxdata.mpdata.mpsizes.np)*nbl);
 if nbl
-idx=auxdata.mpdata.linkConst.all.idx;
-nfd=size(idx,2);
-% ez=auxdata.mpdata.options.mp.perturbation.J*auxdata.mpdata.map.all;
-for i=1:nfd
-    x0p=x0;x0m=x0;
-    xfp=xf;xfm=xf;
-    u0p=u0;u0m=u0;
-    ufp=uf;ufm=uf;
-    
-    if mpdata.map.allidx(i)~=0
-        x0p{mpdata.map.allidx(i)}=x0p{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.ex0(:,i);
-        x0m{mpdata.map.allidx(i)}=x0m{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.ex0(:,i);
-        xfp{mpdata.map.allidx(i)}=xfp{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.exf(:,i);
-        xfm{mpdata.map.allidx(i)}=xfm{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.exf(:,i);
-        u0p{mpdata.map.allidx(i)}=u0p{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.eu0(:,i);
-        u0m{mpdata.map.allidx(i)}=u0m{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.eu0(:,i);
-        ufp{mpdata.map.allidx(i)}=ufp{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.euf(:,i);
-        ufm{mpdata.map.allidx(i)}=ufm{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.euf(:,i);
+    idx=auxdata.mpdata.linkConst.all.idx;
+    nfd=size(idx,2);
+    % ez=auxdata.mpdata.options.mp.perturbation.J*auxdata.mpdata.map.all;
+    for i=1:nfd
+        x0p=x0;x0m=x0;
+        xfp=xf;xfm=xf;
+        u0p=u0;u0m=u0;
+        ufp=uf;ufm=uf;
+
+        if mpdata.map.allidx(i)~=0
+            x0p{mpdata.map.allidx(i)}=x0p{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.ex0(:,i);
+            x0m{mpdata.map.allidx(i)}=x0m{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.ex0(:,i);
+            xfp{mpdata.map.allidx(i)}=xfp{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.exf(:,i);
+            xfm{mpdata.map.allidx(i)}=xfm{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.exf(:,i);
+            u0p{mpdata.map.allidx(i)}=u0p{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.eu0(:,i);
+            u0m{mpdata.map.allidx(i)}=u0m{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.eu0(:,i);
+            ufp{mpdata.map.allidx(i)}=ufp{mpdata.map.allidx(i)}+mpdata.map.phases{mpdata.map.allidx(i)}.euf(:,i);
+            ufm{mpdata.map.allidx(i)}=ufm{mpdata.map.allidx(i)}-mpdata.map.phases{mpdata.map.allidx(i)}.euf(:,i);
+        end
+
+        [blp_l, blp_nl]=linkfunctions(x0p,xfp,u0p,ufp,p+mpdata.map.ep(:,i),t0+mpdata.map.et0(:,i),tf+mpdata.map.etf(:,i),mpdata.data);
+        [blm_l, blm_nl]=linkfunctions(x0m,xfm,u0m,ufm,p-mpdata.map.ep(:,i),t0-mpdata.map.et0(:,i),tf-mpdata.map.etf(:,i),mpdata.data);
+        blz=blz+sparse(1:nbl,idx(:,i),([blp_l;blp_nl]-[blm_l;blm_nl])/(2*auxdata.mpdata.options.mp.perturbation.J),nbl,auxdata.mpdata.mpsizes.nz);
     end
-    
-    [blp_l, blp_nl]=linkfunctions(x0p,xfp,u0p,ufp,p+mpdata.map.ep(:,i),t0+mpdata.map.et0(:,i),tf+mpdata.map.etf(:,i),mpdata.data);
-    [blm_l, blm_nl]=linkfunctions(x0m,xfm,u0m,ufm,p-mpdata.map.ep(:,i),t0-mpdata.map.et0(:,i),tf-mpdata.map.etf(:,i),mpdata.data);
-    blz=blz+sparse(1:nbl,idx(:,i),([blp_l;blp_nl]-[blm_l;blm_nl])/(2*auxdata.mpdata.options.mp.perturbation.J),nbl,auxdata.mpdata.mpsizes.nz);
-end
 end
 
 jacConst_mp=[jacConst_mp;blz];

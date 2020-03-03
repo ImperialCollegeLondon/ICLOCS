@@ -35,6 +35,8 @@ if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.
         dX_quad=data.D_mat*X_quad./(data.DT_seg/2)/(tf-t0);
         
         P_quad=repelem(P(1,:),data.M_quad,1);
+        
+        ng_eq=dataNLP.sizes{18};
 else
         % h Transcription Method
         n=dataNLP.sizes{3};
@@ -50,14 +52,24 @@ else
         dX_quad=data.AfHS*F;
         
         P_quad=repelem(P(1,:),data.M_quad,1);
+        
+        ng_eq=dataNLP.sizes{15};
 end
 
 
-Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
+Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);        
 Res=(dX_quad-Fp).^2;
 Res_int=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res));
-ResNorm=sum(Res_int.*data.ResNormScale',1);
-Res_int=scale_variables( Res_int', data.dataNLP.data.discErrorConstScaling, 0 )';
+
+if ng_eq
+    Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
+    Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+else
+    Gp_eq=[];
+end
+
+ResNorm=sum([Res_int;Gp_eq].*data.ResNormScale',1);
+Res_int=scale_variables( [Res_int;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
 
 end
 

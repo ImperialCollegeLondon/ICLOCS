@@ -84,29 +84,32 @@ else
                     if data.dataNLP.options.resminEarlyStop
                         data.funcs=rmfield(data.funcs,'iterfunc');
                     end
+%                     
 
                     M=data.dataNLP.sizes{7};np=data.dataNLP.sizes{2};
                     switch data.dataNLP.options.discretization
                         case{'globalLGR','hpLGR'} % p/hp Transcription Method
                             if isfield(solution,'scaledVariables')
-                                [~,ResColl]=costResidualMin_ModeMinRes( solution.scaledVariables.coll.X,[solution.scaledVariables.coll.U;solution.scaledVariables.coll.U(end,:)],reshape(repmat(solution.scaledVariables.coll.p,M+1,1),M+1,np),[solution.coll.T;solution.tf],data);
+                                [costResmin,ResColl]=costResidualMin_ModeMinRes( solution.scaledVariables.coll.X,[solution.scaledVariables.coll.U;solution.scaledVariables.coll.U(end,:)],reshape(repmat(solution.scaledVariables.coll.p,M+1,1),M+1,np),[solution.coll.T;solution.tf],data);
                             else
-                                [~,ResColl]=costResidualMin_ModeMinRes( solution.coll.X,[solution.coll.U;solution.coll.U(end,:)],reshape(repmat(solution.coll.p,M+1,1),M+1,np),[solution.coll.T;solution.tf],data);
+                                [costResmin,ResColl]=costResidualMin_ModeMinRes( solution.coll.X,[solution.coll.U;solution.coll.U(end,:)],reshape(repmat(solution.coll.p,M+1,1),M+1,np),[solution.coll.T;solution.tf],data);
                             end
-                            ResColl=sum(ResColl,2);
                         otherwise % h Transcription Method
                             if isfield(solution,'scaledVariables')
-                                [~,ResColl]=costResidualMin_ModeMinRes( solution.scaledVariables.coll.X,solution.scaledVariables.coll.U,reshape(repmat(solution.scaledVariables.coll.p,M,1),M,np),solution.coll.T,data);
+                                [costResmin,ResColl]=costResidualMin_ModeMinRes( solution.scaledVariables.coll.X,solution.scaledVariables.coll.U,reshape(repmat(solution.scaledVariables.coll.p,M,1),M,np),solution.coll.T,data);
                             else
-                                [~,ResColl]=costResidualMin_ModeMinRes( solution.coll.X,solution.coll.U,reshape(repmat(solution.coll.p,M,1),M,np),solution.coll.T,data);
+                                [costResmin,ResColl]=costResidualMin_ModeMinRes( solution.coll.X,solution.coll.U,reshape(repmat(solution.coll.p,M,1),M,np),solution.coll.T,data);
                             end
-                            ResColl=sum(ResColl,2);
                     end
+                    ResColl=sum(ResColl,2);
+                    cost_resmin=sum(costResmin);
 
                     switch data.dataNLP.options.meshstrategy
                         case{'fixed','hp_flexible'}
                             ResConst=ResColl;
-                            ResConst=ResConst*2;
+                            if any(ResConst<1e-04)
+                                ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*2;
+                            end
                             ResConst(ResConst<sqrt(eps))=sqrt(eps);
 
                         case{'mesh_refinement'}
@@ -152,6 +155,7 @@ else
                         otherwise % h Transcription Method
                     end
                     [solution,status,data]=solveSingleNLP_ResidualMin(NLP,data);
+                    solution.cost_resmin=cost_resmin;
                 else
                     if mode_min_res && ~strcmp(data.dataNLP.options.errortype,'int_res')
                         data.mode=1;
@@ -168,6 +172,7 @@ else
                         mode_min_res=0;
                         solution.min_res_satisfy=1;
                     end
+                    solution.cost_resmin=cost_resmin;
                 end
             elseif strcmp(data.dataNLP.options.min_res_mode,'weightedCost')
                 data.mode=0;

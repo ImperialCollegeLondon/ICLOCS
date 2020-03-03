@@ -19,7 +19,7 @@ function jac=resMin_jacobianFD_ModeMinRes_Adigator(L,E,g,avrc,X,Xr,U,Ur,P,T,b,x0
 
 dataNLP=data.dataNLP;
 e=dataNLP.options.perturbation.J;                                 % pertubation size
-[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(dataNLP.sizes{1:13});
+[nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~,~,ng_eq,ng_neq]=deal(dataNLP.sizes{1:16});
 nrc=nrcl+nrcu+nrce;
 % 
 if nt

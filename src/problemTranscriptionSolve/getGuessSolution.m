@@ -267,8 +267,12 @@ else
             else
                 data.multipliers.lambda=[];
             end
-            if ng
-                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+            if ng 
+                if ~isempty(guess.multipliers.lambda_g)
+                    lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+                else
+                    lambda_g=interp1(guess.timeFull, zeros(length(guess.multipliers.lambda_g),1),T,'linear');
+                end
                 lambda_g=reshape(lambda_g',M*ng,1);
                 data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
             end
