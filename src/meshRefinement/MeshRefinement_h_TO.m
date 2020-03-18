@@ -47,8 +47,12 @@ Mold=length(options.tau);
 n=data.sizes{3};
 idx=[];
 Error=zeros(length(tau_inc_org)-1,n);
-for i=1:n
-    Error(:,i)=max([solution.ErrorScaled(1:2:end-1,i) solution.ErrorScaled(2:2:end,i)],[],2);
+if (strcmp(options.discretization,'hermite'))
+    for i=1:n
+        Error(:,i)=max([solution.ErrorScaled(1:2:end-1,i) solution.ErrorScaled(2:2:end,i)],[],2);
+    end
+else
+    Error=solution.ErrorScaled;
 end
 
 Error_ratio=max(Error./options.discErrorTol_Scaled,[],2);
