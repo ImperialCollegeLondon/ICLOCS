@@ -11,11 +11,17 @@ else
 end
 nrc=nrcl+nrcu+nrce;
 
-[L,E,f,g,avrc,b]=deal(data.functions_unscaled{:});
+[L,E,f,g,avrc,b]=deal(data.functions{:});
 
-X_test=zeros(1,n);
-U_test=zeros(1,m);
-P_test=zeros(1,np);
+X_test=rand(1,n)*0.5;
+U_test=rand(1,m)*0.5;
+P_test=rand(1,np)*0.5;
+X_test(X_test<problem.states.xl)=problem.states.xl(X_test<problem.states.xl);
+X_test(X_test>problem.states.xu)=problem.states.xu(X_test>problem.states.xu);
+U_test(U_test<problem.inputs.ul)=problem.inputs.ul(U_test<problem.inputs.ul);
+U_test(U_test>problem.inputs.uu)=problem.inputs.uu(U_test>problem.inputs.uu);
+P_test(P_test<problem.parameters.pl)=problem.parameters.pl(P_test<problem.parameters.pl);
+P_test(P_test>problem.parameters.pu)=problem.parameters.pu(P_test>problem.parameters.pu);
 
 dfdx=zeros(n,n);
 dgdx=zeros(ng,n);
