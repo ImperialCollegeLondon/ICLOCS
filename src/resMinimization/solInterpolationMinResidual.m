@@ -152,6 +152,7 @@ auxdata.infoNLP.zu=options.zu;
 auxdata.infoNLP.zl=options.zl;
 auxdata.infoNLP.c_Tol=c_Tol;
 auxdata.dataNLP.data.discErrorConstScaling=1./ResColl';
+% auxdata.dataNLP.data.discErrorConstScaling=ones(length(ResColl),1);
 ResConstScaleMat=repmat(auxdata.dataNLP.data.discErrorConstScaling, auxdata.nps, 1 );
 auxdata.ResConstScaleMat=diag(ResConstScaleMat(:));
 
