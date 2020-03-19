@@ -13,15 +13,22 @@ nrc=nrcl+nrcu+nrce;
 
 [L,E,f,g,avrc,b]=deal(data.functions{:});
 
-X_test=rand(1,n)*0.5;
-U_test=rand(1,m)*0.5;
-P_test=rand(1,np)*0.5;
-X_test(X_test<problem.states.xl)=problem.states.xl(X_test<problem.states.xl);
-X_test(X_test>problem.states.xu)=problem.states.xu(X_test>problem.states.xu);
-U_test(U_test<problem.inputs.ul)=problem.inputs.ul(U_test<problem.inputs.ul);
-U_test(U_test>problem.inputs.uu)=problem.inputs.uu(U_test>problem.inputs.uu);
-P_test(P_test<problem.parameters.pl)=problem.parameters.pl(P_test<problem.parameters.pl);
-P_test(P_test>problem.parameters.pu)=problem.parameters.pu(P_test>problem.parameters.pu);
+X_test1=-0.5+rand(1,n);
+U_test1=-0.5+rand(1,m);
+P_test1=-0.5+rand(1,np);
+X_test1(X_test1<problem.states.xl)=problem.states.xl(X_test1<problem.states.xl);
+X_test1(X_test1>problem.states.xu)=problem.states.xu(X_test1>problem.states.xu);
+U_test1(U_test1<problem.inputs.ul)=problem.inputs.ul(U_test1<problem.inputs.ul);
+U_test1(U_test1>problem.inputs.uu)=problem.inputs.uu(U_test1>problem.inputs.uu);
+P_test1(P_test1<problem.parameters.pl)=problem.parameters.pl(P_test1<problem.parameters.pl);
+P_test1(P_test1>problem.parameters.pu)=problem.parameters.pu(P_test1>problem.parameters.pu);
+
+X_test2=-0.5+rand(1,n);
+U_test2=-0.5+rand(1,m);
+X_test2(X_test2<problem.states.xl)=problem.states.xl(X_test2<problem.states.xl);
+X_test2(X_test2>problem.states.xu)=problem.states.xu(X_test2>problem.states.xu);
+U_test2(U_test2<problem.inputs.ul)=problem.inputs.ul(U_test2<problem.inputs.ul);
+U_test2(U_test2>problem.inputs.uu)=problem.inputs.uu(U_test2>problem.inputs.uu);
 
 dfdx=zeros(n,n);
 dgdx=zeros(ng,n);
@@ -29,14 +36,14 @@ dLdx=zeros(1,n);
 dEdx0=zeros(1,n);
 dEdxf=zeros(1,n);
 for i=1:n
-    X_temp=X_test;
+    X_temp=X_test1;
     X_temp(1,i)=NaN;
-    dfdx(:,i)=f(X_temp,U_test,P_test,1,problem.data)';
-    dLdx(1,i)=L(X_temp,[],U_test,[],P_test,1,problem.data);
-    dEdx0(1,i)=E(X_temp,X_test,U_test,U_test,P_test,1,1,problem.data);
-    dEdxf(1,i)=E(X_test,X_temp,U_test,U_test,P_test,1,1,problem.data);
+    dfdx(:,i)=f(X_temp,U_test1,P_test1,1,problem.data)';
+    dLdx(1,i)=L(X_temp,[],U_test1,[],P_test1,1,problem.data);
+    dEdx0(1,i)=E(X_temp,X_test2,U_test1,U_test2,P_test1,1,1,problem.data);
+    dEdxf(1,i)=E(X_test2,X_temp,U_test1,U_test2,P_test1,1,1,problem.data);
     if ng
-        dgdx(:,i)=g(X_temp,U_test,P_test,1,problem.data)';
+        dgdx(:,i)=g(X_temp,U_test1,P_test1,1,problem.data)';
     end
 end
 dfdx(~isnan(dfdx))=0;
@@ -56,14 +63,14 @@ dLdu=zeros(1,m);
 dEdu0=zeros(1,m);
 dEduf=zeros(1,m);
 for i=1:m
-    U_temp=U_test;
+    U_temp=U_test1;
     U_temp(1,i)=NaN;
-    dfdu(:,i)=f(X_test,U_temp,P_test,1,problem.data)';
-    dLdu(1,i)=L(X_test,[],U_temp,[],P_test,1,problem.data);
-    dEdu0(1,i)=E(X_test,X_test,U_temp,U_test,P_test,1,1,problem.data);
-    dEduf(1,i)=E(X_test,X_test,U_test,U_temp,P_test,1,1,problem.data);
+    dfdu(:,i)=f(X_test1,U_temp,P_test1,1,problem.data)';
+    dLdu(1,i)=L(X_test1,[],U_temp,[],P_test1,1,problem.data);
+    dEdu0(1,i)=E(X_test1,X_test2,U_temp,U_test2,P_test1,1,1,problem.data);
+    dEduf(1,i)=E(X_test1,X_test2,U_test2,U_temp,P_test1,1,1,problem.data);
     if ng
-        dgdu(:,i)=g(X_test,U_temp,P_test,1,problem.data)';
+        dgdu(:,i)=g(X_test1,U_temp,P_test1,1,problem.data)';
     end
 end
 dfdu(~isnan(dfdu))=0;
@@ -82,7 +89,7 @@ sparsity.dgdx=sparse(dgdx);
 sparsity.dLdx=sparse(dLdx);
 sparsity.dEdx0=sparse(dEdx0);
 sparsity.dEdxf=sparse(dEdxf);
-
+% 
 sparsity.dfdu=sparse(dfdu);
 sparsity.dgdu=sparse(dgdu);
 sparsity.dLdu=sparse(dLdu);
