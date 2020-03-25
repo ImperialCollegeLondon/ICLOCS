@@ -1,4 +1,4 @@
-function [ ] = genAdigator4ICLOCS_resmin( options, data, n, m, np, nt, M )
+function [ ] = genAdigator4ICLOCS_resmin( options, data, n, m, np, nt, M, ng_eq )
 %genAdigator4ICLOCS_resmin - Initialize Adigator for use with integrated residual minimization method
 %
 % Syntax:  [ ] = genAdigator4ICLOCS_resmin( options, data, n, m, np, nt, M )
@@ -48,9 +48,17 @@ switch options.discretization
 
         % Create 1st Derivative File
         if options.scaling
-            adigator('costResidualMin_ModeMinRes_Adigator_Scaling',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            if ng_eq
+                adigator('costResidualMin_ModeMinRes_Adigator_Scaling_DAE',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            else
+                adigator('costResidualMin_ModeMinRes_Adigator_Scaling',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            end
         else
-            adigator('costResidualMin_ModeMinRes_Adigator',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            if ng_eq
+                adigator('costResidualMin_ModeMinRes_Adigator_DAE',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            else
+                adigator('costResidualMin_ModeMinRes_Adigator',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            end
         end
 
 
@@ -99,9 +107,17 @@ switch options.discretization
 
         % Create 1st Derivative File
         if options.scaling
-            adigator('costResidualMin_ModeMinRes_Adigator_Scaling',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            if ng_eq
+                adigator('costResidualMin_ModeMinRes_Adigator_Scaling_DAE',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            else
+                adigator('costResidualMin_ModeMinRes_Adigator_Scaling',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            end
         else
-            adigator('costResidualMin_ModeMinRes_Adigator',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            if ng_eq
+                adigator('costResidualMin_ModeMinRes_Adigator_DAE',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            else
+                adigator('costResidualMin_ModeMinRes_Adigator',{gX,gU,gP,gT,data},'minresCost_Y',adigatorOptions('overwrite',1));
+            end
         end
 
 

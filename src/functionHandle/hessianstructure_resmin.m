@@ -12,4 +12,4 @@ function H = hessianstructure_resmin(auxdata)
 % iclocs@imperial.ac.uk
 
 
-H=auxdata.dataNLP.hessianStruct;
+H=auxdata.dataNLP.hessianStruct_resmin;

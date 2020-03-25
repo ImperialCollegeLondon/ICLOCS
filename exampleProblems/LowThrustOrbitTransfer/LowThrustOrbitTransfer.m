@@ -117,16 +117,6 @@ problem.states.xConstraintTol=[1 1 1 1 1 1 1];
 problem.states.xfl=[p_f f_min g_min h_min k_min L_min w_min];
 problem.states.xfu=[p_f f_max g_max h_max k_max L_max w_max];
 
-% Guess the state trajectories with [x0 xf]
-% guess.time=linspace(0,guess.tf,25);
-% guess.states(:,1)=[p0 linspace(22e6, 40e6, 14) linspace(41e6, 50e6, 4) linspace(45e6, 41e6, 2) linspace(45e6, 52e6, 2) linspace(45e6, 40e6, 2)];
-% guess.states(:,2)=[f0 -0.005 -0.01 0.01 -0.015 0.01 -0.02 0.01 -0.03 0.01 -0.04 -0.04 0.005 -0.035 -0.075 -0.015 0 -0.04 -0.11 -0.115 -0.03 0 0.03 -0.08 -0.1];
-% guess.states(:,3)=[g0 linspace(-0.002, 0.1, 15) linspace(0.15 ,0.7, 9 )];
-% guess.states(:,4)=[linspace(h0, -0.35, 16) linspace(-0.35 ,-0.6, 9 )];
-% guess.states(:,5)=[linspace(k0, 0.02, 16) 0.02 0.02 0 0.02 0.065 0.06 0.065 0.03 -0.1];
-% guess.states(:,6)=linspace(L0,9*2*pi,25);
-% guess.states(:,7)=linspace(w0,0.22,25);
-
 % Number of control actions N 
 % Set problem.inputs.N=0 if N is equal to the number of integration steps.  
 % Note that the number of integration steps defined in settings.m has to be divisible 
@@ -142,12 +132,6 @@ problem.inputs.u0u=[u_r_max u_t_max u_h_max];
 
 % Input constraint error bounds
 problem.inputs.uConstraintTol=[1 1 1];
-
-% Guess the input sequences with [u0 uf]
-% guess.inputs(:,1)=[0.2 -0.2 0.1 0.2 -0.2 0.25 -0.23 0.2 -0.2 -0.1 0.5 -0.3 -0.1 0.4 0.9 -0.3 0.1 0.5 0.6 -0.3 -0.45 -0.3 0.6 0.45 0.35];
-% guess.inputs(:,2)=[0.8 1 1 1 0.8 0.9 0.7 0.9 0.6 1 0.7 0.7 1 0.6 0 0.8 1 0.5 0 -0.5 0.2 1 0.5 -0.3 -0.5];
-% guess.inputs(:,3)=[0.5 -0.5 0 0.5 -0.7 0.6 -0.7 0.6 -0.8 0.2 0.6 -0.8 0.2 0.7 -1 -.6 0.2 0.8 0.5 -.9 -.9 -.2 0.8 0.9 0.8];
-
 
 % Choose the set-points if required
 problem.setpoints.states=[];
@@ -192,6 +176,8 @@ problem.sim.functions=SimDynamics;
 problem.sim.inputX=[];
 problem.sim.inputU=1:length(problem.inputs.ul);
 problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc,@b_unscaled};
+problem.data.functions_unscaled=problem.functions_unscaled;
+problem.data.ng_eq=problem.constraints.ng_eq;
 problem.constraintErrorTol=[problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.states.xConstraintTol,problem.states.xConstraintTol,problem.inputs.uConstraintTol,problem.inputs.uConstraintTol];
 
 %------------- END OF CODE --------------

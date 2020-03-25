@@ -860,6 +860,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
         
         dfz_noD=dfz;
         dfz=dfz+[kron(speye(n),D_structure) zeros(M*n,M*m+np+nt)];
+        dfz_Hrm=[repmat(D_structure,n,n) repmat(D_structure(1:M,1:M),n,m) sparse(n*(M),np+nt) ; repmat(D_structure,m,n) repmat(D_structure(1:M,1:M),m,m) sparse(m*M,np+nt)];
         if ng
             dgz=[Jac_templete.dgxu repmat(sparsity.dgdp,M,1) repmat(ones(1,nt),M*ng,1)];
         else
@@ -906,6 +907,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             
         jS= [dfz;dgz(gAllidx,:);drcz_rcl;drcz_rcu;drcz_rce;dbz]; %Jacobian structure
         jS_noB=[dfz_noD;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
+        jS_Hrm=[dfz_Hrm;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
         data.jS_noB=spones(jS_noB);
         
@@ -992,10 +994,12 @@ if ~strcmp(options.transcription,'multiple_shooting')
         data.map.spmatsize.hSg=nnz(jS_noB'*jS_noB);
 
         data.hessianStruct=Lz'*Lz+Ez'*Ez+(jS_noB'*jS_noB);
+        data.hessianStruct_resmin=Lz'*Lz+Ez'*Ez+(jS_Hrm'*jS_Hrm);
         if options.reorderLGR
              data.hessianStruct=data.hessianStruct(data.reorder.z_idx,data.reorder.z_idx);
         end
         data.hessianStruct=tril(data.hessianStruct);
+        data.hessianStruct_resmin=tril(data.hessianStruct_resmin);
         
         hS=data.hessianStruct;
         data.hSidx.org.XUXU.row=1:nz-nt-np;
@@ -1199,6 +1203,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.map.spmatsize.hSg=nnz(data.jacStruct'*data.jacStruct);
             
             data.hessianStruct=tril(Lz'*Lz+Ez'*Ez+(data.jacStruct'*data.jacStruct));
+            data.hessianStruct_resmin=data.hessianStruct;
             data.funcs.hessianstructure  = @hessianstructure;
             data.funcs.hessian           = @computeHessian;
             
@@ -1436,16 +1441,16 @@ end
     
     data.funcs=data.dataNLP.funcs;
     data.funcs.jacobianstructure = @(data) sparse(ones(length(infoNLP.cl),length(infoNLP.z0)));
-    if  ((strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR')))
-        data.funcs.hessianstructure  = @(data) sparse(tril(ones(length(infoNLP.z0),length(infoNLP.z0))));
-    else
+%     if  ((strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR')))
+%         data.funcs.hessianstructure  = @(data) sparse(tril(ones(length(infoNLP.z0),length(infoNLP.z0))));
+%     else
         data.funcs.hessianstructure  = @hessianstructure_resmin;
-    end
+%     end
     
     data.options.transcription= data.dataNLP.options.transcription;
     
     if strcmp(options.derivatives,'adigator')
-        genAdigator4ICLOCS_resmin( options, data, n, m, np, nt, M );
+        genAdigator4ICLOCS_resmin( options, data, n, m, np, nt, M ,ng_eq );
     end
  
   else

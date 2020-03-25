@@ -154,6 +154,8 @@ problem.sim.functions=SimDynamics;
 problem.sim.inputX=[];
 problem.sim.inputU=1:length(problem.inputs.ul);
 problem.functions_unscaled={@L_unscaled,@E_unscaled,@f_unscaled,@g_unscaled,@avrc,@b_unscaled};
+problem.data.functions_unscaled=problem.functions_unscaled;
+problem.data.ng_eq=problem.constraints.ng_eq;
 problem.constraintErrorTol=[problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.constraints.gTol_eq,problem.constraints.gTol_neq,problem.states.xConstraintTol,problem.states.xConstraintTol,problem.inputs.uConstraintTol,problem.inputs.uConstraintTol];
 
 %------------- END OF CODE --------------

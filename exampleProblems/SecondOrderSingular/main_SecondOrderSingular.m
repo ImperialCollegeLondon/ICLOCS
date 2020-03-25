@@ -32,7 +32,7 @@ plot(xx,speval(solution,'X',1,xx),'b-' )
 plot(xx,speval(solution,'U',1,xx),'r-' )
 xlabel('Time [s]')
 ylabel('States')
-legend('x1 [-]','x2 [-]','x3 [-]')
+legend('x1 [-]','x2 [-]')
 grid on
 
 figure

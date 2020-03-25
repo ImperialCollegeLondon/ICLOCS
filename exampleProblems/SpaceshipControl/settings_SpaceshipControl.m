@@ -123,7 +123,7 @@ end
 % Numerical differentiation: finite differences  ('numeric')
 % Algorithmic differentiation with Adigator      ('adigator')
     % Make sure you provide the path to the Adigator directory of startupadigator.m
-options.derivatives='adigator';
+options.derivatives='numeric';
 options.adigatorPath='../../adigator';
 
 % Perturbation sizes for numerical differentiation

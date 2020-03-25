@@ -307,7 +307,7 @@ for i=i_st:i_end
                                 Rest=Rest(:,1:3:end)+Rest(:,2:3:end);
                              case 1
                                 Rest=Rest(:,1:3:end)+[Rest(:,2:3:end) zeros(n_res,1)];
-                                if length(idx1)~=length(Rest)
+                                if length(idx1)~=size(Rest,2)
                                     if length(idx1)~=length(idx2)
                                         idx2(end)=[];Rest(:,end)=[];
                                     else
@@ -326,7 +326,7 @@ for i=i_st:i_end
                                 Rest=Rest(:,2:3:end)+Rest(:,3:3:end);
                              case 2
                                 Rest=Rest(:,2:3:end)+[Rest(:,3:3:end) zeros(n_res,1)];
-                                if length(idx1)~=length(Rest)
+                                if length(idx1)~=size(Rest,2)
                                     if length(idx1)~=length(idx2)
                                         idx2(end)=[];Rest(:,end)=[];
                                     else
@@ -352,7 +352,7 @@ for i=i_st:i_end
                             idx1=idx1(logical(data.idx_perturb_hes(1:idx_pert_end_i,k1)),i);
                             idx2=idx2(logical(data.idx_perturb_hes(1:idx_pert_end_j,k2)),j);
                          end
-                         if length(idx1)<length(Rest)
+                         if length(idx1)<size(Rest,2)
                              Rest(:,end)=[];
                          end
                          if k2==1

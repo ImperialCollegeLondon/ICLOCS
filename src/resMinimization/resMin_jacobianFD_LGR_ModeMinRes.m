@@ -341,7 +341,7 @@ for i=i_st:i_end
                  end
             elseif j==2
                  if mod(data.nps,2)
-                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_eqn,1)];
+                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_neq,1)];
                  else
                     dRes=dRes(:,1:2:end)+dRes(:,2:2:end);
                  end

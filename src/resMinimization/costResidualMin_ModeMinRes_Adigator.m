@@ -70,9 +70,9 @@ else
             P_quad=repmat(p,data.M_quad,1);
             T_quad=data.tau_quad*delta_t;
             
-            [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
-            Gp=Gp(:,1:ng_eq);
-            Res=[(dX_quad-Fp).^2 Gp.^2];
+
+            Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
+            Res=(dX_quad-Fp).^2;
             Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
         else % fixed start and end time
             t0=dataNLP.t0;
@@ -98,9 +98,9 @@ else
             P_quad=repmat(p,data.M_quad,1);
             T_quad=data.tau_quad*deltat;
             
-            [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
-            Gp=Gp(:,1:ng_eq);
-            Res=[(dX_quad-Fp).^2 Gp.^2];
+
+            Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
+            Res=(dX_quad-Fp).^2;
             Res_int=1/(deltat.^2).*data.sum_nps_quad*Res;
         end
 end

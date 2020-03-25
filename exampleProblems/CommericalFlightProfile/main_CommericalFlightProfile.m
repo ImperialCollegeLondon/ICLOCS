@@ -62,7 +62,7 @@ rectangle('Position',obspos,'Curvature',[1 1], 'FaceColor', 'red', 'Edgecolor','
 plot(speval(solution,'X',3,xx),speval(solution,'X',2,xx),'b-','LineWidth',2)
 xlabel('East Position [m]')
 ylabel('North Position [m]')
-grid on
+% grid on
 plot(problem.states.x0(3)-1000, problem.states.x0(2)-1000, '.k', 'MarkerSize',20)
 plot(problem.states.xfl(3)-1000, problem.states.xfl(2)-1000, '.k', 'MarkerSize',20)
 text(problem.states.x0(3)+20000,problem.states.x0(2),'ORG')

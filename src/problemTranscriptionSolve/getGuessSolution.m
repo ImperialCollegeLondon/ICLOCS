@@ -131,7 +131,7 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
                 u_guess=u_guess(:);
             end
         end
-        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1
+        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1 && size(guess.multipliers.lambda,1)==M*n+M*ng+nb+nrc
             data.multipliers.lambda=guess.multipliers.lambda;
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
@@ -258,7 +258,7 @@ else
                 u_guess=reshape(u_guess',M*m,1);
             end
         end
-        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1
+        if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda) && size(guess.multipliers.lambda,2)==1 && size(guess.multipliers.lambda,1)==M*n+M*ng+nb+nrc
             data.multipliers.lambda=guess.multipliers.lambda;
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
