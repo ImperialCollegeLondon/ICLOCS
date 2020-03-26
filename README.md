@@ -3,7 +3,7 @@ Imperial College London Optimal Control Software (ICLOCS)
 
 http://www.ee.ic.ac.uk/ICLOCS/
 
-## Note for update your problem from version 2 to run with version 2.5
+## Note for updating your problem from version 2 to run with version 2.5
 
 We have recently introduced changes to the problem file (see myProblem.m in the template). 
 
