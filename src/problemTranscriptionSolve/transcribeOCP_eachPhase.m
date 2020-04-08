@@ -575,11 +575,11 @@ if options.scaling
     end
     
     if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
-        XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
-        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M*n,M*n);
-        XscaleMat=repmat( data.data.Xscale, M, 1 );
-        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M*n,M*n);
-        data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
+        XunscaleMat=1./repmat( data.data.Xscale, M+1, 1 );
+        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,(M+1)*n,(M+1)*n);
+        XscaleMat=repmat( data.data.Xscale, (M+1), 1 );
+        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,(M+1)*n,(M+1)*n);
+        data.scaling.XshiftMat=repmat( data.data.Xshift, (M+1), 1 );
         
         UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
         data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
@@ -627,9 +627,13 @@ end
 
 % Reference trajectory for the cost function; it is assigned as the set-point
 % but the user can be redefine it if necessary
-data.references.xr=repmat(problem.setpoints.states,M,1);   
-data.references.ur=repmat(problem.setpoints.inputs,M,1);   
-
+if isfield(problem,'setpoints')
+    data.references.xr=repmat(problem.setpoints.states,M,1);   
+    data.references.ur=repmat(problem.setpoints.inputs,M,1);   
+else
+    data.references.xr=[];
+    data.references.ur=[];
+end
 
 % Define bounds for the NLP variable 
 %---------------------------------------
@@ -764,8 +768,8 @@ else
             discErrorConst=max(discErrorTol_Full/2,guess.residual);
             data.data.discErrorConstScaling=1./discErrorConst(:)';
             data.data.discErrorTol_FullScaling=discErrorTol_Full.*data.data.discErrorConstScaling;
-            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n,1)];
-            infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;ones(n,1)];
+            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
+            infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;ones(n+ng_eq,1)];
         else
             discErrorConst=inf*ones(n+ng_eq,1);
             data.data.discErrorConstScaling=ones(1,n+ng_eq);
@@ -910,6 +914,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
         jS_Hrm=[dfz_Hrm;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
         data.jS_noB=spones(jS_noB);
+        data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
         
         data.jSidx.org.XUg.row=1:size(jS,1)-nb;
         data.jSidx.org.XUg.col=1:nz-nt-np;
@@ -1124,6 +1129,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             end
             
            data.jacStruct=spones(jS);
+           data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
            
             data.jSidx.org.XUg.row=1:size(jS,1)-nb;
             data.jSidx.org.XUg.col=1+nt+np:nz;
@@ -1439,8 +1445,9 @@ end
     data.data.resmin=1;
     data = transcribeResMin( t_list,options,data );
     
+    
     data.funcs=data.dataNLP.funcs;
-    data.funcs.jacobianstructure = @(data) sparse(ones(length(infoNLP.cl),length(infoNLP.z0)));
+    data.funcs.jacobianstructure = @jacobianstructure_resmin;
 %     if  ((strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR')))
 %         data.funcs.hessianstructure  = @(data) sparse(tril(ones(length(infoNLP.z0),length(infoNLP.z0))));
 %     else

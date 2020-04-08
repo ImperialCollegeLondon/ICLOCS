@@ -53,12 +53,12 @@ switch dataNLP.options.discretization
         Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
         if ng_eq
             Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
-            Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+            Gp_eq=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Gp_eq.^2));
         else
             Gp_eq=[];
         end
         Res=dX_quad-Fp;
-        Res=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res.^2));
+        Res=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Res.^2));
         Res=scale_variables( [Res;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
         
         if mode==1
@@ -67,13 +67,14 @@ switch dataNLP.options.discretization
             T_mesh=T(1:end-1,:);
             X_mesh_Np1=X;
             
-            if ng_neq
-                Gc=g(X_mesh,U_mesh,P,T_mesh,data.dataNLP.data);
-                Gc_neq=Gc(:,ng_eq+1:ng);
-            else
-                Gc_neq=[];
-            end
-            g_vect=reshape(Gc_neq',M*ng,1);
+%             if ng_neq
+%                 Gc=g(X_mesh,U_mesh,P,T_mesh,data.dataNLP.data);
+%                 Gc_neq=Gc(:,ng_eq+1:end);
+%             else
+%                 Gc_neq=[];
+%             end
+%             g_vect=reshape(Gc_neq',M*ng,1);
+            g_vect=reshape(g(X_mesh,U_mesh,P,T_mesh,data.dataNLP.data)',M*ng,1);
             if isfield(data.dataNLP.data,'Xscale')
                 cr=avrc(X_s,U_s,P_s,T,data.dataNLP)';
             else
@@ -106,22 +107,23 @@ switch dataNLP.options.discretization
         Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
         if ng_eq
             Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
-            Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+            Gp_eq=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Gp_eq.^2));
         else
             Gp_eq=[];
         end
         Res=dX_quad-Fp;
-        Res=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res.^2));
+        Res=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Res.^2));
         Res=scale_variables( [Res;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
         
         if mode==1
-            if ng_neq
-                Gc=g(X,U,P,T,data.dataNLP.data);
-                Gc_neq=Gc(:,ng_eq+1:ng);
-            else
-                Gc_neq=[];
-            end
-            g_vect=reshape(Gc_neq',M*ng,1);
+%             if ng_neq
+%                 Gc=g(X,U,P,T,data.dataNLP.data);
+%                 Gc_neq=Gc(:,ng_eq+1:end);
+%             else
+%                 Gc_neq=[];
+%             end
+%             g_vect=reshape(Gc_neq',M*ng,1);
+            g_vect=reshape(g(X,U,P,T,data.dataNLP.data)',M*ng,1);
             if isfield(data.dataNLP.data,'Xscale')
                 cr=avrc(X_s,U_s,P_s,T,data.dataNLP)';
             else

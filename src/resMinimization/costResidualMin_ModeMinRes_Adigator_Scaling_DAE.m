@@ -53,7 +53,7 @@ if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.
         [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
         Gp=Gp(:,1:ng_eq);
         Res=[(dX_quad-Fp).^2 Gp.^2];
-        Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
+        Res_int=delta_t*data.DT_seg_node_mat./2*data.sum_nps_quad*Res;
 else
 	% h Transcription Method
         n=dataNLP.sizes{3};
@@ -86,7 +86,7 @@ else
             [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
             Gp=Gp(:,1:ng_eq);
             Res=[(dX_quad-Fp).^2 Gp.^2];
-            Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
+            Res_int=delta_t*data.DT_seg_node_mat./2.*data.sum_nps_quad*Res;
         else % fixed time
             t0=dataNLP.t0;
             tf=dataNLP.tf;
@@ -114,7 +114,7 @@ else
             [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
             Gp=Gp(:,1:ng_eq);
             Res=[(dX_quad-Fp).^2 Gp.^2];
-            Res_int=1/(deltat.^2).*data.sum_nps_quad*Res;
+            Res_int=deltat*data.DT_seg_node_mat./2.*data.sum_nps_quad*Res;
 
         end
 

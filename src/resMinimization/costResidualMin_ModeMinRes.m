@@ -59,11 +59,11 @@ end
 
 Fp=f(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);        
 Res=(dX_quad-Fp).^2;
-Res_int=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Res));
+Res_int=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Res));
 
 if ng_eq
     Gp_eq=g_eq(X_quad,U_quad,P_quad,data.tau_quad*(tf-t0),data.dataNLP.data);
-    Gp_eq=1/((tf-t0).^2).*transpose(data.sum_nps_quad*(Gp_eq.^2));
+    Gp_eq=transpose((tf-t0)*data.DT_seg_node_mat./2*data.sum_nps_quad*(Gp_eq.^2));
 else
     Gp_eq=[];
 end

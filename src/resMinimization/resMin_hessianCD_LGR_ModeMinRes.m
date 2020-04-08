@@ -180,7 +180,7 @@ if nb && (~isfield(dataNLP.options,'resminRep') || ~dataNLP.options.resminRep.co
     exf=e*dataNLP.FD.vector.b.exf;euf=e*dataNLP.FD.vector.b.euf;
 
 
-    if free_time
+    if data.free_time
         i_st=1;
         i_end=nfd;
     else

@@ -230,7 +230,7 @@ switch required
 
     case{'const'}
         
-        if data.mode==1 
+        if data.mode==1 %Minimizing Cost
             if strcmp(dataNLP.options.derivatives,'adigator')
                 const = constResidualMin_ModeMinCost_Adigator( X, U, P, T, data, 1);
                 const= [const;Res_vec.f];
@@ -252,7 +252,7 @@ switch required
         sol{phaseNo}.const = const;
         solution=sol{phaseNo}.const;
     case{'jacConst'}
-        if data.mode==1
+        if data.mode==1 %Minimizing Cost
             if strcmp(dataNLP.options.derivatives,'adigator')
                 switch dataNLP.options.discretization
                     case{'globalLGR','hpLGR'} % p/hp Transcription Method

@@ -22,7 +22,7 @@ if isfield(options,'mp')
             [infoNLP,data,options]=transcribeMultiphaseOCP(problem,guess,options);% Format for NLP solver
             [solution,status,data]=solveSingleNLP_DirectCollocation_MultiPhase(infoNLP,data);% Solve the NLP
             [solution] = runPostSolveTasks(problem,solution,options,data); % Output solutions
-            if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+            if isfield(options,'resultRep') && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
                 data.options.resultRep='res_min';
                 [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
             end

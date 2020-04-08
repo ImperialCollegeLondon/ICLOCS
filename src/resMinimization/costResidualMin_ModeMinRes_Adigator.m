@@ -37,7 +37,7 @@ if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.
         T_quad=data.tau_quad*delta_t;
         Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
         Res=(dX_quad-Fp).^2;
-        Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
+        Res_int=delta_t*data.DT_seg_node_mat./2*data.sum_nps_quad*Res;
 
 
 else
@@ -73,7 +73,7 @@ else
 
             Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
             Res=(dX_quad-Fp).^2;
-            Res_int=1/(delta_t.^2).*data.sum_nps_quad*Res;
+            Res_int=delta_t*data.DT_seg_node_mat./2*data.sum_nps_quad*Res;
         else % fixed start and end time
             t0=dataNLP.t0;
             tf=dataNLP.tf;
@@ -101,7 +101,7 @@ else
 
             Fp=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
             Res=(dX_quad-Fp).^2;
-            Res_int=1/(deltat.^2).*data.sum_nps_quad*Res;
+            Res_int=deltat*data.DT_seg_node_mat./2*data.sum_nps_quad*Res;
         end
 end
 

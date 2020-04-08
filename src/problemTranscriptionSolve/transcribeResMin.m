@@ -291,6 +291,8 @@ auxdata.tau_quad=tau_quad;
 auxdata.M_quad=M_quad;
 auxdata.DT_seg_quad=DT_seg_quad;
 auxdata.DT_seg_mesh=DT_seg_mesh;
+auxdata.DT_seg_node=DT';
+auxdata.DT_seg_node_mat=spdiags(DT',0,length(DT),length(DT));
 auxdata.tau=tau;
         
 auxdata.idx_spt=idx_spt;

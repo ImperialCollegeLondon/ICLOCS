@@ -107,9 +107,11 @@ else
                     switch data.dataNLP.options.meshstrategy
                         case{'fixed','hp_flexible'}
                             ResConst=ResColl;
-                            if any(ResConst<1e-04)
-                                ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*2;
-                            end
+                            idx1=1.2*ResColl<data.dataNLP.data.discErrorTol_Full;
+                            ResConst(idx1)=ResConst(idx1)*1.2;
+%                             if any(ResConst<1e-04)
+%                                 ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*10;
+%                             end
                             ResConst(ResConst<sqrt(eps))=sqrt(eps);
 
                         case{'mesh_refinement'}
@@ -133,17 +135,23 @@ else
                     end
 
                     NLP.z0 = solution.z;
-                    NLP.cl = [NLP.cl(1:end-data.dataNLP.sizes{3}-1);zeros(data.dataNLP.sizes{3},1)];
-                    NLP.cu = [NLP.cu(1:end-data.dataNLP.sizes{3}-1);ones(data.dataNLP.sizes{3},1)];
+                    n=data.dataNLP.sizes{3};
+                    if strcmp(data.dataNLP.options.discretization,'globalLGR') || strcmp(data.dataNLP.options.discretization,'hpLGR')
+                        ng_eq=data.dataNLP.sizes{18};
+                    else
+                        ng_eq=data.dataNLP.sizes{15};
+                    end
+                    NLP.cl = [NLP.cl(1:end-n-ng_eq-1);zeros(n+ng_eq,1)];
+                    NLP.cu = [NLP.cu(1:end-n-ng_eq-1);ones(n+ng_eq,1).*sqrt(ResConst)];
 
 
-                    data.dataNLP.data.discErrorConstScaling=1./ResConst';
+                    data.dataNLP.data.discErrorConstScaling=1./sqrt(ResConst)';
                     data.dataNLP.data.discErrorTol_FullScaling=data.dataNLP.data.discErrorTol_Full.*data.dataNLP.data.discErrorConstScaling';
                     ResConstScaleMat=repmat(data.dataNLP.data.discErrorConstScaling, data.nps, 1 );
                     data.ResConstScaleMat=diag(ResConstScaleMat(:));
                     data.dataNLP.options.ipopt.constr_viol_tol=min(ResConst);
                     if ~strcmp(data.dataNLP.options.NLPsolver,'NOMAD') 
-                        data.dataNLP.multipliers.lambda=[solution.multipliers.lambdaNLP(1:end-data.dataNLP.sizes{3}-1);zeros(data.dataNLP.sizes{3},1)];
+                        data.dataNLP.multipliers.lambda=[solution.multipliers.lambdaNLP(1:end-n-ng_eq-1);zeros(n+ng_eq,1)];
                     end
 
                 if (all(ResColl<data.dataNLP.data.discErrorTol_Full) && strcmp(data.dataNLP.options.errortype,'int_res')) || strcmp(data.dataNLP.options.meshstrategy,'fixed')
