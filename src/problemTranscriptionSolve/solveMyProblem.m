@@ -21,10 +21,14 @@ if isfield(options,'mp')
         case{'fixed','hp_flexible'}
             [infoNLP,data,options]=transcribeMultiphaseOCP(problem,guess,options);% Format for NLP solver
             [solution,status,data]=solveSingleNLP_DirectCollocation_MultiPhase(infoNLP,data);% Solve the NLP
-            [solution] = runPostSolveTasks(problem,solution,options,data); % Output solutions
-            if isfield(options,'resultRep') && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                data.options.resultRep='res_min';
-                [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+            try
+                [solution] = runPostSolveTasks(problem,solution,options,data); % Output solutions
+                if isfield(options,'resultRep') && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                    data.options.resultRep='res_min';
+                    [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                end
+            catch
+                error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
             end
 
             varargout{1}=solution;
@@ -72,56 +76,61 @@ if isfield(options,'mp')
                 end
 
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
-                [solution] = runPostSolveTasks(problem,solution,options,data);    % Output solutions
+                
+                try
+                    [solution] = runPostSolveTasks(problem,solution,options,data);    % Output solutions
 
-                for j=1:nphase
-                    errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
-                    ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
-                    if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                        resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
-                    end
-                    
-                end
-                timeHistory(i)=solution.mp.computation_time;
-                solutionHistory{i}=solution;
-                statusHistory{i}=status;
-
-                runCondition_MR=0;
-                switch options.mp.errortype
-                case{'local_abs'}
                     for j=1:nphase
-                        runCondition_MR= (runCondition_MR || any(errorHistory{i,j}>problem.phases{j}.states.xErrorTol_local) || any(ConstraintErrorHistory{i,j}>problem.phases{j}.constraintErrorTol)) && i<=imax;
-                    end
-                    for j=1:nphase
-                        if ~runCondition_MR && (strcmp(options.phaseoptions{j}.resultRep,'res_min_final_manual') || strcmp(options.phaseoptions{j}.resultRep,'res_min_final_default'))
-                            data.phasedata{j}.options.resultRep='res_min';
-                            [solution] = runPostSolveTasks(problem,solution,options,data);         % Output solutions
-                            errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
-                            ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
-                            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                                resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
-                            end
+                        errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
+                        ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
+                        if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                            resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
                         end
-                        timeHistory(i)=solution.mp.computation_time;
-                        solutionHistory{i}=solution;
-                        statusHistory{i}=status;
-                    end
 
-                end
-                runCondition=runCondition_MR;
-                if runCondition_MR
-                    for j=1:nphase
-                        [ options.phaseoptions{j}, guess.phases{j} ] = doMeshRefinement( options.phaseoptions{j}, problem.phases{j}, guess.phases{j}, data.phasedata{j}, solution.phaseSol{j}, i );
                     end
-                else
-                    if isfield(options.mp,'regstrategy') && strcmp(options.mp.regstrategy,'simultaneous') && data.mpdata.data.penalty.i<length(data.mpdata.data.penalty.values)
+                    timeHistory(i)=solution.mp.computation_time;
+                    solutionHistory{i}=solution;
+                    statusHistory{i}=status;
+
+                    runCondition_MR=0;
+                    switch options.mp.errortype
+                    case{'local_abs'}
                         for j=1:nphase
-                            [ options.phaseoptions{j}, guess.phases{j}] = doWarmStart( options.phaseoptions{j}, guess.phases{j}, solution.phaseSol{j}, data.phasedata{j} );
+                            runCondition_MR= (runCondition_MR || any(errorHistory{i,j}>problem.phases{j}.states.xErrorTol_local) || any(ConstraintErrorHistory{i,j}>problem.phases{j}.constraintErrorTol)) && i<=imax;
                         end
-                        runCondition=1;
+                        for j=1:nphase
+                            if ~runCondition_MR && (strcmp(options.phaseoptions{j}.resultRep,'res_min_final_manual') || strcmp(options.phaseoptions{j}.resultRep,'res_min_final_default'))
+                                data.phasedata{j}.options.resultRep='res_min';
+                                [solution] = runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                                errorHistory{i,j}=max(abs(solution.phaseSol{j}.Error));
+                                ConstraintErrorHistory{i,j}=max(solution.phaseSol{j}.ConstraintError);
+                                if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                                    resErrorHistory{i,j}=solution.phaseSol{j}.residuals.r;
+                                end
+                            end
+                            timeHistory(i)=solution.mp.computation_time;
+                            solutionHistory{i}=solution;
+                            statusHistory{i}=status;
+                        end
+
                     end
+                    runCondition=runCondition_MR;
+                    if runCondition_MR
+                        for j=1:nphase
+                            [ options.phaseoptions{j}, guess.phases{j} ] = doMeshRefinement( options.phaseoptions{j}, problem.phases{j}, guess.phases{j}, data.phasedata{j}, solution.phaseSol{j}, i );
+                        end
+                    else
+                        if isfield(options.mp,'regstrategy') && strcmp(options.mp.regstrategy,'simultaneous') && data.mpdata.data.penalty.i<length(data.mpdata.data.penalty.values)
+                            for j=1:nphase
+                                [ options.phaseoptions{j}, guess.phases{j}] = doWarmStart( options.phaseoptions{j}, guess.phases{j}, solution.phaseSol{j}, data.phasedata{j} );
+                            end
+                            runCondition=1;
+                        end
+                    end
+                    i=i+1;
+                catch
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
                 end
-                i=i+1;
             end
 
             if isfield(data.mpdata.data,'penalty') && strcmp(options.mp.regstrategy,'MR_priority')
@@ -132,25 +141,30 @@ if isfield(options,'mp')
                             data.phasedata{k}.data.penalty.i=j;
                         end
                         [solution,status,data]=solveSingleNLP_DirectCollocation_MultiPhase(infoNLP,data);
-                        [solution] = runPostSolveTasks(problem,solution,options,data);    % Output solutions
+                        
+                        try
+                            [solution] = runPostSolveTasks(problem,solution,options,data);    % Output solutions
 
-                        for k=1:nphase
-                            errorHistory{i,k}=max(abs(solution.phaseSol{k}.Error));
-                            ConstraintErrorHistory{i,k}=max(solution.phaseSol{k}.ConstraintError);
-                            if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                                resErrorHistory{i,k}=solution.phaseSol{k}.residuals.r;
+                            for k=1:nphase
+                                errorHistory{i,k}=max(abs(solution.phaseSol{k}.Error));
+                                ConstraintErrorHistory{i,k}=max(solution.phaseSol{k}.ConstraintError);
+                                if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                                    resErrorHistory{i,k}=solution.phaseSol{k}.residuals.r;
+                                end
                             end
-                        end
-                        timeHistory(i)=solution.mp.computation_time;
-                        solutionHistory{i}=solution;
-                        statusHistory{i}=status;
+                            timeHistory(i)=solution.mp.computation_time;
+                            solutionHistory{i}=solution;
+                            statusHistory{i}=status;
 
 
-                        for k=1:length(solution.phaseSol)
-                            data.phasedata{k}.multipliers.lambda=solution.phaseSol{k}.multipliers.lambdaNLP;
+                            for k=1:length(solution.phaseSol)
+                                data.phasedata{k}.multipliers.lambda=solution.phaseSol{k}.multipliers.lambdaNLP;
+                            end
+                            infoNLP.mpinfoNLP.z0=solution.mp.z_org;
+                            i=i+1;
+                        catch
+                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
                         end
-                        infoNLP.mpinfoNLP.z0=solution.mp.z_org;
-                        i=i+1;
                     end
                 else
                     error('Regularization Parameters Not Properly Configured!')
@@ -192,10 +206,15 @@ else % single phase problem
                         [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
                         [ options, guess] = doWarmStart( options, guess, solution, data.dataNLP );
                     end
-                    [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
+                    
+                    try
+                        [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
 
-                    varargout{1}=solution;
-                    varargout{2}=status;
+                        varargout{1}=solution;
+                        varargout{2}=status;
+                    catch
+                        error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                    end
                 else
                     error('Weighting Parameters Not Properly Configured for Residual Minimization with Penalty Method!')
                 end
@@ -203,9 +222,14 @@ else % single phase problem
                 [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
                 [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
-                if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                    data.options.resultRep='res_min';
-                    [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                
+                try
+                    if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                        data.options.resultRep='res_min';
+                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                    end
+                catch
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
                 end
 
                 varargout{1}=solution;
@@ -254,136 +278,140 @@ else % single phase problem
                 end
 
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
-                [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
-
-                maxAbsError=max(abs(solution.Error));
-                maxAbsConstraintError=max(solution.ConstraintError);
-                if isfield(options.print,'residual_error') && options.print.residual_error
-                    resError=solution.residuals.r;
-                    resErrorHistory{i,1}=resError;
-                end
-                errorHistory{i,1}=maxAbsError;
-                ConstraintErrorHistory{i,1}=maxAbsConstraintError;
-                timeHistory(i)=solution.computation_time;
-                solutionHistory{i,1}=solution;
-                statusHistory{i,1}=status;
-                iterHistory(i)=status.iter;
-
-
-                switch options.errortype
-                case{'local_abs'}
-                    runCondition_MR=(any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
-                    if ~runCondition_MR && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                        data.options.resultRep='res_min';
-                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
-                        maxAbsError=max(abs(solution.Error));
-                        maxAbsConstraintError=max(solution.ConstraintError);
-                        errorHistory{i,1}=maxAbsError;
-                        ConstraintErrorHistory{i,1}=maxAbsConstraintError;
-                        timeHistory(i)=solution.computation_time;
-                        solutionHistory{i,1}=solution;
-                        statusHistory{i,1}=status;
-                        if isfield(options.print,'residual_error') && options.print.residual_error
-                            resError=solution.residuals.r;
-                            resErrorHistory{i,1}=resError;
-                        end
-                        iterHistory(i)=status.iter;
-                    end
-                    if i>1
-                          MRiterCheck(i)=(any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
-                    end
-                    if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                        waitAnswer=1;
-                        while waitAnswer
-                            keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                            if strcmp(keepMR, 'Yes')
-                                waitAnswer=0;
-                            elseif strcmp(keepMR, 'No')
-                                runCondition_MR=false(1); 
-                                waitAnswer=0;
-                            else
-                                disp('Answer not recognized, please enter again!')
-                            end
-                        end
-                    end
-
-                case{'int_res'}
-                    runCondition_MR=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
-                    if ~any(maxAbsError>problem.states.xErrorTol_local) && ~any(maxAbsConstraintError>problem.constraintErrorTol) && runCondition_MR
-                        solution.Error=solution.Error./max(solution.Error).*problem.states.xErrorTol_local.*resError'./problem.states.xErrorTol_integral;
-                    end
-                    
-                    if i>1
-                          MRiterCheck(i)=(any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
-                    end
-                    if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                        waitAnswer=1;
-                        while waitAnswer
-                            keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                            if strcmp(keepMR, 'Yes')
-                                waitAnswer=0;
-                            elseif strcmp(keepMR, 'No')
-                                runCondition_MR=false(1); 
-                                waitAnswer=0;
-                            else
-                                disp('Answer not recognized, please enter again!')
-                            end
-                        end
-                    end
-                    
-                case{'both'}
-                    runCondition_local=(any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
-                    runCondition_integral=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
-                    runCondition_MR=runCondition_local || runCondition_integral;
-                    if runCondition_integral && ~runCondition_local && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                        data.options.resultRep='res_min';
-                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
-                        maxAbsError=max(abs(solution.Error));
-                        maxAbsConstraintError=max(solution.ConstraintError);
-                        errorHistory{i,1}=maxAbsError;
-                        ConstraintErrorHistory{i,1}=maxAbsConstraintError;
-                        timeHistory(i)=solution.computation_time;
-                        solutionHistory{i,1}=solution;
-                        statusHistory{i,1}=status;
-                        if isfield(options.print,'residual_error') && options.print.residual_error
-                            resError=solution.residuals.r;
-                            resErrorHistory{i,1}=resError;
-                        end
-                        iterHistory(i)=status.iter;
-
-                       runCondition_MR=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
-                    end
-                    
-                    if i>1
-                          MRiterCheck(i)=((any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05))) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
-                    end
-                    if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                        waitAnswer=1;
-                        while waitAnswer
-                            keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                            if strcmp(keepMR, 'Yes')
-                                waitAnswer=0;
-                            elseif strcmp(keepMR, 'No')
-                                runCondition_MR=false(1); 
-                                waitAnswer=0;
-                            else
-                                disp('Answer not recognized, please enter again!')
-                            end
-                        end
-                    end
-                end
                 
-                runCondition=runCondition_MR;
-                if runCondition_MR
-                    [ options, guess ] = doMeshRefinement( options, problem, guess, data, solution, i );
-                else
-                    if isfield(options,'regstrategy') && strcmp(options.regstrategy,'simultaneous') && data.data.penalty.i<length(data.data.penalty.values)
-                        [ options, guess] = doWarmStart( options, guess, solution, data );
-                        runCondition=1;
-                    end
-                end
-                i=i+1;
+                try
+                    [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
 
+                    maxAbsError=max(abs(solution.Error));
+                    maxAbsConstraintError=max(solution.ConstraintError);
+                    if isfield(options.print,'residual_error') && options.print.residual_error
+                        resError=solution.residuals.r;
+                        resErrorHistory{i,1}=resError;
+                    end
+                    errorHistory{i,1}=maxAbsError;
+                    ConstraintErrorHistory{i,1}=maxAbsConstraintError;
+                    timeHistory(i)=solution.computation_time;
+                    solutionHistory{i,1}=solution;
+                    statusHistory{i,1}=status;
+                    iterHistory(i)=status.iter;
+
+
+                    switch options.errortype
+                    case{'local_abs'}
+                        runCondition_MR=(any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
+                        if ~runCondition_MR && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                            data.options.resultRep='res_min';
+                            [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                            maxAbsError=max(abs(solution.Error));
+                            maxAbsConstraintError=max(solution.ConstraintError);
+                            errorHistory{i,1}=maxAbsError;
+                            ConstraintErrorHistory{i,1}=maxAbsConstraintError;
+                            timeHistory(i)=solution.computation_time;
+                            solutionHistory{i,1}=solution;
+                            statusHistory{i,1}=status;
+                            if isfield(options.print,'residual_error') && options.print.residual_error
+                                resError=solution.residuals.r;
+                                resErrorHistory{i,1}=resError;
+                            end
+                            iterHistory(i)=status.iter;
+                        end
+                        if i>1
+                              MRiterCheck(i)=(any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
+                        end
+                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
+                            waitAnswer=1;
+                            while waitAnswer
+                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                if strcmp(keepMR, 'Yes')
+                                    waitAnswer=0;
+                                elseif strcmp(keepMR, 'No')
+                                    runCondition_MR=false(1); 
+                                    waitAnswer=0;
+                                else
+                                    disp('Answer not recognized, please enter again!')
+                                end
+                            end
+                        end
+
+                    case{'int_res'}
+                        runCondition_MR=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
+                        if ~any(maxAbsError>problem.states.xErrorTol_local) && ~any(maxAbsConstraintError>problem.constraintErrorTol) && runCondition_MR
+                            solution.Error=solution.Error./max(solution.Error).*problem.states.xErrorTol_local.*resError'./problem.states.xErrorTol_integral;
+                        end
+
+                        if i>1
+                              MRiterCheck(i)=(any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
+                        end
+                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
+                            waitAnswer=1;
+                            while waitAnswer
+                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                if strcmp(keepMR, 'Yes')
+                                    waitAnswer=0;
+                                elseif strcmp(keepMR, 'No')
+                                    runCondition_MR=false(1); 
+                                    waitAnswer=0;
+                                else
+                                    disp('Answer not recognized, please enter again!')
+                                end
+                            end
+                        end
+
+                    case{'both'}
+                        runCondition_local=(any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
+                        runCondition_integral=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
+                        runCondition_MR=runCondition_local || runCondition_integral;
+                        if runCondition_integral && ~runCondition_local && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                            data.options.resultRep='res_min';
+                            [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                            maxAbsError=max(abs(solution.Error));
+                            maxAbsConstraintError=max(solution.ConstraintError);
+                            errorHistory{i,1}=maxAbsError;
+                            ConstraintErrorHistory{i,1}=maxAbsConstraintError;
+                            timeHistory(i)=solution.computation_time;
+                            solutionHistory{i,1}=solution;
+                            statusHistory{i,1}=status;
+                            if isfield(options.print,'residual_error') && options.print.residual_error
+                                resError=solution.residuals.r;
+                                resErrorHistory{i,1}=resError;
+                            end
+                            iterHistory(i)=status.iter;
+
+                           runCondition_MR=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
+                        end
+
+                        if i>1
+                              MRiterCheck(i)=((any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05))) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
+                        end
+                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
+                            waitAnswer=1;
+                            while waitAnswer
+                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                if strcmp(keepMR, 'Yes')
+                                    waitAnswer=0;
+                                elseif strcmp(keepMR, 'No')
+                                    runCondition_MR=false(1); 
+                                    waitAnswer=0;
+                                else
+                                    disp('Answer not recognized, please enter again!')
+                                end
+                            end
+                        end
+                    end
+
+                    runCondition=runCondition_MR;
+                    if runCondition_MR
+                        [ options, guess ] = doMeshRefinement( options, problem, guess, data, solution, i );
+                    else
+                        if isfield(options,'regstrategy') && strcmp(options.regstrategy,'simultaneous') && data.data.penalty.i<length(data.data.penalty.values)
+                            [ options, guess] = doWarmStart( options, guess, solution, data );
+                            runCondition=1;
+                        end
+                    end
+                    i=i+1;
+                catch
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                end
 
             end
 
@@ -392,24 +420,29 @@ else % single phase problem
                     for j=1:length(data.data.penalty.values)
                         data.data.penalty.i=j;
                         [solution,status,data]=solveSingleNLP_DirectCollocation(infoNLP,data);
-                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
+                        
+                        try
+                            [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
 
-                        maxAbsError=max(abs(solution.Error));
-                        maxAbsConstraintError=max(solution.ConstraintError);
-                        errorHistory{i,1}=maxAbsError;
-                        ConstraintErrorHistory{i,1}=maxAbsConstraintError;
-                        timeHistory(i)=solution.computation_time;
-                        solutionHistory{i,1}=solution;
-                        statusHistory{i,1}=status;
-                        if isfield(options.print,'residual_error') && options.print.residual_error
-                            resError=solution.residuals.r;
-                            resErrorHistory{i,1}=resError;
+                            maxAbsError=max(abs(solution.Error));
+                            maxAbsConstraintError=max(solution.ConstraintError);
+                            errorHistory{i,1}=maxAbsError;
+                            ConstraintErrorHistory{i,1}=maxAbsConstraintError;
+                            timeHistory(i)=solution.computation_time;
+                            solutionHistory{i,1}=solution;
+                            statusHistory{i,1}=status;
+                            if isfield(options.print,'residual_error') && options.print.residual_error
+                                resError=solution.residuals.r;
+                                resErrorHistory{i,1}=resError;
+                            end
+                            iterHistory(i)=status.iter;
+
+                            data.multipliers.lambda=solution.multipliers.lambdaNLP;
+                            infoNLP.z0=solution.z;
+                            i=i+1;
+                        catch
+                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
                         end
-                        iterHistory(i)=status.iter;
-
-                        data.multipliers.lambda=solution.multipliers.lambdaNLP;
-                        infoNLP.z0=solution.z;
-                        i=i+1;
                     end
                 else
                     error('Regularization Parameters Not Properly Configured!')

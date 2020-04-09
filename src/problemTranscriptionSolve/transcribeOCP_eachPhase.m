@@ -789,9 +789,9 @@ data.nConst=length(infoNLP.cl);
 %---------------------------------------
 % if ~strcmp(options.derivatives,'analytic')
 % 
-    
+%     ~(isfield(options,'sysStructTest') && ~options.sysStructTest)
 sparsity_num=getStructure(data.sizes,options.discretization);
-if ~strcmp(options.derivatives,'adigator') && (strcmp(options.resultRep,'default') || strcmp(options.resultRep,'manual')) && strcmp(options.transcription,'direct_collocation') && ~(isfield(options,'sysStructTest') && ~options.sysStructTest) && ~(strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR'))
+if ~strcmp(options.derivatives,'adigator') && (strcmp(options.resultRep,'default') || strcmp(options.resultRep,'manual')) && strcmp(options.transcription,'direct_collocation') && (isfield(options,'sysStructTest') && options.sysStructTest) && ~(strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR'))
     try
         sparsity=getStructure_NaNTest( problem, options, data, sparsity_num );
     catch

@@ -906,6 +906,7 @@ if isfield(data,'resmin')
     DxHS_hf=data.resmin.DxHS_hf;
     DxHS_p1=data.resmin.DxHS_p1;
     AfHS=data.resmin.AfHS;
+    DT=data.resmin.tf_list-data.resmin.t0_list;
     f=data.functions_unscaled{3};
 elseif isfield(data,'dataNLP')
     ntg=length(data.tau_quad);
@@ -920,6 +921,7 @@ elseif isfield(data,'dataNLP')
     DxHS_hf=data.DxHS_hf;
     DxHS_p1=data.DxHS_p1;
     AfHS=data.AfHS;
+    DT=data.tf_list-data.t0_list;
     f=data.dataNLP.functions_unscaled{3};
 end
 
@@ -967,7 +969,7 @@ F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
 
 
 Res=dXg-F;
-r_seg=1/((tf-t0).^2).*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
+r_seg=DT/2.*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
 r=sum(r_seg,2);
 end
 %------------- END OF CODE --------------
@@ -1261,6 +1263,7 @@ if isfield(data,'resmin')
     idx_quad=data.resmin.idx_quad;
     LGRweights=data.resmin.LGR.weights;
     nps=data.resmin.nps;
+    DT=data.resmin.tf_list-data.resmin.t0_list;
     f=data.functions_unscaled{3};
 else
     ntg=length(data.tau_quad);
@@ -1270,6 +1273,7 @@ else
     idx_quad=data.idx_quad;
     LGRweights=data.LGR.weights;
     nps=data.nps;
+    DT=data.tf_list-data.t0_list;
     f=data.dataNLP.functions_unscaled{3};
 end
 
@@ -1298,7 +1302,7 @@ end
 F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
 
 Res=dXg-F;
-r_seg=1/((tf-t0).^2).*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
+r_seg=DT/2.*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
 r=sum(r_seg,2);
 
 end
