@@ -1,5 +1,5 @@
-function [problem,guess] = BangBangTwoPhase_Phase2(problem_mp, guess_mp)
-%BangBangTwoPhase - BangBang Control (Double Integrator Minimum Time Repositioning) Problem (Phase 2)
+function [problem,guess] = GoddardRocket
+%BangBang - BangBang Control (Double Integrator Minimum Time Repositioning) Problem
 %
 % The problem was adapted from Example 4.11 from
 % J. Betts, "Practical Methods for Optimal Control and Estimation Using Nonlinear Programming: Second Edition," Advances in Design and Control, Society for Industrial and Applied Mathematics, 2010.
@@ -20,62 +20,81 @@ function [problem,guess] = BangBangTwoPhase_Phase2(problem_mp, guess_mp)
 % 1 Aug 2019
 % iclocs@imperial.ac.uk
 
+D0=5.4915e-05;
+H=23800;
+T_min=0;
+T_max=193;
+grav=32.174;
+c=1580.9425;
+
+h_0=0;
+v_0=0;
+m_0=3;
+
+h_max=23800;
+v_max=2500;
+m_max=3;
+
+h_min=0;
+v_min=-2500;
+m_min=1;
+
+
 %------------- BEGIN CODE --------------
-% Plant model name, used for Adigator and simulation
-InternalDynamics=@BangBang_Dynamics_Phase2;
-SimDynamics=[];
+% Plant model name, used for Adigator
+InternalDynamics=@GoddardRocket_Dynamics_Internal;
+SimDynamics=@GoddardRocket_Dynamics_Sim;
 
 % Analytic derivative files (optional)
-problem.analyticDeriv.gradCost=@gradCost_BangBang_Phase2;
-problem.analyticDeriv.hessianLagrangian=@hessianLagrangian_BangBang_Phase2;
-problem.analyticDeriv.jacConst=@jacConst_BangBang;
+problem.analyticDeriv.gradCost=[];
+problem.analyticDeriv.hessianLagrangian=[];
+problem.analyticDeriv.jacConst=[];
 
 % Settings file
-problem.settings=@settings_BangbangTwoPhase_Phase2;
+problem.settings=@settings_GoddardRocket;
 
 % Initial time. t0<tf
-problem.time.t0_idx=2;
-problem.time.t0_min=problem_mp.time.t_min(problem.time.t0_idx);
-problem.time.t0_max=problem_mp.time.t_max(problem.time.t0_idx);
-guess.t0=guess_mp.time(problem.time.t0_idx);
+problem.time.t0_min=0;
+problem.time.t0_max=0;
+guess.t0=0;
 
 % Final time. Let tf_min=tf_max if tf is fixed.
-problem.time.tf_idx=3;
-problem.time.tf_min=problem_mp.time.t_min(problem.time.tf_idx);     
-problem.time.tf_max=problem_mp.time.t_max(problem.time.tf_idx); 
-guess.tf=guess_mp.time(problem.time.tf_idx);
+problem.time.tf_min=0;     
+problem.time.tf_max=70; 
+guess.tf=45;
 
 % Parameters bounds. pl=< p <=pu
-problem.parameters.pl=problem_mp.parameters.pl;
-problem.parameters.pu=problem_mp.parameters.pu;
-guess.parameters=guess_mp.parameters;
+problem.parameters.pl=[];
+problem.parameters.pu=[];
+guess.parameters=[];
 
 % Initial conditions for system
-% problem.states.x0=[300 0];
+problem.states.x0=[h_0 v_0 m_0];
 
 % Initial conditions for system. Bounds if x0 is free s.t. x0l=< x0 <=x0u
-problem.states.x0l=[0 -200]; 
-problem.states.x0u=[300 200]; 
+problem.states.x0l=[h_0 v_0 m_0];
+problem.states.x0u=[h_0 v_0 m_0];
 
 % State bounds. xl=< x <=xu
-problem.states.xl=[0 -200];
-problem.states.xu=[310 200];
+problem.states.xl=[h_min v_min m_min];
+problem.states.xu=[h_max v_max m_max];
 
 % State error bounds
-problem.states.xErrorTol_local=[1e-3 1e-3];
-problem.states.xErrorTol_integral=[1e-2 1e-2];
+problem.states.xErrorTol_local=[1e-2 1e-2 1e-2];
+problem.states.xErrorTol_integral=[0.5 0.1 0.1];
 
 % State constraint error bounds
-problem.states.xConstraintTol=[1e-2 1e-2];
+problem.states.xConstraintTol=[1e-2 1e-2 1e-2];
 
 
 % Terminal state bounds. xfl=< xf <=xfu
-problem.states.xfl=[0 0]; 
-problem.states.xfu=[0 0];
+problem.states.xfl=[h_min v_min m_min];
+problem.states.xfu=[h_max v_max m_min];
 
 % Guess the state trajectories with [x0 xf]
-guess.states(:,1)=[100 0];
-guess.states(:,2)=[-50 0];
+guess.states(:,1)=[0 18000];
+guess.states(:,2)=[0 0];
+guess.states(:,3)=[m_max m_min];
 
 
 
@@ -87,19 +106,18 @@ guess.states(:,2)=[-50 0];
 problem.inputs.N=0;
 
 % Input bounds
-problem.inputs.ul=[-1];
-problem.inputs.uu=[2];
+problem.inputs.ul=[T_min];
+problem.inputs.uu=[T_max];
 
 % Bounds on first control action
-problem.inputs.u0l=[-1];
-problem.inputs.u0u=[2]; 
+problem.inputs.u0l=[T_min];
+problem.inputs.u0u=[T_max]; 
 
 % Input constraint error bounds
 problem.inputs.uConstraintTol=[0.1];
 
 % Guess the input sequences with [u0 uf]
-guess.inputs(:,1)=[-1 2];
-
+guess.inputs(:,1)=[T_max T_min];
 
 % Choose the set-points if required
 problem.setpoints.states=[];
@@ -122,10 +140,11 @@ problem.constraints.bTol=[];
 
 
 % store the necessary problem parameters used in the functions
-% problem.data = []; % [lb]
-problem.data=problem_mp.data;
+problem.data.H = H; % [lb]
+problem.data.D0 = D0; % [lb]
+problem.data.grav = grav; % [lb]
+problem.data.c = c; % [lb]
 
-% problem.data.tau = tau;
 % Get function handles and return to Main.m
 problem.data.InternalDynamics=InternalDynamics;
 problem.data.functionfg=@fg;
@@ -196,9 +215,10 @@ function boundaryCost=E_unscaled(x0,xf,u0,uf,p,t0,tf,vdat)
 %
 %------------- BEGIN CODE --------------
 
-boundaryCost=tf;
+boundaryCost=-xf(1);
 
 %------------- END OF CODE --------------
+
 
 function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
 

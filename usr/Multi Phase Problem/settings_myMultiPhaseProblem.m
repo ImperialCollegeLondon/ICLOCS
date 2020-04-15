@@ -1,4 +1,4 @@
-function options = settings_BangbangTwoPhase
+function options = settings_myMultiPhaseProblem
 
 %SETTINGS - General and solver-specific settings are selected here (multiphase)
 % Unless specified otherwise the options are set using 0 => no and 1 => yes
@@ -55,16 +55,6 @@ options.errortype='local_abs';
 
 
 %% Derivative generation
-
-% Derivative computation method
-%---------------------------------------
-% Analytic differentiation: analytic gradients   ('analytic')
-    % Whenever the analytic differentiation is enabled it is necessary to specify the available analytic forms for the cost function, the dynamic equations and the constraints in the appropriate files .m
-% Numerical differentiation: finite differences  ('numeric')
-% Algorithmic differentiation with Adigator      ('adigator')
-    % Make sure you provide the path to the Adigator directory of startupadigator.m
-options.derivatives='analytic';
-options.adigatorPath='../../adigator';
 
 % Perturbation sizes for numerical differentiation
 %---------------------------------------

@@ -73,6 +73,17 @@ if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final
         options.inputRep='linear';
 end
 
+%% Derivative generation
+
+% Derivative computation method
+%---------------------------------------
+% Analytic differentiation: analytic gradients   ('analytic')
+    % Whenever the analytic differentiation is enabled it is necessary to specify the available analytic forms for the cost function, the dynamic equations and the constraints in the appropriate files .m
+% Numerical differentiation: finite differences  ('numeric')
+% Algorithmic differentiation with Adigator      ('adigator')
+    % Make sure you provide the path to the Adigator directory of startupadigator.m
+options.derivatives='analytic';
+options.adigatorPath='../../adigator';
 
 %% Meshing Strategy
 

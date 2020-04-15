@@ -28,8 +28,9 @@ function options = settings_GoddardRocketThreePhase_Phase1(varargin)
 %------------- BEGIN CODE --------------
 
 
+%% Discretization Method
 
-% Discretization Method:
+% Select a discretization method
 %---------------------------------------
 % Discrete-time model       ('discrete')
 % Euler method              ('euler')
@@ -43,23 +44,17 @@ options.discretization='hermite';
 % Result Representation:
 %---------------------------------------
 % Direct interpolation in correspondence with the transcription method        ('default')
-% Representation by integrated residual minimization       ('res_min')
-% Representation by integrated residual minimization, only when error criteria is set to 'both' and the local error tolerance has been fulfilled    ('res_min_final_default')
-% Representation by integrated residual minimization, only when error criteria is set to 'both' and the local error tolerance has been fulfilled    ('res_min_final_manual')
 % Manually selected       ('manual')
+% Representation by integrated residual minimization       ('res_min')
+% Final representation by integrated residual minimization, with intermediate mesh refinement itrations represented with default method     ('res_min_final_default')      Note: only when error criteria is set to 'both' and the local error tolerance has been fulfilled
+% Final representation by integrated residual minimization, with intermediate mesh refinement itrations represented with the manually selected method    ('res_min_final_manual')      Note: only when error criteria is set to 'both' and the local error tolerance has been fulfilled
 options.resultRep='default';
 
-% Further settings
-if strcmp(options.resultRep,'res_min') || strcmp(options.resultRep,'res_min_final_default') || strcmp(options.resultRep,'res_min_final_manual')
-        % Matching the end-point results from collocation (1)
-        % Do not match results from collocation, i.e. only use as intial values (0)
-        options.resminRep.collmatch=0; 
-        options.resminRep.costTol=0; %
-end
-if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final_manual') 
-        % Maunal selection of result representation method:
-        %---------------------------------------
+% Specify the representation method when 'manual' method is selected
+%---------------------------------------
+if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final_manual')         
         % State representation
+        %---------------------------------------
         %   - Piecewise linear          ('linear'), available for Euler transcription method  
         %   - Piecewise quadratic       ('quadratic'), available for Euler and Trapezoidal transcription methods  
         %   - Piecewise cubic           ('cubic'), available for Hermite-Simpson transcription method  
@@ -68,6 +63,7 @@ if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final
         %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
         options.stateRep='pchip';
         % Input representation
+        %---------------------------------------
         %   - Piecewise constant        ('constant'), available for all transcription methods
         %   - Piecewise linear          ('linear'), available for all transcription methods
         %   - Piecewise quadratic       ('quadratic'), available for Trapezoidal transcription methods  
@@ -77,14 +73,39 @@ if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final
         options.inputRep='linear';
 end
 
+%% Derivative generation
 
-% Direct transcription settings
+% Derivative computation method
 %---------------------------------------
+% Analytic differentiation: analytic gradients   ('analytic')
+    % Whenever the analytic differentiation is enabled it is necessary to specify the available analytic forms for the cost function, the dynamic equations and the constraints in the appropriate files .m
+% Numerical differentiation: finite differences  ('numeric')
+% Algorithmic differentiation with Adigator      ('adigator')
+    % Make sure you provide the path to the Adigator directory of startupadigator.m
+options.derivatives='numeric';
+options.adigatorPath='../../adigator';
+
+%% Meshing Strategy
+
+% Minimum and maximum time interval
+%---------------------------------------
+% Define the minimum and maximum time interval (in the same unit as in t) for the hp-flexible method and for mesh refinement schemes
+options.mintimeinterval=1e-09;
+options.maxtimeinterval=inf; 
+
+% Distribution of integration steps. 
+%---------------------------------------
+% Set tau=0 for equispaced steps.
+% Otherwise: tau is a vector of length M-1 with 0<tau(i)<1 and sum(tau)=1.
+% For discrete time system  set  tau=0.
+options.tau=0;
 
 
-% Number of integration nodes in the interval t=[0,tf]; nodes=steps+1.
-% The quantity steps/N (N number of control actions) must be a positive
-% integer. For LGR: Number of LGR points on interval t=[-1,tau_n], tau_n<1
+%% Other Settings
+
+% Auto selection of h/hp method based on input formulation of the settings function call
+%---------------------------------------
+% LEAVE THIS PART UNCHANGED AND USE FUNCTION SYNTAX (AS DESCRIBED ON THE TOP) TO DEFINE THE ITEGRATION NODES
 if nargin==2
     if strcmp(varargin{2},'h')
         options.nodes=varargin{1}; 
@@ -102,17 +123,3 @@ if nargin==2
 else
     options.nodes=varargin{1}; 
 end
-
-% Adaptively spaced segments
-options.adaptseg=0; 
-
-% Minimum time interval
-options.mintimeinterval=0.1; 
-
-
-% Distribution of integration steps. Set tau=0 for equispaced steps.
-% Otherwise: tau is a vector of length M-1 with 0<tau(i)<1 and sum(tau)=1.
-% For discrete time system  set  tau=0.
-
-options.tau=0;
-

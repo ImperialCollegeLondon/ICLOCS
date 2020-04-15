@@ -27,7 +27,7 @@ SimDynamics=[];
 
 % Analytic derivative files (optional)
 problem.analyticDeriv.gradCost=@gradCost_BangBang_Phase1;
-problem.analyticDeriv.hessianLagrangian=@hessianLagrangian_BangBang;
+problem.analyticDeriv.hessianLagrangian=@hessianLagrangian_BangBang_Phase1;
 problem.analyticDeriv.jacConst=@jacConst_BangBang;
 
 % Settings file
