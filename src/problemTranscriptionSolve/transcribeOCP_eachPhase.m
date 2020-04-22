@@ -35,6 +35,8 @@ function [infoNLP,data,options]=transcribeOCP_eachPhase(problem,guess,options)
 
 persistent adigatorGen
 
+checkProblem(problem);
+
 if ~isfield(problem.data,'mode')
     problem.data.mode.currentMode='Original';
 end
