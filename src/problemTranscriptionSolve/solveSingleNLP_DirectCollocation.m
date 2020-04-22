@@ -276,8 +276,11 @@ end
 %solution.status=status;
 solution.computation_time=tB;
 
-[solution] = postProcessSolution(z, data, solution);
-
+try
+    [solution] = postProcessSolution(z, data, solution);
+catch
+    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
+end
 
 
 end

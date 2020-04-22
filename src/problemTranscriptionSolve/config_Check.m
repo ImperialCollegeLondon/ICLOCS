@@ -42,7 +42,7 @@ if nargin==3
 else
     options=varargin{1};
     N=varargin{2};
-    if N<3
+    if length(N)==1 && N<3
         error('Do not supported number of mesh nodes less than 3.')
     end
     if strcmp(options.transcription,'integral_res_min')

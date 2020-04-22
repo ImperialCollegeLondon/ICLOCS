@@ -20,8 +20,8 @@ if isfield(solution,'mp')
     solution.mp.cost=0;
     for i=1:length(problem.phases)
         [solution.phaseSol{i}]=postSolveAnalysis(problem.phases{i},solution.phaseSol{i},options.phaseoptions{i},data.phasedata{i});
+        solution.mp.cost=solution.mp.cost+solution.phaseSol{i}.cost;
     end
-    solution.mp.cost=solution.mp.cost+solution.phaseSol{i}.cost;
     printSolveInfo(solution,options);
 else
     [solution]=postSolveAnalysis(problem,solution,options,data);

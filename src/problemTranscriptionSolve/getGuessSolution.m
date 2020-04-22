@@ -152,7 +152,8 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
                 data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
             end
             if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
-                data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+%                 data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+                data.multipliers.lambda=[data.multipliers.lambda;0;guess.multipliers.lambda_resconst];
             end
         end
     end
@@ -283,7 +284,8 @@ else
                 data.multipliers.lambda=[data.multipliers.lambda;zeros(nrc,1)];
             end
             if isfield(guess.multipliers,'lambda_resconst') %&& strcmp(options.transcription,'direct_collocation')
-                data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+%                 data.multipliers.lambda=[0;data.multipliers.lambda;guess.multipliers.lambda_resconst];
+                data.multipliers.lambda=[data.multipliers.lambda;0;guess.multipliers.lambda_resconst];
             end 
         end
         

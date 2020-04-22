@@ -289,14 +289,18 @@ end
 %solution.status=status;
 solution.mp.computation_time=tB;
 
-
-for i=1:length(data.phasedata)
-    z_phase=zeros(data.phasedata{i}.nz,1);
-    sol.multipliers.lambda=zeros(data.phasedata{i}.nConst,1);
-    z_phase(data.phasedata{i}.zidx.org.z,1)=z(data.phasedata{i}.zidx.mp.z,1);
-    sol.multipliers.lambda(data.phasedata{i}.zidx.org.const,1)=solution.mp.multipliers.lambda(data.phasedata{i}.zidx.mp.const,1);
-    [solution.phaseSol{i}] = postProcessSolution(z_phase, data.phasedata{i}, sol);
+try
+    for i=1:length(data.phasedata)
+        z_phase=zeros(data.phasedata{i}.nz,1);
+        sol.multipliers.lambda=zeros(data.phasedata{i}.nConst,1);
+        z_phase(data.phasedata{i}.zidx.org.z,1)=z(data.phasedata{i}.zidx.mp.z,1);
+        sol.multipliers.lambda(data.phasedata{i}.zidx.org.const,1)=solution.mp.multipliers.lambda(data.phasedata{i}.zidx.mp.const,1);
+        [solution.phaseSol{i}] = postProcessSolution(z_phase, data.phasedata{i}, sol);
+    end
+catch
+    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
 end
+
 
 
 %------------- END OF CODE --------------

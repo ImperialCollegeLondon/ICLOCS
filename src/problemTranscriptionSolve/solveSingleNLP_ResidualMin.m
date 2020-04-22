@@ -35,14 +35,14 @@ function [solution,status,data]=solveSingleNLP_ResidualMin(NLP,data)
 data.infoNLP=NLP;
 
 if strcmp(data.dataNLP.options.discretization,'globalLGR') || strcmp(data.dataNLP.options.discretization,'hpLGR')
-    [nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive]=deal(data.dataNLP.sizes{1:17});
+    [nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive,ng_eq,ng_neq]=deal(data.dataNLP.sizes{1:19});
     if data.dataNLP.options.reorderLGR
         NLP.z0(1:n)=data.dataNLP.x0t;
     else
         NLP.z0(1:M+1:M*n)=data.dataNLP.x0t;
     end
 else
-    [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.dataNLP.sizes{1:13});
+    [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive,nps,ng_eq,ng_neq]=deal(data.dataNLP.sizes{1:16});
     NLP.z0(nt+np+1:n+nt+np)=data.dataNLP.x0t;
 end
 nrc=nrcl+nrcu+nrce;
@@ -351,7 +351,7 @@ if strcmp(data.dataNLP.options.discretization,'globalLGR') || strcmp(data.dataNL
         if nb
             solution.multipliers.lambda_b=solution.multipliers.lambdaNLP((ngActive+nrc+1):(ngActive+nrc+nb));
         end
-        solution.multipliers.lambda_resconst=solution.multipliers.lambdaNLP(end-n+1:end);
+        solution.multipliers.lambda_resconst=solution.multipliers.lambdaNLP(end-n-ng_eq+1:end);
     end
     
         solution.X=solution.coll.X;
@@ -433,7 +433,7 @@ else
             if nb
                 solution.multipliers.lambda_b=solution.multipliers.lambdaNLP(ngActive+nrc+1:ngActive+nrc+nb);
             end
-            solution.multipliers.lambda_resconst=solution.multipliers.lambdaNLP(end-n+1:end);
+            solution.multipliers.lambda_resconst=solution.multipliers.lambdaNLP(end-n-ng_eq+1:end);
         end
     end
 end

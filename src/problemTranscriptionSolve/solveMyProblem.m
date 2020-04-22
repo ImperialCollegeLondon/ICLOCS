@@ -28,7 +28,7 @@ if isfield(options,'mp')
                     [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                 end
             catch
-                error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
             end
 
             varargout{1}=solution;
@@ -129,7 +129,7 @@ if isfield(options,'mp')
                     end
                     i=i+1;
                 catch
-                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
             end
 
@@ -163,7 +163,7 @@ if isfield(options,'mp')
                             infoNLP.mpinfoNLP.z0=solution.mp.z_org;
                             i=i+1;
                         catch
-                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                         end
                     end
                 else
@@ -213,7 +213,7 @@ else % single phase problem
                         varargout{1}=solution;
                         varargout{2}=status;
                     catch
-                        error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                        error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                     end
                 else
                     error('Weighting Parameters Not Properly Configured for Residual Minimization with Penalty Method!')
@@ -221,15 +221,15 @@ else % single phase problem
             else
                 [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
-                [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
                 
                 try
+                [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
                     if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
                         data.options.resultRep='res_min';
                         [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                     end
                 catch
-                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
 
                 varargout{1}=solution;
@@ -410,7 +410,7 @@ else % single phase problem
                     end
                     i=i+1;
                 catch
-                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
 
             end
@@ -441,7 +441,7 @@ else % single phase problem
                             infoNLP.z0=solution.z;
                             i=i+1;
                         catch
-                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully.');
+                            error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                         end
                     end
                 else

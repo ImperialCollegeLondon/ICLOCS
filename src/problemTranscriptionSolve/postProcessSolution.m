@@ -183,7 +183,7 @@ if data.options.scaling
     if isfield(data.data,'Pscale')
         solution.scaledVariables.p=solution.p;
         solution.scaledVariables.coll.p=solution.coll.p;
-        solution.coll.p=scale_variables_back( solution.coll.p', data.data.Pscale, data.data.Pshift )';
+        solution.p=scale_variables_back( solution.p', data.data.Pscale, data.data.Pshift )';
         solution.coll.p=scale_variables_back( solution.coll.p', data.data.Pscale, data.data.Pshift )';
     else
         solution.scaledVariables.p=[];
