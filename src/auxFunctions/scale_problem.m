@@ -55,7 +55,7 @@ end
      problem.states.xru=scale_variables( problem.states.xru, problem.states.scales, 0 );
  end
  
- if ~isempty(problem.setpoints.states)
+ if isfield(problem,'setpoints') && ~isempty(problem.setpoints.states)
     problem.setpoints.states=scale_variables( problem.setpoints.states, problem.states.scales, problem.states.shifts );
  end
 
@@ -94,7 +94,7 @@ end
  if ~isempty(guess.inputs)
     guess.inputs=scale_variables( guess.inputs, problem.inputs.scales, problem.inputs.shifts );
  end
- if ~isempty(problem.setpoints.inputs)
+ if isfield(problem,'setpoints') && ~isempty(problem.setpoints.inputs)
     problem.setpoints.inputs=scale_variables(problem.setpoints.inputs, problem.inputs.scales, problem.inputs.shifts );
  end
 

@@ -66,7 +66,7 @@ U=reshape(mp.Vu*z,M,m); %input exluding the end point
 %%
 % Extract design parameters if specified and convert to cells
 if np
-    P=reshape(repmat(z(n*(M+1)+M*m+1:n*(M+1)+M*m+np),M,1),M,np);
+    P=repmat(z(n*(M+1)+M*m+1:n*(M+1)+M*m+np)',M,1);
 else
     P=spalloc(M,0,1);
 end

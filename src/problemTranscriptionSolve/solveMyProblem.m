@@ -223,7 +223,7 @@ else % single phase problem
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
                 
                 try
-                [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
+                    [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
                     if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
                         data.options.resultRep='res_min';
                         [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions

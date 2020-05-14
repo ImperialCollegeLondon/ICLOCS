@@ -41,7 +41,7 @@ else
         % h Transcription Method
         n=dataNLP.sizes{3};
 
-        F_k=f(X(1:2:end,:),U(1:2:end,:),P,data.tau(1:2:end)*(tf-t0),data.dataNLP.data);
+        F_k=f(X(1:2:end,:),U(1:2:end,:),P(1:2:end,:),data.tau(1:2:end)*(tf-t0),data.dataNLP.data);
         F_kph=data.DxHS_hf*X/(tf-t0)-F_k(1:end-1,:)/2;
         F_kp1=data.DxHS_p1*X/(tf-t0)+F_k(1:end-1,:);
         F=[F_k(1:end-1,:) F_kph F_kp1]';

@@ -352,29 +352,37 @@ if nrc
     
     if strcmp(options.discretization,'hermite')
 
-        data.RCmap.AxHS1=diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2);
+        data.RCmap.AxHS1=spdiags([-3*ones(M,1) 4*ones(M,1) -ones(M,1)],0:2,M,M);
+%         diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2);
         data.RCmap.AxHS1([2:2:end,end],:)=[];
-        data.RCmap.AxHS2=diag(ones(M,1))+diag(-4*ones(M-1,1),1)+diag(3*ones(M-2,1),2);
+        data.RCmap.AxHS2=spdiags([ones(M,1) -4*ones(M,1) 3*ones(M,1)],0:2,M,M);
         data.RCmap.AxHS2([2:2:end,end],:)=[];
-        data.RCmap.AxHS3=diag(-ones(M,1))+diag(ones(M-2,1),2);
+        data.RCmap.AxHS3=spdiags([-ones(M,1) ones(M,1)],[0 2],M,M);
         data.RCmap.AxHS3([2:2:end,end],:)=[];
-        data.RCmap.AxHS4=diag(-ones(M,1))+diag(ones(M-1,1),1);
+        data.RCmap.AxHS4=spdiags([-ones(M,1) ones(M,1)],[0 1],M,M);
+%         diag(-ones(M,1))+diag(ones(M-1,1),1);
         data.RCmap.AxHS4([2:2:end,end],:)=[];
 
-        data.RCmap.AuHS1=diag(-3*ones(N,1))+diag(4*ones(N-1,1),1)+diag(-ones(N-2,1),2);
+        data.RCmap.AuHS1=spdiags([-3*ones(N,1) 4*ones(N,1) -ones(N,1)],0:2,N,N);
+%         diag(-3*ones(N,1))+diag(4*ones(N-1,1),1)+diag(-ones(N-2,1),2);
         data.RCmap.AuHS1([2:2:end,end],:)=[];
-        data.RCmap.AuHS2=diag(ones(N,1))+diag(-4*ones(N-1,1),1)+diag(3*ones(N-2,1),2);
+        data.RCmap.AuHS2=spdiags([ones(N,1) -4*ones(N,1) 3*ones(N,1)],0:2,N,N);
+%         diag(ones(N,1))+diag(-4*ones(N-1,1),1)+diag(3*ones(N-2,1),2);
         data.RCmap.AuHS2([2:2:end,end],:)=[];
-        data.RCmap.AuHS3=diag(-ones(N,1))+diag(ones(N-2,1),2);
+        data.RCmap.AuHS3=spdiags([-ones(N,1) ones(N,1)],[0 2],N,N);
+%         diag(-ones(N,1))+diag(ones(N-2,1),2);
         data.RCmap.AuHS3([2:2:end,end],:)=[];
-        data.RCmap.AuHS4=diag(-ones(N,1))+diag(ones(N-1,1),1);
+        data.RCmap.AuHS4=spdiags([-ones(N,1) ones(N,1)],[0 1],N,M);
+%         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.AuHS4([2:2:end,end],:)=[];
     elseif (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR'))
     else
 
-        data.RCmap.Ax=diag(-ones(M,1))+diag(ones(M-1,1),1);
+        data.RCmap.Ax=spdiags([-ones(M,1) ones(M,1)],[0 1],M,M);
+%         diag(-ones(M,1))+diag(ones(M-1,1),1);
         data.RCmap.Ax(end,:)=[];
-        data.RCmap.Au=diag(-ones(N,1))+diag(ones(N-1,1),1);
+        data.RCmap.Au=spdiags([-ones(N,1) ones(N,1)],[0 1],N,M);
+%         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.Au(end,:)=[];
     end
 end

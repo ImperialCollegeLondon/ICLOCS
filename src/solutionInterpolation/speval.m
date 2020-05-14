@@ -30,6 +30,8 @@ for k=1:length(nidx)
                 Pp=solution.Up;
             case{'dx','dX','dynamics'}
                 Pp=solution.dXp;
+            case{'du','dU'}
+                Pp=solution.dUp;
             otherwise
                 error('requested solution type not defined!!');
         end
@@ -43,6 +45,8 @@ for k=1:length(nidx)
                 Pp=solution.Up;
             case{'dx','dX','dynamics'}
                 Pp=solution.dXp;
+            case{'du','dU'}
+                Pp=solution.dUp;
             otherwise
                 error('requested solution type not defined!!');
         end
@@ -51,11 +55,11 @@ for k=1:length(nidx)
         else
             Sp=zeros(length(T),1);Ppi=Pp(:,n);
             for i=1:length(TSeg_Bar)-1 
-                Tau_Seg=normalizeT(T(T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),TSeg_Bar(i),TSeg_Bar(i+1));
+                Tau_Seg=normalizeT(T(T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),TSeg_Bar(i),TSeg_Bar(i+1));
                 if size(Ppi{i},2)==1
-                    Sp((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=legendreEval(Ppi{i},Tau_Seg);
+                    Sp((T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),:)=legendreEval(Ppi{i},Tau_Seg);
                 else
-                    Sp((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=BaryEval(Ppi{i},Tau_Seg);
+                    Sp((T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),:)=BaryEval(Ppi{i},Tau_Seg);
                 end
             end
             if TSeg_Bar(end)==T(end)

@@ -422,7 +422,7 @@ else
         end
         
         p=solution.p;
-        F_k=f(X(1:2:end,:),U(1:2:end,:),repmat(p',length(data.tau),1),data.tau(1:2:end)*(tf-t0),dataNLP.data);
+        F_k=f(X(1:2:end,:),U(1:2:end,:),repmat(p',length(data.tau(1:2:end)),1),data.tau(1:2:end)*(tf-t0),dataNLP.data);
         F_kph=data.DxHS_hf*X/(tf-t0)-F_k(1:end-1,:)/2;
         F_kp1=data.DxHS_p1*X/(tf-t0)+F_k(1:end-1,:);
         F=[F_k(1:end-1,:) F_kph F_kp1]';
@@ -942,7 +942,7 @@ end
 
 
 if ~isfield(data,'resmin')
-    F_k=f(Xcoll(1:2:end,:),Ucoll(1:2:end,:),repmat(p',length(tau),1),tau(1:2:end)*(tf-t0)+t0,vdat);
+    F_k=f(Xcoll(1:2:end,:),Ucoll(1:2:end,:),repmat(p',length(tau(1:2:end)),1),tau(1:2:end)*(tf-t0)+t0,vdat);
     F_kph=DxHS_hf*Xcoll/(tf-t0)-F_k(1:end-1,:)/2;
     F_kp1=DxHS_p1*Xcoll/(tf-t0)+F_k(1:end-1,:);
     F=[F_k(1:end-1,:) F_kph F_kp1]';

@@ -149,7 +149,7 @@ for i=1:nfd
             ufm{mpdata.map.allidx(j)}=ufm{mpdata.map.allidx(j)}-mpdata.map.phases{mpdata.map.allidx(j)}.euf(:,j);
         end
 
-         [~,blo]=linkfunctions(x0,xf,u0,uf,p,t0,tf,mpdata.data.auxdata);
+         [~,blo]=linkfunctions(x0,xf,u0,uf,p,t0,tf,mpdata.data);
          [~,blp1]=linkfunctions(x0p,xfp,u0p,ufp,p+mpdata.map.ep(:,i),t0+mpdata.map.et0(:,i),tf+mpdata.map.etf(:,i),mpdata.data);
          [~,blp2]=linkfunctions(x0m,xfm,u0m,ufm,p-mpdata.map.ep(:,i),t0-mpdata.map.et0(:,i),tf-mpdata.map.etf(:,i),mpdata.data);
          blt=(blp2-2*blo+blp1).*adjoint'/e2; 
