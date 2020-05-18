@@ -508,6 +508,7 @@ end
             vector.b.et0=eb(2*n+2*m+np+1,:);
             vector.b.etf=eb(2*n+2*m+np+nt,:); 
         else
+            vector.b.et=eb(2*n+2*m+np+1:2*n+2*m+np+2,:)';
             vector.b.et0=eb(2*n+2*m+np+1,:);
             vector.b.etf=eb(2*n+2*m+np+2,:); 
         end
