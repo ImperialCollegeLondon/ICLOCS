@@ -348,8 +348,10 @@ for i=1:data.mpsizes.nphase
     data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)=data.jacStruct(data_phase.jSidx.mp.B_T.row,data_phase.jSidx.mp.B_T.col)+data_phase.jacStruct(data_phase.jSidx.org.B_T.row,data_phase.jSidx.org.B_T.col);
 end
 data.jacStruct(end-data.mpsizes.nbl+1:end,[data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx])=1;
+data.jacStruct=spones(data.jacStruct);
+
 data.hessianStruct([data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx],[data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx])=1;
-data.hessianStruct=tril(data.hessianStruct);
+data.hessianStruct=spones(tril(data.hessianStruct));
 
 
 data.linkConst.all.idx=repmat([data.linkConst.xu0f.idx data.linkConst.p.idx data.linkConst.t.idx],data.mpsizes.nbl,1);

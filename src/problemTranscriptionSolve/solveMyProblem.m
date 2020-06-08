@@ -44,6 +44,7 @@ if isfield(options,'mp')
             timeHistory=zeros(1,1);
             iterHistory=zeros(1,1);
             solutionHistory=cell(1,1);
+            problemHistory=cell(1,1);
             statusHistory=cell(1,1);
             if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
                 resErrorHistory=cell(1,nphase);
@@ -55,9 +56,19 @@ if isfield(options,'mp')
 
             problem_iter=problem;
             while runCondition
-
-                if i~=1 && isfield(options,'ECH') && options.ECH.enabled
-                    [ problem_iter,guess,options ] = selectAppliedConstraint( problem, guess, options, data, solutionHistory, i );
+                
+                for j=1:nphase
+                    if i~=1 && (statusHistory{1}.status==0 || statusHistory{1}.status==1) && isfield(options.phaseoptions{j},'ECH') && options.phaseoptions{j}.ECH.enabled
+                        if i==2
+                            solutionHisECH{1}=solutionHistory{1}.phaseSol{j};
+                        elseif i>2
+                            for k=1:i-1
+                                solutionHisECH{k}=solutionHistory{k}.phaseSol{j};
+                            end
+                        end
+                        [ problem_iter.phases{j},guess.phases{j},options.phaseoptions{j} ] = selectAppliedConstraint( problem.phases{j}, guess.phases{j}, options.phaseoptions{j}, data.phasedata{j}, solutionHisECH, i );
+                        problemHistory{i,j}=problem_iter;
+                    end
                 end
 
                 [infoNLP,data,options]=transcribeMultiphaseOCP(problem_iter,guess,options); % Format for NLP solver
@@ -91,7 +102,7 @@ if isfield(options,'mp')
                     timeHistory(i)=solution.mp.computation_time;
                     solutionHistory{i}=solution;
                     statusHistory{i}=status;
-
+                    iterHistory(i)=status.iter;
                     runCondition_MR=0;
                     switch options.mp.errortype
                     case{'local_abs'}
@@ -111,6 +122,7 @@ if isfield(options,'mp')
                             timeHistory(i)=solution.mp.computation_time;
                             solutionHistory{i}=solution;
                             statusHistory{i}=status;
+                            iterHistory(i)=status.iter;
                         end
 
                     end
@@ -155,7 +167,7 @@ if isfield(options,'mp')
                             timeHistory(i)=solution.mp.computation_time;
                             solutionHistory{i}=solution;
                             statusHistory{i}=status;
-
+                            iterHistory(i)=status.iter;
 
                             for k=1:length(solution.phaseSol)
                                 data.phasedata{k}.multipliers.lambda=solution.phaseSol{k}.multipliers.lambdaNLP;
@@ -174,6 +186,8 @@ if isfield(options,'mp')
             MeshRefinementHistory.errorHistory=errorHistory;
             MeshRefinementHistory.timeHistory=timeHistory;
             MeshRefinementHistory.iterHistory=iterHistory;
+            MeshRefinementHistory.solutionHistory=solutionHistory;
+            MeshRefinementHistory.problemHistory=problemHistory;
             MeshRefinementHistory.ConstraintErrorHistory=ConstraintErrorHistory;
             if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
                 MeshRefinementHistory.resErrorHistory=resErrorHistory;

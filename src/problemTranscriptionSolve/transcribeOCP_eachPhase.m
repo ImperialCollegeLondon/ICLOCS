@@ -472,11 +472,17 @@ u0_l=problem.inputs.u0l(:);u0_u=problem.inputs.u0u(:);
 
 % configure the initial condition
 if ~isfield(problem.states,'x0') || isempty(problem.states.x0)
-  cx0=0;
-  data.x0=x0l;
-  data.x0t=(x0_l+(x0_u-x0_l).*rand(n,1));
-  data.x0t(isinf(data.x0t))=0;
-  data.x0t(isnan(data.x0t))=0;
+  if isfield(guess,'states')
+      cx0=0;
+      data.x0=guess.states(1,:);
+      data.x0t=guess.states(1,:)';
+  else
+      cx0=0;
+      data.x0=x0l;
+      data.x0t=(x0_l+(x0_u-x0_l).*rand(n,1));
+      data.x0t(isinf(data.x0t))=0;
+      data.x0t(isnan(data.x0t))=0;
+  end
 else  
   cx0=1;
   data.x0t=problem.states.x0.';
@@ -765,30 +771,43 @@ else
     if any(discErrorTol_Full<eps)
         error('Integral of the residual errors allowed must be strictly larger than machine precision');
     else
-        if isfield(guess,'cost')
-            cost_ub=guess.cost.ub;
-            cost_lb=guess.cost.lb;
+        if strcmp(options.min_res_mode,'directCostMin')
+            discErrorTol_Full=discErrorTol_Full';
+            data.data.discErrorTol_Full=discErrorTol_Full;
+            data.data.discErrorConstScaling=1./sqrt(discErrorTol_Full)';
+            data.data.discErrorTol_FullScaling=data.data.discErrorTol_Full.*data.data.discErrorConstScaling';
+%             ResConstScaleMat=repmat(data.dataNLP.data.discErrorConstScaling, data.nps, 1 );
+%             data.ResConstScaleMat=diag(ResConstScaleMat(:));
+            
+            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);zeros(n+ng_eq,1)];
+            infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);ones(n+ng_eq,1).*sqrt(discErrorTol_Full)];
+            infoNLP.c_Tol=[g_tolAll(gAllidx);zeros(size(rcu(:)));bTol(:);zeros(n+ng_eq,1)];
+
         else
-            cost_lb=-inf;
-            cost_ub=inf;
+            if isfield(guess,'cost')
+                cost_ub=guess.cost.ub;
+                cost_lb=guess.cost.lb;
+            else
+                cost_lb=-inf;
+                cost_ub=inf;
+            end
+            discErrorTol_Full=discErrorTol_Full';
+            data.data.discErrorTol_Full=discErrorTol_Full;
+            if isfield(guess,'residual')
+                discErrorConst=max(discErrorTol_Full/2,guess.residual);
+                data.data.discErrorConstScaling=1./sqrt(discErrorConst(:))';
+                data.data.discErrorTol_FullScaling=discErrorTol_Full.*data.data.discErrorConstScaling;
+                infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
+                infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;ones(n+ng_eq,1).*sqrt(discErrorConst)];
+            else
+                discErrorConst=inf*ones(n+ng_eq,1);
+                data.data.discErrorConstScaling=ones(1,n+ng_eq);
+                data.data.discErrorTol_FullScaling=discErrorTol_Full;
+                infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
+                infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;discErrorConst(:)];
+            end
+            infoNLP.c_Tol=[g_tolAll(gAllidx);zeros(size(rcu(:)));bTol(:);0;zeros(n+ng_eq,1)];
         end
-        discErrorTol_Full=discErrorTol_Full';
-        data.data.discErrorTol_Full=discErrorTol_Full;
-        if isfield(guess,'residual')
-            discErrorConst=max(discErrorTol_Full/2,guess.residual);
-            data.data.discErrorConstScaling=1./discErrorConst(:)';
-            data.data.discErrorTol_FullScaling=discErrorTol_Full.*data.data.discErrorConstScaling;
-            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
-            infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;ones(n+ng_eq,1)];
-        else
-            discErrorConst=inf*ones(n+ng_eq,1);
-            data.data.discErrorConstScaling=ones(1,n+ng_eq);
-            data.data.discErrorTol_FullScaling=discErrorTol_Full;
-            infoNLP.cl=[glAll(gAllidx);rcl(:);bl(:);cost_lb;zeros(n+ng_eq,1)];
-            infoNLP.cu=[guAll(gAllidx);rcu(:);bu(:);cost_ub;discErrorConst(:)];
-        end
-        infoNLP.c_Tol=[g_tolAll(gAllidx);zeros(size(rcu(:)));bTol(:);0;zeros(n+ng_eq,1)];
-        
         
     end
 end
@@ -1081,7 +1100,9 @@ if ~strcmp(options.transcription,'multiple_shooting')
             %
 
             Fxu=[kron(speye(M/N),sparsity.dfdx),repmat(sparsity.dfdu,M/N,1)];
-            dfz=[rand((M)*n,nt)+1 rand((M)*n,np)+1 kron(speye(N),Fxu)];
+%             dfz=[rand((M)*n,nt)+1 rand((M)*n,np)+1 kron(speye(N),Fxu)];
+            seq=1:(M*n);
+            dfz=[repmat(seq',1,nt) repmat(seq',1,np) kron(speye(N),Fxu)];
 
             Gxu=[kron(speye((M)/N),sparse(sparsity.dgdx)),repmat(sparse(sparsity.dgdu),(M)/N,1)];
             dgz=[repmat(sparsity.dgdt,M,1) repmat(sparsity.dgdp,M,1) kron(speye(N),Gxu)];
@@ -1218,7 +1239,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.map.spmatsize.hSf=nnz(data.jacStruct'*data.jacStruct);
             data.map.spmatsize.hSg=nnz(data.jacStruct'*data.jacStruct);
             
-            data.hessianStruct=tril(Lz'*Lz+Ez'*Ez+(data.jacStruct'*data.jacStruct));
+            data.hessianStruct=spones(tril(Lz'*Lz+Ez'*Ez+(data.jacStruct'*data.jacStruct)));
             data.hessianStruct_resmin=data.hessianStruct;
             data.funcs.hessianstructure  = @hessianstructure;
             data.funcs.hessian           = @computeHessian;

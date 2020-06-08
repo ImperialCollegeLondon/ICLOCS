@@ -135,7 +135,11 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
             data.multipliers.lambda=guess.multipliers.lambda;
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
-                data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                if isfield(guess,'time_org')
+                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                else
+                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear');
+                end
                 data.multipliers.lambda=data.multipliers.lambda(:);
             else
                 data.multipliers.lambda=[];
@@ -263,7 +267,11 @@ else
             data.multipliers.lambda=guess.multipliers.lambda;
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
-                data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                if isfield(guess,'time_org')
+                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                else
+                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear');
+                end
                 data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
             else
                 data.multipliers.lambda=[];
