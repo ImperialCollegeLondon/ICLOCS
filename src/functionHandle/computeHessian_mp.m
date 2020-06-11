@@ -28,7 +28,7 @@ function hessian_mp=computeHessian_mp(z_mp,sigma,lambda_mp,auxdata)
 
 
 %------------- BEGIN CODE --------------
-hessian_mp=zeros(auxdata.mpdata.mpsizes.nz,auxdata.mpdata.mpsizes.nz);
+hessian_mp=sparse(auxdata.mpdata.mpsizes.nz,auxdata.mpdata.mpsizes.nz);
 nbl=auxdata.mpdata.mpsizes.nbl_nl;
 
 x0=cell(auxdata.mpdata.mpsizes.nphase,1);xf=cell(auxdata.mpdata.mpsizes.nphase,1);

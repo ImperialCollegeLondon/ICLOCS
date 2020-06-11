@@ -29,6 +29,9 @@ problem.analyticDeriv.gradCost=@gradCost_myProblem;
 problem.analyticDeriv.hessianLagrangian=@hessianLagrangian_myProblem;
 problem.analyticDeriv.jacConst=@jacConst_myProblem;
 
+% (optional) customized call back function
+%problem.callback=@callback_myProblem;
+
 % Settings file
 problem.settings=@settings_myProblem;
 
@@ -58,7 +61,7 @@ problem.states.x0u=[x1(t0)_upperbound ... xn(t0)_upperbound];
 problem.states.xl=[x1_lowerbound ... xn_lowerbound];
 problem.states.xu=[x1_upperbound ... xn_upperbound];
 
-% State rate bounds. xrl=< x <=xru
+% State rate bounds. xrl=< x_dot <=xru
 problem.states.xrl=[x1dot_lowerbound ... xndot_lowerbound]; 
 problem.states.xru=[x1dot_upperbound ... xndot_upperbound]; 
 
@@ -132,6 +135,8 @@ problem.data.auxdata=auxdata;
 % optional setting for automatic regularization
 problem.data.penalty.values=[weight_1, weight_2, ... weight_n];
 problem.data.penalty.i=1; %starting weight
+
+
 
 % Get function handles and return to Main.m
 problem.data.InternalDynamics=InternalDynamics;

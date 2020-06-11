@@ -30,8 +30,6 @@ for k=1:length(nidx)
                 Pp=solution.Up;
             case{'dx','dX','dynamics'}
                 Pp=solution.dXp;
-            case{'du','dU'}
-                Pp=solution.dUp;
             otherwise
                 error('requested solution type not defined!!');
         end
@@ -41,16 +39,10 @@ for k=1:length(nidx)
         switch solType
             case{'x','X','state','states'}
                 Pp=solution.Xp;
-                diffT_seg_Bar=ones(length(TSeg_Bar)-1,1);
             case{'u','U','input','inputs'}
                 Pp=solution.Up;
-                diffT_seg_Bar=ones(length(TSeg_Bar)-1,1);
             case{'dx','dX','dynamics'}
                 Pp=solution.dXp;
-                diffT_seg_Bar=diff((TSeg_Bar-TSeg_Bar(1))./(TSeg_Bar(end)-TSeg_Bar(1)))*(solution.tf-solution.t0);
-            case{'du','dU'}
-                Pp=solution.dUp;
-                diffT_seg_Bar=diff((TSeg_Bar-TSeg_Bar(1))./(TSeg_Bar(end)-TSeg_Bar(1)))*(solution.tf-solution.t0);
             otherwise
                 error('requested solution type not defined!!');
         end
@@ -58,21 +50,16 @@ for k=1:length(nidx)
             Sp=ppval(Pp{n},T);
         else
             Sp=zeros(length(T),1);Ppi=Pp(:,n);
-            
             for i=1:length(TSeg_Bar)-1 
-                Tau_Seg=normalizeT(T(T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),TSeg_Bar(i),TSeg_Bar(i+1));
-                if size(Ppi{i},1)==1
-                    Sp((T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),:)=polyval(Ppi{i},Tau_Seg/2+0.5)./diffT_seg_Bar(i);
-                elseif size(Ppi{i},2)==1
-                    Sp((T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),:)=legendreEval(Ppi{i},Tau_Seg);
+                Tau_Seg=normalizeT(T(T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),TSeg_Bar(i),TSeg_Bar(i+1));
+                if size(Ppi{i},2)==1
+                    Sp((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=legendreEval(Ppi{i},Tau_Seg);
                 else
-                    Sp((T-TSeg_Bar(i)>=-1e-10 & T<TSeg_Bar(i+1)),:)=BaryEval(Ppi{i},Tau_Seg);
+                    Sp((T>=TSeg_Bar(i) & T<TSeg_Bar(i+1)),:)=BaryEval(Ppi{i},Tau_Seg);
                 end
             end
             if TSeg_Bar(end)==T(end)
-                if size(Ppi{i},1)==1
-                    Sp(end)=polyval(Ppi{i},1)./diffT_seg_Bar(i);
-                elseif size(Ppi{i},2)==1
+                if size(Ppi{i},2)==1
                     Sp(end)=legendreEval(Ppi{i},1);
                 else
                     Sp(end)=BaryEval(Ppi{i},1);

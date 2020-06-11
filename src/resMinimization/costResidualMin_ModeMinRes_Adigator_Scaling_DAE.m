@@ -36,7 +36,7 @@ end
 if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.discretization,'hpLGR')
 	% p/hp Transcription Method
         n=dataNLP.sizes{3};
-        
+        ng_eq=dataNLP.sizes{18};
         t_0=T(1);
         t_f=T(end);
         delta_t=t_f-t_0;
@@ -57,6 +57,7 @@ if strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.
 else
 	% h Transcription Method
         n=dataNLP.sizes{3};
+        ng_eq=dataNLP.sizes{15};
         nt=dataNLP.sizes{1};
         M=dataNLP.sizes{7};
         if nt % free time
@@ -86,7 +87,7 @@ else
             [Fp,Gp]=f(X_quad,U_quad,P_quad,T_quad,dyn_data);
             Gp=Gp(:,1:ng_eq);
             Res=[(dX_quad-Fp).^2 Gp.^2];
-            Res_int=delta_t*data.DT_seg_node_mat./2.*data.sum_nps_quad*Res;
+            Res_int=delta_t*data.DT_seg_node_mat./2*data.sum_nps_quad*Res;
         else % fixed time
             t0=dataNLP.t0;
             tf=dataNLP.tf;
@@ -122,12 +123,12 @@ end
 
 % Compuation of integrated residual for each dynamics equation
 Res_int_Const=data.ResConstScaleMat*Res_int(:);
-Res_int_Const=reshape(Res_int_Const,data.nps,n);
+Res_int_Const=reshape(Res_int_Const,data.nps,n+ng_eq);
 Res_intsum=sum(Res_int_Const)';
 
 % Compuation of integrated residual norm
 Res_int_Norm=data.ResNormScaleMat*Res_int(:);
-Res_int_Norm=reshape(Res_int_Norm,data.nps,n);
+Res_int_Norm=reshape(Res_int_Norm,data.nps,n+ng_eq);
 ResNorm_intsum=sum(sum(Res_int_Norm));
 
 

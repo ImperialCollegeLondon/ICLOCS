@@ -76,23 +76,25 @@ if strcmp(data.options.discretization,'hermite')
     AuHS1([2:2:end,end],:)=[];
     AxHS3=diag(-ones(M,1))+diag(ones(M-2,1),2);
     AxHS3([2:2:end,end],:)=[];
-    AuHS3=diag(-ones(N,1))+diag(ones(N-2,1),2);
+%     AuHS3=diag(-ones(N,1))+diag(ones(N-2,1),2);
+%     AuHS3([2:2:end,end],:)=[];
+    AuHS3=diag(ones(N,1))+diag(-4*ones(N-1,1),1)+diag(3*ones(N-2,1),2);
     AuHS3([2:2:end,end],:)=[];
     
-    dX=zeros(length(DT),nx);dU=zeros(length(DT),nu);
-    dX_mid=zeros(length(DT),nx);dU_mid=zeros(length(DT),nu);
+    dX=zeros(length(DT),nx);dU_plus=zeros(length(DT),nu);
+    dX_mid=zeros(length(DT),nx);dU_minus=zeros(length(DT),nu);
     for i=1:nx
         dX(:,i)=AxHS1*x(:,i)./DT;
         dX_mid(:,i)=AxHS3*x(:,i)./DT;
     end
     for i=1:nu
-        dU(:,i)=AuHS1*u(:,i)./DT;
-        dU_mid(:,i)=AuHS3*u(:,i)./DT;
+        dU_plus(:,i)=AuHS1*u(:,i)./DT;
+        dU_minus(:,i)=AuHS3*u(:,i)./DT;
     end
-    dX_org=reshape([dX dX_mid]',size(dX,2),size(dX,1)*2)';
-    dU_org=reshape([dU dU_mid]',size(dU,2),size(dU,1)*2)';
-    solution.org.dX=dX_org;
-    solution.org.dU=dU_org;
+    dX=reshape([dX dX_mid]',size(dX,2),size(dX,1)*2)';
+    dU=reshape([dU_plus dU_minus]',size(dU_plus,2),size(dU_plus,1)*2)';
+    solution.org.dX=dX;
+    solution.org.dU=dU;
 
 elseif (strcmp(data.options.discretization,'globalLGR')) || (strcmp(data.options.discretization,'hpLGR'))
     

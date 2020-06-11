@@ -29,7 +29,7 @@ function jacConst_mp=constraintJacobian_mp(z_mp,auxdata)
 %------------- BEGIN CODE --------------
 nbl=auxdata.mpdata.mpsizes.nbl;
 
-jacConst_mp=zeros(auxdata.mpdata.mpsizes.nConst-nbl,auxdata.mpdata.mpsizes.nz);
+jacConst_mp=sparse(auxdata.mpdata.mpsizes.nConst-nbl,auxdata.mpdata.mpsizes.nz);
 
 x0=cell(auxdata.mpdata.mpsizes.nphase,1);xf=cell(auxdata.mpdata.mpsizes.nphase,1);
 u0=cell(auxdata.mpdata.mpsizes.nphase,1);uf=cell(auxdata.mpdata.mpsizes.nphase,1);

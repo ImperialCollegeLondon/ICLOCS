@@ -28,6 +28,7 @@ auxdata.tf_org=solution.tf;
 switch dataNLP.options.discretization
     
     case{'globalLGR','hpLGR'} % p/hp Transcription Method
+        ng_eq=dataNLP.sizes{18};
         idx_endpoint=dataNLP.tau_local_seg == -1;
         if dataNLP.options.scaling
             auxdata.dataNLP.data.u_endpoint=[solution.scaledVariables.U(idx_endpoint,:);solution.scaledVariables.U(end,:)];
@@ -69,6 +70,7 @@ switch dataNLP.options.discretization
         end
        
     otherwise % h Transcription Method
+        ng_eq=dataNLP.sizes{15};
         if dataNLP.options.scaling
             auxdata.dataNLP.data.u_endpoint=solution.scaledVariables.U;
             auxdata.dataNLP.data.x_endpoint=solution.scaledVariables.X;
@@ -185,7 +187,7 @@ auxdata.options.discretization='resMinInterpolationForSolution';
 
 auxdata.mode=2;
 if strcmp(options.derivatives,'adigator')
-    genAdigator4ICLOCS_resmin( options, auxdata, n, m, np, nt, M );
+    genAdigator4ICLOCS_resmin( options, auxdata, n, m, np, nt, M, ng_eq);
 end
 
     

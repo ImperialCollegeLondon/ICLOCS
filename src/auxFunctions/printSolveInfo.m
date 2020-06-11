@@ -22,7 +22,7 @@ function printSolveInfo(solution,options)
         
         % Display minimized cost
         if (options.mp.print.cost)
-            disp('minimized cost:');disp(solution.mp.cost);
+            disp('minimized cost:');disp(solution.mp.cost.J);
         end
 
         if options.mp.print.relative_local_error
@@ -47,7 +47,7 @@ function printSolveInfo(solution,options)
     
         % Display minimized cost
         if (options.print.cost)
-            disp('minimized cost:');disp(solution.cost);
+            disp('minimized cost:');disp(solution.cost.J);
         end
 
         if options.print.relative_local_error

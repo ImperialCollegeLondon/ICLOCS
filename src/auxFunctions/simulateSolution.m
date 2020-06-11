@@ -71,10 +71,10 @@ end
 
 uv=zeros(length(tv),length(problem.sim.inputX)+length(problem.sim.inputU));
 for i=1:length(problem.sim.inputX)
-    uv(:,i)=speval(solution,'X',i,tv);
+    uv(:,i)=speval(solution,'X',problem.sim.inputX(i),tv);
 end
 for i=1:length(problem.sim.inputU)
-    uv(:,i+length(problem.sim.inputX))=speval(solution,'U',i,tv);
+    uv(:,i+length(problem.sim.inputX))=speval(solution,'U',problem.sim.inputU(i),tv);
 end
 
 ul=[problem.states.xl(problem.sim.inputX) problem.inputs.ul(problem.sim.inputU)];

@@ -51,24 +51,11 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     vdat=dataNLP.data;
     z=solution.z;
     
-    if (options.print.cost)
-        if strcmp(dataNLP.options.transcription,'integral_res_min')
-            if (strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.discretization,'hpLGR')) && dataNLP.options.reorderLGR
-                J=costFunction(solution.z_org,data);
-            else
-                J=costFunction(z,data);
-            end
-        else
-            if (strcmp(dataNLP.options.discretization,'globalLGR') || strcmp(dataNLP.options.discretization,'hpLGR')) && dataNLP.options.reorderLGR
-                J=costFunction(solution.z_org,dataNLP);
-            else
-                J=costFunction(z,dataNLP);
-            end
-        end
-    end
-    solution.cost=J;
-    f=dataNLP.functions_unscaled{3};
 
+
+    f=dataNLP.functions_unscaled{3};
+    Lcost=dataNLP.functions_unscaled{1};
+    Ecost=dataNLP.functions_unscaled{2};
     % Generate time vector
     if nt==1
         t0=dataNLP.t0;
@@ -114,6 +101,29 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     F=f(X,U,P,T,vdat);
     F_Np1=f(X_Np1,U_Np1,P_Np1,[T;tf],vdat);
     Xp=cell(length(npd),n);dXp=cell(length(npd),n);Up=cell(1,m);
+    
+
+    if strcmp(dataNLP.options.transcription,'integral_res_min')
+        if dataNLP.options.reorderLGR
+            J=costFunction(solution.z_org,data);
+        else
+            J=costFunction(z,data);
+        end
+
+    else
+        if dataNLP.options.reorderLGR
+            J=costFunction(solution.z_org,dataNLP);
+        else
+            J=costFunction(z,dataNLP);
+        end
+    end
+    costL=Lcost(X,[],U,[],P,T,vdat);
+    costE=Ecost(X(1,:),X(end,:),U(1,:),U(end,:),P,t0,tf,vdat);
+    solution.cost.J=J;
+    solution.cost.E=costE;
+    solution.cost.L=costL;
+    solution.cost.L_int=J-costE;
+
     
     if isfield(data,'dataNLP')
         tf=z(end);
@@ -243,10 +253,23 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
                          dXp{j,i}=[[dataNLP.map.LGR.points{npduidx(j)};1],F_Np1(idxst:idxed,i)];
                      end
                 end
+            elseif strcmp(dataNLP.options.stateRep,'pwPolyFit')%pw Poly Fitting
+                tau_seg_01=dataNLP.tau_segment/2+0.5;
+                for i=1:n 
+                     for j=1:length(npd)
+                         idxst=sum(npd(1:j-1))+1;
+                         idxed=sum(npd(1:j));
+                         
+                         [dXp{j,i}]=polyfit(dataNLP.map.LGR.points{npduidx(j)}/2+0.5,F_Np1(idxst:idxed,i).*(tau_seg_01(j+1)-tau_seg_01(j))*(tf-T(1)),npd(j)-1);
+                         Xp{j,i}=polyint(dXp{j,i},X_Np1(idxst,i));
+                     end
+                end
             elseif strcmp(dataNLP.options.stateRep,'pchip')  % pchip interpolation
                 for i=1:n
-                    Xp{i}=pchip([T;solution.tf],X_Np1(:,i)');
                     dXp{i}=pchip([T;solution.tf],F_Np1(:,i)');
+                    Xp{i}=dXp{i};
+                    Xp{i}.coefs=[dXp{i}.coefs./(size(dXp{i}.coefs,2):-1:1) X_Np1(1:end-1,i)];
+                    Xp{i}.order=dXp{i}.order+1;
                 end
             elseif strcmp(dataNLP.options.stateRep,'Legendre') % Legendre interpolation
                 for i=1:n 
@@ -270,6 +293,16 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
                      idxed=sum(npd(1:j))+1;
                      Up{j,i}=[[dataNLP.map.LGR.points{npduidx(j)};1],U_Np1(idxst:idxed,i)];
                  end
+                end
+            elseif strcmp(dataNLP.options.stateRep,'pwPolyFit')%pw Poly Fitting
+%                 tau_seg_01=dataNLP.tau_segment/2+0.5;
+                for i=1:m
+                     for j=1:length(npd)
+                         idxst=sum(npd(1:j-1))+1;
+                         idxed=sum(npd(1:j));
+                         
+                         [Up{j,i}]=polyfit(dataNLP.map.LGR.points{npduidx(j)}/2+0.5,U(idxst:idxed,i),npd(j)-1);
+                     end
                 end
             elseif strcmp(dataNLP.options.inputRep,'pchip')   % pchip interpolation
                 for i=1:m 
@@ -322,7 +355,7 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     solution.MaxConstVioError=max(solution.ConstraintError);
 
     if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
-        [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data);
+        [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data,ng_eq);
         solution.residuals.r=r;
         solution.residuals.r_seg=r_seg;
     end
@@ -332,12 +365,13 @@ else
     % Define some variables
     vdat=dataNLP.data;
     z=solution.z;
-    J=costFunction(z,data);
-    solution.cost=J;
+
     Vx=dataNLP.map.Vx;
     Vu=dataNLP.map.Vu;
     f=dataNLP.functions_unscaled{3};
-
+    Lcost=dataNLP.functions_unscaled{1};
+    Ecost=dataNLP.functions_unscaled{2};
+    
     % Generate time vector
     if nt==1
         tf=solution.tf;
@@ -396,16 +430,22 @@ else
     end
 
 
-
-
-
-    
     F=f(X,U,P,T,vdat);
     solution.coll.F=F;
     Fi=repelem(F,2,1);Fi(4:4:end,:)=[];Fi(1,:)=[];Fi(end,:)=[];
     
+    % Compute the objective values
+    J=costFunction(z,data);
+    costL=Lcost(X,[],U,[],P,T,vdat);
+    costE=Ecost(X(1,:),X(end,:),U(1,:),U(end,:),P,t0,tf,vdat);
+    solution.cost.J=J;
+    solution.cost.E=costE;
+    solution.cost.L=costL;
+    solution.cost.L_int=J-costE;
+
+    
     % Define piecewise polynomials
-    Xp=cell(n,1);dXp=cell(n,1);Up=cell(m,1);
+    Xp=cell(n,1);dXp=cell(n,1);Up=cell(m,1);dUp=cell(m,1);
 
     % Solution reconstruction
     if isfield(data,'dataNLP')
@@ -471,7 +511,7 @@ else
                     [Xp{i}, dXp{i}]=HSInterpolation(T,X(:,i),Fi(:,i));
                 end
                 for i=1:m % Piecewise quadratic polynomials
-                    [Up{i}]=HSInterpolationU(T,U(:,i));
+                    [Up{i},dUp{i}]=HSInterpolationU(T,U(:,i));
                 end
             elseif strcmp(dataNLP.options.discretization,'trapezoidal')
                 for i=1:n % Quadratic interpolation
@@ -479,6 +519,7 @@ else
                 end
                 for i=1:m % Piecewise linear polynomials
                     Up{i}=Linsplines(T,U(:,i),diff(U(:,i)));
+                    dUp{i}=mkpp(T,diff(U(:,i))');
                 end
             else
                 for i=1:n % Linear interpolation
@@ -486,6 +527,7 @@ else
                 end
                 for i=1:m % Piecewise constant polynomials
                     Up{i}=mkpp(T,U(1:end-1,i)');
+                    dUp{i}=mkpp(T,zeros(size(U(1:end-1,i)))');
                 end
             end
         else
@@ -505,8 +547,10 @@ else
                 end
             elseif strcmp(dataNLP.options.stateRep,'pchip')
                 for i=1:n
-                    Xp{i}=pchip(T,X(:,i)');
                     dXp{i}=pchip(T,F(:,i)');
+                    Xp{i}=dXp{i};
+                    Xp{i}.coefs=[dXp{i}.coefs./(size(dXp{i}.coefs,2):-1:1) X(1:end-1,i)];
+                    Xp{i}.order=dXp{i}.order+1;
                 end
             else
                 error('State representation method invalid or not supported by the selected discretization method');
@@ -516,18 +560,26 @@ else
             if strcmp(dataNLP.options.inputRep,'constant')
                 for i=1:m % Piecewise constant polynomials
                     Up{i}=mkpp(T,U(1:end-1,i)');
+                    dUp{i}=mkpp(T,zeros(size(U(1:end-1,i)))');
                 end
             elseif strcmp(dataNLP.options.inputRep,'linear')
                 for i=1:m % Piecewise linear polynomials
                     Up{i}=Linsplines(T,U(:,i),diff(U(:,i)));
+                    dUp{i}=mkpp(T,diff(U(:,i))');
                 end
             elseif strcmp(dataNLP.options.inputRep,'quadratic') && strcmp(dataNLP.options.discretization,'hermite')
                 for i=1:m % Piecewise quadratic polynomials
-                    [Up{i}]=HSInterpolationU(T,U(:,i));
+                    [Up{i},dUp{i}]=HSInterpolationU(T,U(:,i));
                 end
             elseif strcmp(dataNLP.options.inputRep,'pchip')
                 for i=1:m 
                     Up{i}=pchip(T,U(:,i)');
+                    dUp{i}=Up{i};
+                    pd = 3; 
+                    D = diag(pd:-1:1,1);
+                    dUp{i}.coefs = Up{i}.coefs*D;
+                    dUp{i}.coefs(:,1)=[];
+                    dUp{i}.order = Up{i}.order-1;
                 end
             else
                 error('Input representation method invalid or not supported by the selected discretization method');
@@ -543,6 +595,7 @@ else
     solution.Xp=Xp;
     solution.dXp=dXp;
     solution.Up=Up;
+    solution.dUp=dUp;
     
     % Display discretization error, constaint violation and number of active
     % constraints
@@ -599,7 +652,7 @@ else
 
         if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
             if strcmp(dataNLP.options.discretization,'hermite')
-                [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data);
+                [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data,ng_eq);
             else
                 r_seg=Error';
                 r=sum(r_seg,2);
@@ -866,7 +919,7 @@ end
 
 end
 
-function [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data)
+function [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data,ng_eq)
 
 %estimateConstraintViolation - Estimate the absolute local constraint violation
 %
@@ -908,6 +961,7 @@ if isfield(data,'resmin')
     AfHS=data.resmin.AfHS;
     DT=data.resmin.tf_list-data.resmin.t0_list;
     f=data.functions_unscaled{3};
+    g=data.functions_unscaled{4};
 elseif isfield(data,'dataNLP')
     ntg=length(data.tau_quad);
     tg=data.tau_quad*(tf-t0)+t0;
@@ -923,6 +977,7 @@ elseif isfield(data,'dataNLP')
     AfHS=data.AfHS;
     DT=data.tf_list-data.t0_list;
     f=data.dataNLP.functions_unscaled{3};
+    g=data.dataNLP.functions_unscaled{4};
 end
 
 Xg=zeros(ntg,n);
@@ -966,9 +1021,14 @@ end
 
 
 F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
+if ng_eq
+    G_eq=g(Xg,Ug,P,tg,vdat);
+    G_eq=G_eq(:,1:ng_eq);
+else
+    G_eq=[];
+end
 
-
-Res=dXg-F;
+Res=[dXg-F,G_eq];
 r_seg=DT/2.*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
 r=sum(r_seg,2);
 end
@@ -1265,6 +1325,7 @@ if isfield(data,'resmin')
     nps=data.resmin.nps;
     DT=data.resmin.tf_list-data.resmin.t0_list;
     f=data.functions_unscaled{3};
+    g=data.functions_unscaled{4};
 else
     ntg=length(data.tau_quad);
     tg=data.tau_quad*(tf-t0)+t0;
@@ -1275,6 +1336,7 @@ else
     nps=data.nps;
     DT=data.tf_list-data.t0_list;
     f=data.dataNLP.functions_unscaled{3};
+    g=data.dataNLP.functions_unscaled{4};
 end
 
 Xg=zeros(ntg,n);
@@ -1300,8 +1362,15 @@ end
 
 
 F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
+if ng_eq
+    G_eq=g(Xg,Ug,P,tg,vdat);
+    G_eq=G_eq(:,1:ng_eq);
+else
+    G_eq=[];
+end
 
-Res=dXg-F;
+Res=[dXg-F,G_eq];
+
 r_seg=DT/2.*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
 r=sum(r_seg,2);
 

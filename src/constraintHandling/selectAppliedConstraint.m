@@ -70,6 +70,7 @@ if ng
     % For all path constraints, identify at which time intervals this
     % will happen
     idxGActive0=true(1,size(guess_lambda_g,2));
+    
     for i=ng_eq+1:size(guess_lambda_g,2)
         gActiveTime{i} = identifyConstActive( problem_old, options, solution, guess_lambda_g(:,i), ng, i );
         if isempty(gActiveTime{i}) % No time intervals can be indentified for constraint being active
@@ -101,6 +102,10 @@ if ng
 
     gActiveTime(:,idxjoint)=[];
     problem.constraints.g_neq_ActiveTime=gActiveTime(:,ng_eq+1:end);
+    
+    if isfield(options.ECH,'noConstIntv') && options.ECH.noConstIntv
+        problem.constraints=rmfield(problem.constraints,'g_neq_ActiveTime');
+    end
 
     problem.data.gFilter=idxjoint;
     

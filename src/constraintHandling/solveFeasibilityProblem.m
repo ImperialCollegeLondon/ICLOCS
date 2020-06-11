@@ -80,21 +80,21 @@ m=length(problem.inputs.ul);               % Number of inputs
             ns=1;
         end
         [ data, tau ] = genTimeMesh( options, data, ns, M );
-        T=(guess.tf-guess.t0)*[0;cumsum(tau)]*data.Nm/ns+data.k0;
+        T=(guess.tf-guess.t0)*[0;cumsum(tau)]*data.Nm/ns+guess.t0;
         x_guess=zeros(M,n);u_guess=zeros(N,m);
         if isfield(guess,'TSeg_Bar')
             for i=1:n
-                x_guess(:,i)=speval(guess.Xp,i,guess.TSeg_Bar,T);
+                x_guess(:,i)=speval(guess,'X',i,guess.TSeg_Bar,T);
             end
             for i=1:m
-                u_guess(:,i)=speval(guess.Up,i,guess.TSeg_Bar,T);
+                u_guess(:,i)=speval(guess,'U',i,guess.TSeg_Bar,T);
             end
         else
             for i=1:n
-                x_guess(:,i)=speval(guess.Xp,i,T);
+                x_guess(:,i)=speval(guess,'X',i,T);
             end
             for i=1:m
-                u_guess(:,i)=speval(guess.Up,i,T);
+                u_guess(:,i)=speval(guess,'U',i,T);
             end
         end
         [ ConstraintError ] = max(calcConstraintViolation( data, guess, x_guess, u_guess, problem, T));
@@ -119,7 +119,7 @@ m=length(problem.inputs.ul);               % Number of inputs
     options.start='Warm';
     problem_feas.constraints.gl=[-inf*ones(1,ng) problem_feas.constraints.gl];
     problem_feas.constraints.gu=[problem_feas.constraints.gu inf*ones(1,ng)];
-    problem_feas.constraints.gTol_neg=[problem_feas.constraints.gTol_neg problem_feas.constraints.gTol_neg];
+    problem_feas.constraints.gTol_neq=[problem_feas.constraints.gTol_neq problem_feas.constraints.gTol_neq];
     problem_feas.constraints.g_neq_ActiveTime=[problem_feas.constraints.g_neq_ActiveTime problem_feas.constraints.g_neq_ActiveTime];
     
     

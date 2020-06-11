@@ -1,5 +1,5 @@
  
-function [pp]=HSInterpolationU(T,u)
+function [Up,dUp]=HSInterpolationU(T,u)
 %  Hsplines - Approximate the trajectory in x with a cubic Hermite
 %             interpolation
 %
@@ -43,9 +43,14 @@ U_kp1=u(3:2:end);
 % Create the standard MATLAB piecewise polynomial (pp) containing the estimation
 % of the derivatives of x
 
-pp=struct('form','pp','breaks',T(1:2:end).','coefs',zeros(M,3),'pieces',M,'order',3,'dim',1);
+Up=struct('form','pp','breaks',T(1:2:end).','coefs',zeros(M,3),'pieces',M,'order',3,'dim',1);
 
 % compute coefficients for the cubic Hermite spline interpolation 
-pp.coefs(:,3)=U_k;
-pp.coefs(:,2)=(-3*U_k+4*U_kph-U_kp1)./DT;
-pp.coefs(:,1)=(2*U_k-4*U_kph+2*U_kp1)./(DT.*DT);
+Up.coefs(:,3)=U_k;
+Up.coefs(:,2)=(-3*U_k+4*U_kph-U_kp1)./DT;
+Up.coefs(:,1)=(2*U_k-4*U_kph+2*U_kp1)./(DT.*DT);
+
+dUp=struct('form','pp','breaks',T(1:2:end).','coefs',zeros(M,2),'pieces',M,'order',2,'dim',1);
+% compute coefficients for the cubic Hermite spline interpolation 
+dUp.coefs(:,2)=(-3*U_k+4*U_kph-U_kp1)./(DT);
+dUp.coefs(:,1)=(2*U_k-4*U_kph+2*U_kp1)./(DT);
