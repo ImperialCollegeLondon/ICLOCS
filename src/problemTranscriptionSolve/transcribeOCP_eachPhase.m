@@ -232,8 +232,7 @@ end
 % For LGR, when t0 and tf both variables: nt=2
 %          when adaptive method, nt equal to the actual number of time
 %          varibles (>2)
-t0l=problem.time.t0_min; t0u=problem.time.t0_max;
-tfl=problem.time.tf_min; tfu=problem.time.tf_max;
+
 if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
     if options.adaptseg==1
         nt=nps+1;
@@ -241,14 +240,28 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
         nt=2;
     end
 else
-    nt=2; 
+    if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
+        nt=0;
+    else
+        nt=2; 
+    end
 end
 
-
+if nt
+    t0l=problem.time.t0_min; t0u=problem.time.t0_max;
+    tfl=problem.time.tf_min; tfu=problem.time.tf_max;
+else
+    t0l=[];t0u=[];tfl=[];tfu=[];
+end
 
 % Set the initial time and other parameters to adjust the temporal
 % scale
-% data.t0=problem.time.t0;
+
+if ~nt
+    data.t0=problem.time.t0_min;
+    data.tf=problem.time.tf_min;
+end
+
 if (strcmp(options.discretization,'discrete'))
      if problem.time.t0_min~=problem.time.t0_max
         error('Error: for discrete problems, currently only support fixed t0. Please set t0_min to equal to t0_max to precede.')
@@ -694,7 +707,7 @@ switch options.transcription
                 nz=nt+np+nx+nu;              % Length of the optimization variable
 
                 xpl=repmat(xl(:),M/N,1);xpu=repmat(xu(:),M/N,1);
-
+                
                 infoNLP.zl=[t0l;tfl; pl;repmat([xpl(:);ul(:)],N-1,1);xf_l(:);ul(:)];
                 infoNLP.zu=[t0u;tfu; pu;repmat([xpu(:);uu(:)],N-1,1);xf_u(:);uu(:)];
                 infoNLP.zl(nt+np+1:nt+np+n)=x0_l;    % Prune bounds for initial conditions
@@ -1273,7 +1286,7 @@ if ~strcmp(options.transcription,'multiple_shooting')
             else
                 data.hSidx.org.TXU.row=[];
                 data.hSidx.org.TXU.col=[];
-                data.hS_TXU=zeros(0,1:nz-nt-np);
+                data.hS_TXU=zeros(0,nz-nt-np);
                 data.hSidx.org.TT.row=[];
                 data.hSidx.org.TT.col=[];
                 data.hS_TT=zeros(0,0);

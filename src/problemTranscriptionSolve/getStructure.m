@@ -104,11 +104,13 @@ if nb
         dbdp=zeros(nb,np);  
     end
     if (nt==1)
+        dbdt0=zeros(nb,nt);
         dbdtf=ones(nb,nt);
     elseif (nt>=2)
         dbdt0=ones(nb,1);
         dbdtf=ones(nb,1);
     else
+        dbdt0=zeros(nb,nt);    
         dbdtf=zeros(nb,nt);    
     end   
 else
@@ -165,14 +167,18 @@ structure.dEdp=spones(dEdp);
 structure.dLdt=spones(dLdt);
 
 
-if (nt==1)                                      % Get structure of E wrt tf
+if (nt==1)      
+    dEdt0=[];       % Get structure of E wrt tf
     dEdtf = 1;
+    structure.dEdt0=spones(dEdt0);
 elseif (nt>=2)                                      % Get structure of E wrt tf
     dEdt0 = 1;
     dEdtf = 1;
     structure.dEdt0=spones(dEdt0);
 else
+    dEdt0=[];
     dEdtf=[];
+    structure.dEdt0=spones(dEdt0);
 end
 
 structure.dEdtf=spones(dEdtf);
@@ -189,7 +195,7 @@ structure.dbdx0=spones(dbdx0);structure.dbdxf=spones(dbdxf);
 structure.dbdu0=spones(dbdu0);structure.dbduf=spones(dbduf);
 structure.dbdp=spones(dbdp);structure.dbdtf=spones(dbdtf);
 
-if nt>=2
+if nt==0 || nt>=2
     structure.dbdt0=spones(dbdt0);
 end
 

@@ -198,8 +198,12 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(dfdp)+nt);...
 
 
 eg=spalloc(nz,ngcol,nz);
-vector.f.et0=spalloc(1,ngcol,nfd);vector.f.et0(1)=1;
-vector.f.etf=spalloc(1,ngcol,nfd);vector.f.etf(2)=1;
+vector.f.et0=spalloc(1,ngcol,nfd);
+vector.f.etf=spalloc(1,ngcol,nfd);
+if nt
+    vector.f.et0(1)=1;
+    vector.f.etf(2)=1;
+end
 vector.f.ep=eg;vector.f.ex=eg;vector.f.eu=eg;
 ixf=spalloc(n*M,ngcol,n*M*ngcol);
 
@@ -249,8 +253,13 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(dgdp)+nt);...
 
 
 eg=spalloc(nz,ngcol,ngcol*nz);
-vector.g.et0=spalloc(1,ngcol,ngcol);vector.g.et0(1)=1;
-vector.g.etf=spalloc(1,ngcol,ngcol);vector.g.etf(2)=1;
+vector.g.et0=spalloc(1,ngcol,ngcol);
+vector.g.etf=spalloc(1,ngcol,ngcol);
+
+if nt
+    vector.g.et0(1)=1;
+    vector.g.etf(2)=1;
+end
 vector.g.ep=eg;vector.g.ex=eg;vector.g.eu=eg;
 ig=spalloc(ng*M,ngcol,ng*M*ngcol);
 
@@ -297,8 +306,12 @@ colgroup=[[1:nt]';ones(~(np==0))*(overlapping(drcdp)+nt);...
 
 
 erc=spalloc(nz,nrccol,nrccol*nz);
-vector.rc.et0=zeros(1,nrccol);vector.rc.et0(1)=1;
-vector.rc.etf=zeros(1,nrccol);vector.rc.etf(2)=1;
+vector.rc.et0=zeros(1,nrccol);
+vector.rc.etf=zeros(1,nrccol);
+if nt
+    vector.rc.et0(1)=1;
+    vector.rc.etf(2)=1;
+end
 vector.rc.ep=erc;vector.rc.ex=erc;vector.rc.eu=erc;
 irc=spalloc(nrc,nrccol,nrc*nz);
 
