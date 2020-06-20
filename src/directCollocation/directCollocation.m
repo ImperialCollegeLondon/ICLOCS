@@ -82,7 +82,7 @@ try
 
 
     % if strcmp(data.options.transcription,'discrete'); tf=1; t0=0; end
-    tau=[0;cumsum(data.tau)]*data.Nm/ns;
+    tau=[0;data.tau_inc]*data.Nm/ns;
     t=(tf-t0)*tau+t0;
     % t=(tf-t0)*tau+k0;
 

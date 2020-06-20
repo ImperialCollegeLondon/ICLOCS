@@ -30,11 +30,14 @@ function [ data, tau ] = genTimeMesh( options, data, ns, M )
 
 if options.tau==0
     tau=ns*ones(M-1,1)/(M-1); 
+    data.tau_inc=linspace(0,ns,M)';
+    data.tau_inc(1)=[];
 else
    texst=ones(ns,1);
    tau=kron(options.tau,texst);
+   data.tau_inc=cumsum(tau);
 end
-data.tau_inc=cumsum(tau);
+
 if abs(sum(tau)-ns)>sqrt(eps);error('Time vector (tau) should sum to 1');end
 data.tau=tau;
 

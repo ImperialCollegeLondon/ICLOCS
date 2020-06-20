@@ -17,10 +17,14 @@ function [solution] = runPostSolveTasks(problem,solution,options,data)
 
 
 if isfield(solution,'mp')
-    solution.mp.cost=0;
+    solution.mp.cost.J=0;
     for i=1:length(problem.phases)
-        [solution.phaseSol{i}]=postSolveAnalysis(problem.phases{i},solution.phaseSol{i},options.phaseoptions{i},data.phasedata{i});
-        solution.mp.cost=solution.mp.cost+solution.phaseSol{i}.cost;
+        if solution.phaseSol{i}.tf-solution.phaseSol{i}.t0==0
+            warning('Certain phases became redundant (i.e. tf-t0=0), post processing of solution might fail');
+        else
+            [solution.phaseSol{i}]=postSolveAnalysis(problem.phases{i},solution.phaseSol{i},options.phaseoptions{i},data.phasedata{i});
+            solution.mp.cost.J=solution.mp.cost.J+solution.phaseSol{i}.cost.J;
+        end
     end
     printSolveInfo(solution,options);
 else

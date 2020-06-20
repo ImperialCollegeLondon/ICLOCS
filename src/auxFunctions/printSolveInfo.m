@@ -27,14 +27,18 @@ function printSolveInfo(solution,options)
 
         if options.mp.print.relative_local_error
             for i=1:length(solution.phaseSol)
-                disp(['Phase' num2str(i) ':']);
-                disp('Maximum absolute local error:');disp(solution.phaseSol{i}.MaxAbsError);
-                disp('Maximum relative local error:');disp(solution.phaseSol{i}.MaxRelError);
-                if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
-                    disp('Integrated Squared ODE residual:');disp(solution.phaseSol{i}.residuals.r');
+                if solution.phaseSol{i}.tf-solution.phaseSol{i}.t0==0
+                    disp(['Phase ' num2str(i) ' is redundant, i.e. corresponding tf-t0=0']);
+                else
+                    disp(['Phase ' num2str(i) ':']);
+                    disp('Maximum absolute local error:');disp(solution.phaseSol{i}.MaxAbsError);
+                    disp('Maximum relative local error:');disp(solution.phaseSol{i}.MaxRelError);
+                    if isfield(options.mp.print,'residual_error') && options.mp.print.residual_error
+                        disp('Integrated Squared ODE residual:');disp(solution.phaseSol{i}.residuals.r');
+                    end
+                    disp('Maximum absolute constraint violation:');disp(solution.phaseSol{i}.MaxConstVioError);
+                    disp('Number of active constraints:');disp(solution.phaseSol{i}.NumActiveConstraint);
                 end
-                disp('Maximum absolute constraint violation:');disp(solution.phaseSol{i}.MaxConstVioError);
-                disp('Number of active constraints:');disp(solution.phaseSol{i}.NumActiveConstraint);
             end
         end
         

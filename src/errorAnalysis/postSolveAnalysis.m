@@ -384,7 +384,7 @@ else
         t0=dataNLP.t0;
     end
 
-    T=(tf-t0)*[0;cumsum(dataNLP.tau)]*dataNLP.Nm/ns+t0;
+    T=(tf-t0)*[0;dataNLP.tau_inc]*dataNLP.Nm/ns+t0;
     Tdec=T(1:ns:end);
     solution.Tdec=Tdec;
     

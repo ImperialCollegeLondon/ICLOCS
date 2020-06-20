@@ -116,7 +116,7 @@ else
         solution.x0=solution.X(1,:)';
         usp=data.map.Vu*z;
         solution.U=reshape([usp;usp(end-m+1:end)],m,M)';
-        solution.T=(solution.coll.tf-t0)*[0;cumsum(data.tau)]+t0; 
+        solution.T=(solution.coll.tf-t0)*[0;data.tau_inc]+t0; 
 
     else
 
@@ -124,7 +124,7 @@ else
         solution.coll.x0=solution.coll.X(1,:)';
         usp=reshape(data.map.Vu*z,m,N)';
         solution.coll.U=kron(usp,ones((M)/N,1));
-        solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;cumsum(data.tau)*data.Nm/ns]+solution.coll.t0;
+        solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;data.tau_inc*data.Nm/ns]+solution.coll.t0;
 
         if ~strcmp(data.options.NLPsolver,'NOMAD') 
             solution.multipliers.lambdaNLP=solution.multipliers.lambda;
