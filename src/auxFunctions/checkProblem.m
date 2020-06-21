@@ -26,3 +26,7 @@ if length(problem.constraints.bl)==length(problem.constraints.bu) && length(prob
 else
     error('Please ensure all information in problem formulation regarding the boundary constraints and their error tolerances have been correctly configured')
 end
+
+if ~isfield(problem.data,'ng_eq')
+    error('Please follow the instructions on https://github.com/ImperialCollegeLondon/ICLOCS to update your problem to run with ICLOCS version 2.5')
+end
