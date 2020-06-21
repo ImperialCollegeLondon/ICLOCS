@@ -591,6 +591,8 @@ end
 data.options=options;
 data.functions=problem.functions;
 data.functions_unscaled=problem.functions_unscaled;
+data.data.N_tNode=M;
+
 if options.scaling
     data.data.Xscale=problem.states.scales;
     data.data.Uscale=problem.inputs.scales;
