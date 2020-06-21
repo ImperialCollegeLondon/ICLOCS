@@ -32,6 +32,7 @@ e=data.options.perturbation.J;                                % pertubation size
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;
 vdat=data.data;
+fg=vdat.functionfg;
 X=X_Np1(1:M,:);
 DTLP=repmat(data.t_segment_end,1,n);
 DT_ratio_diff=repmat(data.tau_segment_ratio_diff,1,n);

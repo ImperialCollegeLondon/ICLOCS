@@ -31,6 +31,7 @@ e=data.options.perturbation.J;                                % pertubation size
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
 vdat=data.data;
+fg=vdat.functionfg;
 % t0=data.t0;
 % k0=data.k0;
 
