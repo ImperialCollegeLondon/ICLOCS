@@ -1,4 +1,4 @@
-function [dL,dE]=gradCost_myProblem(L,X,Xr,U,Ur,P,t,E,x0,xf,u0,uf,p,t0,tf,data)
+function [dL,dE]=gradCost_myProblem_Phase2(L,X,Xr,U,Ur,P,t,E,x0,xf,u0,uf,p,t0,tf,data)
 
 %GRADCOST - Return the gradient of the cost in analytic form
 %
@@ -68,6 +68,8 @@ dE.dx0=[];
 dE.du0=[];
 dE.dxf=[];
 dE.duf=[];
+
+[ dL,dE ] = batchScaleGradCost(dL,dE,data);
 
 %------------- END CODE --------------
 

@@ -69,6 +69,7 @@ dE.du0=[];
 dE.dxf=[];
 dE.duf=[];
 
+[ dL,dE ] = batchScaleGradCost(dL,dE,data);
 %------------- END CODE --------------
 
 

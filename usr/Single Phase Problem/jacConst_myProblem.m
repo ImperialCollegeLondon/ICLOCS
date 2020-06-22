@@ -99,4 +99,6 @@ df.du{1}=[...];  % Derivative of f(x,u,p,t) wrt. u1
 
 dg.flag=0;
 db.flag=0;
+
+[ df,dg,db ] = batchScalejacConst(df,dg,db,data);
 %------------- END CODE --------------

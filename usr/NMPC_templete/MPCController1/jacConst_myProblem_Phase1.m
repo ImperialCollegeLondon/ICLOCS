@@ -1,5 +1,5 @@
 
-function [df,dg,db]=jacConst_myProblem(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data)
+function [df,dg,db]=jacConst_myProblem_Phase1(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data)
 
 %  jacConst - Return the gradient of the plant model, path constraints and  boundary constraints 
 %
@@ -86,7 +86,7 @@ function [df,dg,db]=jacConst_myProblem(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data)
 
 Lt=ones(size(t));
 
-df.flag=1;               % df.flag=1 if the analytic is supplied otherwise set
+df.flag=0;               % df.flag=1 if the analytic is supplied otherwise set
                          % df.flag=0;
                          
 df.dp{1}=[...];             % Derivatives of f(x,u,p,t) wrt. p
@@ -99,4 +99,6 @@ df.du{1}=[...];  % Derivative of f(x,u,p,t) wrt. u1
 
 dg.flag=0;
 db.flag=0;
+
+[ df,dg,db ] = batchScalejacConst(df,dg,db,data);
 %------------- END CODE --------------

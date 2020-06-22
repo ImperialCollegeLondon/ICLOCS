@@ -1,5 +1,5 @@
 
-function [HL,HE,Hf,Hg,Hb]=hessianLagrangian_myProblem(X,U,P,t,E,x0,xf,u0,uf,p,t0,tf,data)
+function [HL,HE,Hf,Hg,Hb]=hessianLagrangian_myProblem_Phase1(X,U,P,t,E,x0,xf,u0,uf,p,t0,tf,data)
 
 %  hessianLagrangian - Return the Hessian of the Lagrangian
 %
@@ -64,7 +64,6 @@ function [HL,HE,Hf,Hg,Hb]=hessianLagrangian_myProblem(X,U,P,t,E,x0,xf,u0,uf,p,t0
 % ICLOCS (Imperial College London Optimal Control) Version 2.5 
 % 1 Aug 2019
 % iclocs@imperial.ac.uk
-
 %------------- BEGIN CODE ---------------
 [ X,~,U,~,P,x0,xf,u0,uf,p,data ] = batchScaleBack(X,[],U,[],P,x0,xf,u0,uf,p,data);
 
@@ -117,6 +116,7 @@ HE=num2cell(Ez);
 Hg=[];
 Hb=[];
 
+[HL,HE,Hf,Hg,Hb] = batchScaleLagHessian(HL,HE,Hf,Hg,Hb,data);
 [HL,HE,Hf,Hg,Hb] = convertHessianANStruct(HL,HE,Hf,Hg,Hb,data);
 
 

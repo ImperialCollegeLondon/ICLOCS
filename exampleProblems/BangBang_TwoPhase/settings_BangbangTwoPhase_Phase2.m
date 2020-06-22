@@ -61,7 +61,7 @@ if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final
         %   - Barycentric Lagrange Interpolation ('Barycentric'), available for LGR transcription method  
         %   - Legendre polynomial fitting  ('Legendre'), available for LGR transcription method  
         %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
-        options.stateRep='pchip';
+        options.stateRep='cubic';
         % Input representation
         %---------------------------------------
         %   - Piecewise constant        ('constant'), available for all transcription methods
@@ -70,7 +70,7 @@ if strcmp(options.resultRep,'manual') || strcmp(options.resultRep,'res_min_final
         %   - Barycentric Lagrange Interpolation ('Barycentric'), available for LGR transcription method  
         %   - Legendre polynomial fitting  ('Legendre'), available for LGR transcription method  
         %   - Piecewise Cubic Hermite Interpolating Polynomial with Matlab pchip function        ('pchip'), available for all transcription methods
-        options.inputRep='linear';
+        options.inputRep='quadratic';
 end
 
 %% Derivative generation

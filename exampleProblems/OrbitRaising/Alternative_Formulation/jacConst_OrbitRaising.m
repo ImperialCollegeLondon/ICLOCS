@@ -74,7 +74,7 @@ function [df,dg,db]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data)
 
 %------------- BEGIN CODE --------------
 
-
+[ X,~,U,~,P,x0,xf,u0,uf,p,data ] = batchScaleBack(X,[],U,[],P,x0,xf,u0,uf,p,data);
 
 
 %[nt,np,n,m,ng,nb]=deal(data.sizes{1:6});   % extract variable dimension
@@ -122,5 +122,8 @@ db.dx0=[];
 db.du0=[];
 db.duf=[];
 db.dxf=[1./sqrt(xf(1))./xf(1)/2, 0, 1; 0, 1, 0];     % derivatives with respect to [x1(tf) ,x2(tf), x3(tf)]
+
+
+[ df,dg,db ] = batchScalejacConst(df,dg,db,data);
 
 %------------- END CODE --------------

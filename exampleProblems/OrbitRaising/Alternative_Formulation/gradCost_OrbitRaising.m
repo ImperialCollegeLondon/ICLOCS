@@ -44,7 +44,7 @@ function [dL,dE]=gradCost(L,X,Xr,U,Ur,P,t,E,x0,xf,u0,uf,p,t0,tf,data)
 % iclocs@imperial.ac.uk
 
 %------------- BEGIN CODE --------------
-
+[ X,Xr,U,Ur,P,x0,xf,u0,uf,p,data ] = batchScaleBack(X,Xr,U,Ur,P,x0,xf,u0,uf,p,data);
 
 
 Lt=ones(size(t));
@@ -67,6 +67,8 @@ dE.dx0=[];
 dE.du0=[];
 dE.dxf=[-1,0,0];
 dE.duf=[];
+
+[ dL,dE ] = batchScaleGradCost(dL,dE,data);
 
 %------------- END CODE --------------
 

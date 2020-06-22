@@ -600,10 +600,30 @@ if options.scaling
     data.data.Tshift=problem.time.shifts;
     data.data.Xshift=problem.states.shifts;
     data.data.Ushift=problem.inputs.shifts;
+    
+    
     if np
         data.data.Pscale=problem.parameters.scales;
         data.data.Pshift=problem.parameters.shifts;
+        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
+            data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale data.data.Pscale ];
+            data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale data.data.Pscale ];
+        else
+            data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale data.data.Pscale data.data.Tscale data.data.Tscale];
+            data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale data.data.Pscale data.data.Tscale data.data.Tscale];
+        end
+    else
+        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
+            data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale ];
+            data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale ];
+        else
+            data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale data.data.Tscale data.data.Tscale];
+            data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale data.data.Tscale data.data.Tscale];
+        end
+
     end
+    data.data.Allscale_fgL_Mat=data.data.Allscale_fgL'*data.data.Allscale_fgL;
+    data.data.Allscale_bE_Mat=data.data.Allscale_bE'*data.data.Allscale_bE;
     
     if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
         XunscaleMat=1./repmat( data.data.Xscale, M+1, 1 );

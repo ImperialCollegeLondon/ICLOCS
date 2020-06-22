@@ -110,4 +110,7 @@ df.du{1}=[-X(:,1)./500./X(:,4), -X(:,2)./500./X(:,4), (1-X(:,3)/500)./X(:,4), Lt
 
 dg.flag=0;
 db.flag=0;
+
+[ df,dg,db ] = batchScalejacConst(df,dg,db,data);
+
 %------------- END CODE --------------

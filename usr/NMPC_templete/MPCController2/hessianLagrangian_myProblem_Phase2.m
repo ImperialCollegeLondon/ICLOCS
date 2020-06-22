@@ -117,6 +117,7 @@ HE=num2cell(Ez);
 Hg=[];
 Hb=[];
 
+[HL,HE,Hf,Hg,Hb] = batchScaleLagHessian(HL,HE,Hf,Hg,Hb,data);
 [HL,HE,Hf,Hg,Hb] = convertHessianANStruct(HL,HE,Hf,Hg,Hb,data);
 
 
