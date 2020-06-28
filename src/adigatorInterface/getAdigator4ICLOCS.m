@@ -23,12 +23,14 @@ Tvec.dY = ones(size(Tvec.f));
 Pvec.f = p;
 Pvec.dY = ones(size(Pvec.f));
 
-userFunction_Y=data.data.AdigatorUserFunction_Y;
-userFunction_YY=data.data.AdigatorUserFunction_YY;
+
+
 
 if strcmp(data.options.ipopt.hessian_approximation,'limited-memory')
+    userFunction_Y=data.data.AdigatorUserFunction_Y;
     [const_vec_Adigator] = userFunction_Y(Xvec,Uvec,Pvec,Tvec,data);
 else
+    userFunction_YY=data.data.AdigatorUserFunction_YY;
     [const_vec_Adigator] = userFunction_YY(Xvec,Uvec,Pvec,Tvec,data);
 end
 
