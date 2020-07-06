@@ -51,11 +51,15 @@ structure.db.flag=db.flag;
 if dE.flag==1
     if (nt~=0)&&(~isempty(dE.dtf))
       structure.dEdtf = 1;
+    elseif nt==0 && isempty(dE.dtf)
+      structure.dEdtf=[];  
     else
       structure.dEdtf= 0;  
     end
     if (nt>=2)&&(~isempty(dE.dt0))
       structure.dEdt0 = 1;
+    elseif nt==0 && isempty(dE.dtf)
+      structure.dEdt0=[];  
     else
       structure.dEdt0= 0;  
     end
