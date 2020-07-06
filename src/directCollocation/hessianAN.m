@@ -68,21 +68,21 @@ if ng
     adjoint_g=adjoint_g';
 end
 
-if data.FD.index.df.flag && data.FD.index.dg.flag && ~isempty(Hf) && ng && ~isempty(Hg)
+if ~isempty(Hf) && ng && ~isempty(Hg)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
     [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, DT, adjoint_f, vdat, data );
     [ gzz ] = hessian_AN_G( gzz, Hg, M, nt, ng, nz, T, adjoint_g, data );
-elseif (isempty(Hf) || ~data.FD.index.df.flag) && ng && (isempty(Hg) || ~data.FD.index.dg.flag) && size(data.FD.index.f,2)==size(data.FD.index.g,2)
+elseif (isempty(Hf)) && ng && (isempty(Hg)) && size(data.FD.index.f,2)==size(data.FD.index.g,2)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
     [ fzz,gzz ] = hessian_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, t0, T, DT, e, e2, vdat, data );
-elseif ~isempty(Hf) && data.FD.index.df.flag
+elseif ~isempty(Hf) 
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, DT, adjoint_f, vdat, data );
     if ng
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-        if ~isempty(Hg) && data.FD.index.dg.flag
+        if ~isempty(Hg) 
             [ gzz ] = hessian_AN_G( gzz, Hg, M, nt, ng, nz, T, adjoint_g, data );
         else
             
@@ -91,12 +91,12 @@ elseif ~isempty(Hf) && data.FD.index.df.flag
     else
         gzz=sparse(nz,nz);
     end
-elseif isempty(Hf) || ~data.FD.index.dg.flag
+elseif isempty(Hf)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT, e, e2, vdat, data );
     if ng
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-        if ~isempty(Hg) && data.FD.index.dg.flag
+        if ~isempty(Hg)
             [ gzz ] = hessian_AN_G( gzz, Hg, M, nt, ng, nz, T, adjoint_g, data );
         else
             [ gzz ] = hessian_CD_G( gzz, M, ng, nz, g, X, U, P, t0, T, DT, e, e2, adjoint_g, vdat, data );
@@ -114,7 +114,7 @@ end
 
 
 
-if ~isempty(HL) && data.FD.index.dL.flag
+if ~isempty(HL) 
     Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
     [ Lzz ] = hessian_AN_wL( dL, Lzz, HL, M, nt, nz, T, DT, data );
 else
@@ -136,7 +136,7 @@ end
 
 
 
-if ~isempty(HE) && data.FD.index.dE.flag
+if ~isempty(HE)
     Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
     [ Ezz ] = hessian_AN_E( Ezz, HE, nt, data );
 else    
@@ -157,7 +157,7 @@ end
 if nb
   adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
   bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-  if ~isempty(Hb) && data.FD.index.db.flag
+  if ~isempty(Hb)
       [ bzz ] = hessian_AN_B( bzz, Hb, nz, nt, adjoint_b, data );
   else   
       [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );

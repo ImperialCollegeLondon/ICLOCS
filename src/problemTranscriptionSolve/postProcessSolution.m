@@ -35,6 +35,9 @@ if strcmp(data.options.discretization,'globalLGR') || strcmp(data.options.discre
     solution.coll.X=reshape(data.map.Vx*z,M+1,n);
     solution.coll.x0=solution.coll.X(1,:)';
     solution.coll.U=reshape(data.map.Vu*z,M,m);
+    if isfield(data,'t_zone_map')
+        solution.coll.U=solution.coll.U(data.t_zone_map,:);
+    end
     
     if data.options.adaptseg==1
         t_segment=z(end-nt+1:end)';
@@ -115,6 +118,9 @@ else
         solution.X=reshape(data.map.Vx*z,n,M)';
         solution.x0=solution.X(1,:)';
         usp=data.map.Vu*z;
+        if isfield(data,'t_zone_map')
+            usp=usp(data.t_zone_map,:);
+        end
         solution.U=reshape([usp;usp(end-m+1:end)],m,M)';
         solution.T=(solution.coll.tf-t0)*[0;data.tau_inc]+t0; 
 
@@ -123,6 +129,9 @@ else
         solution.coll.X=reshape(data.map.Vx*z,n,M)';
         solution.coll.x0=solution.coll.X(1,:)';
         usp=reshape(data.map.Vu*z,m,N)';
+        if isfield(data,'t_zone_map')
+            usp=usp(data.t_zone_map,:);
+        end
         solution.coll.U=kron(usp,ones((M)/N,1));
         solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;data.tau_inc*data.Nm/ns]+solution.coll.t0;
 

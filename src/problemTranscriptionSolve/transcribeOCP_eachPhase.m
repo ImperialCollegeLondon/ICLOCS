@@ -402,9 +402,9 @@ end
 
 % Generation of mesh (time dimension)
 if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
-    [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( options, data, nps, npdu, npd, npduidx, M );
+    [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( problem,options, data, nps, npdu, npd, npduidx, M );
 else
-    [ data, tau ] = genTimeMesh( options, data, ns, M );
+    [ data, tau ] = genTimeMesh( problem, options, data, ns, M );
 end
 
 

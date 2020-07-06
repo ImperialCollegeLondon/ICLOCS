@@ -1,4 +1,4 @@
-function [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( options, data, nps, npdu, npd, npduidx, M )
+function [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( problem, options, data, nps, npdu, npd, npduidx, M )
 %genTimeMesh - generate discretized mesh along the time dimension, for p/hp methods
 %
 % Syntax:  [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( options, data, nps, npdu, npd, npduidx, M )
@@ -86,6 +86,19 @@ data.tau=tau;
 data.tau_segment_ratio_diff=tau_segment_ratio_diff;
 data.t_segment_mat_m=sparse(t_segment_mat_m);
 data.t_segment_mat_p=sparse(t_segment_mat_p);
+
+if isfield(problem.inputs,'t_zone') && problem.inputs.t_zone>0
+   if problem.time.t0_min==problem.time.t0_min && problem.time.tf_min==problem.time.tf_min
+       t0=problem.time.t0_min;
+       tf=problem.time.tf_min;
+       T=(tf-t0)/2*tau_inc+(tf+t0)/2;
+       [hc,edges,bin]  = histcounts(T,t0:problem.inputs.t_zone:tf);
+       temp=cumsum([1 hc]);
+       data.t_zone_map=temp(bin);
+   else
+       error('Zoning of input is only availabe for fixed t0 and tf problems')
+   end
+end
 
 end
 

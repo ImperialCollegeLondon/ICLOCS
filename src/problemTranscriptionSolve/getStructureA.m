@@ -87,53 +87,53 @@ if dE.flag==1
 end    
 
 data.FD.vindex.E=[];
-if dE.flag==1
+% if dE.flag==1 
     if strcmp(data.options.discretization,'globalLGR') || strcmp(data.options.discretization,'hpLGR')
-        if ~isempty(dE.dx0)
+        if dE.flag==0 || ~isempty(dE.dx0)
           data.FD.vindex.E = [data.FD.vindex.E, 1:n];
         end
-        if ~isempty(dE.dxf)  
+        if dE.flag==0 || ~isempty(dE.dxf)  
           data.FD.vindex.E = [data.FD.vindex.E, n+1:2*n];
         end
-        if ~isempty(dE.du0)
+        if dE.flag==0 || ~isempty(dE.du0)
           data.FD.vindex.E = [data.FD.vindex.E, n*2+1:2*n+m];
         end
-        if ~isempty(dE.duf)
+        if dE.flag==0 || ~isempty(dE.duf)
           data.FD.vindex.E = [data.FD.vindex.E, n*2+m+1:2*n+2*m];
         end    
-        if np&&(~isempty(dE.dp))
+        if np&&(dE.flag==0 || ~isempty(dE.dp))
           data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+1:2*n+2*m+np];
         end
-        if (nt>=2)&&(~isempty(dE.dt0))
+        if (nt>=2)&&(dE.flag==0 || ~isempty(dE.dt0))
           data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+np+1];
         end
-        if (nt~=0)&&(~isempty(dE.dtf))
+        if (nt~=0)&&(dE.flag==0 || ~isempty(dE.dtf))
           data.FD.vindex.E = [data.FD.vindex.E, n*2+m*2+np+1+1];
         end
     else
-        if (nt~=0)&&(~isempty(dE.dtf))
+        if (nt~=0)&&(dE.flag==0 || ~isempty(dE.dtf))
           data.FD.vindex.E = [data.FD.vindex.E, 1];
         end
-        if (nt>=2)&&(~isempty(dE.dt0))
+        if (nt>=2)&&(dE.flag==0 || ~isempty(dE.dt0))
           data.FD.vindex.E = [data.FD.vindex.E, 2];
         end
-        if np&&(~isempty(dE.dp))
+        if np&&(dE.flag==0 || ~isempty(dE.dp))
           data.FD.vindex.E = [data.FD.vindex.E, nt+1:nt+np];
         end
-        if ~isempty(dE.dx0)
+        if dE.flag==0 || ~isempty(dE.dx0)
           data.FD.vindex.E = [data.FD.vindex.E, nt+np+1:nt+np+n];
         end
-        if ~isempty(dE.du0)
+        if dE.flag==0 || ~isempty(dE.du0)
           data.FD.vindex.E = [data.FD.vindex.E, nt+np+n+1:nt+np+n+m];
         end
-        if ~isempty(dE.dxf)  
+        if dE.flag==0 || ~isempty(dE.dxf)  
           data.FD.vindex.E = [data.FD.vindex.E, nt+np+n+m+1:nt+np+n*2+m];
         end
-        if ~isempty(dE.duf)
+        if dE.flag==0 || ~isempty(dE.duf)
           data.FD.vindex.E = [data.FD.vindex.E, nt+np+n*2+m+1:nt+np+n*2+m*2];
         end   
     end
-end    
+% end    
 
 % Preallocate memory
 if dL.flag
