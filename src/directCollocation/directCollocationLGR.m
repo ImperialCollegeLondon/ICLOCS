@@ -62,6 +62,9 @@ mp=data.map;
 X_Np1=reshape(mp.Vx*z,M+1,n); %States including the end point
 X=X_Np1(1:M,:); %States exlduing the end point
 U=reshape(mp.Vu*z,M,m); %input exluding the end point
+% if isfield(data,'t_zone_map')
+%     U=U(data.t_zone_map,:);
+% end
 
 %%
 % Extract design parameters if specified and convert to cells

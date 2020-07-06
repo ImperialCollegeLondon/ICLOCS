@@ -57,6 +57,9 @@ try
     if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
         U(end,:)=U(end-1,:);
     end
+%     if isfield(data,'t_zone_map')
+%         U=U(data.t_zone_map,:);
+%     end
 
 
     %%
@@ -171,7 +174,8 @@ try
             end
 
         case{'hessian'}
-          if strcmp(data.options.derivatives,'analytic')
+            
+          if strcmp(data.options.derivatives,'analytic') && (~isfield(data.options,'forceNumericHes') || ~data.options.forceNumericHes)
                 [Lzz,Ezz,fzz,gzz,bzz]=hessianAN(L,f,g,sol{phaseNo}.Jf,sol{phaseNo}.JL,X,U,P,tau,E,b,x0,...
                                                         xf,u0,uf,p,t0,tf,data);                      
                 hessc=data.sigma*(Lzz+Ezz)+fzz+gzz+bzz;
