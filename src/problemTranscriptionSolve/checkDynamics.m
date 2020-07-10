@@ -51,8 +51,9 @@ if data.QPSolverCheck
     ccst=[testout.const.fc;testout.const.gc;testout.const.avrcc;testout.const.bc];
     OSQP.l=[data.infoNLP.zl;data.infoNLP.cl-ccst]; %lower bound
     OSQP.u=[data.infoNLP.zu;data.infoNLP.cu-ccst]; %upper bound
+    data_org.OSQP=OSQP;
 end
-data_org.OSQP=OSQP;
+
 
 
 end
