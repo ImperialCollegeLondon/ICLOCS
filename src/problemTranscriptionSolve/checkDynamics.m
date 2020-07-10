@@ -42,7 +42,6 @@ if data.QPSolverCheck
         OSQP.q=OSQP.q+testout.gradCost.Lz; %linear term
     end
     if data.FD.FcnTypes.Etype==2 %linear cost
-        OSQP.P=OSQP.P+[]; %no quadratic term
         OSQP.q=OSQP.q+testout.gradCost.Ez; %linear term 
     elseif data.FD.FcnTypes.Etype==3 %quadratic cost
         OSQP.P=OSQP.P+testout.hessian.Lzz;
