@@ -1545,7 +1545,7 @@ end
 
   
 % Check syntax of user defined dynamics and path constraints.
-checkDynamics( infoNLP.z0,data );
+data=checkDynamics( infoNLP.z0,data );
 
 
 

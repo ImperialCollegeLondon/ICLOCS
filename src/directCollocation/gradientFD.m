@@ -1,4 +1,4 @@
-function grad=gradientFD(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,t0,tf,data)
+function varargout=gradientFD(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,t0,tf,data)
 %GRADIENTFD - Generate gradient of the cost using finite-differences
 %
 % Syntax:  grad=gradientFD(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,tf,data)
@@ -58,6 +58,10 @@ end
 
 
 % Return the gradient
-
-grad=Lz+Ez;
+if nargout==1
+    varargout{1}=Lz+Ez;
+elseif nargout==2
+    varargout{1}=Lz;
+    varargout{2}=Ez;
+end
 

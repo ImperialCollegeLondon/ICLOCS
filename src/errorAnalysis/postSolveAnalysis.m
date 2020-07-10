@@ -612,6 +612,9 @@ else
         case{'ipopt'} 
          % Estimate the adjoint variables
            lambda_midpoint=reshape(solution.multipliers.lambda(n+1:n*M),n,M-1)';
+        case{'OSQP'} 
+         % Estimate the adjoint variables
+           lambda_midpoint=reshape(solution.multipliers.lambda(n+1:n*M),n,M-1)';
         case{'worhp'} 
          % Estimate the adjoint variables
            lambda_midpoint=reshape(solution.multipliers.lambda(n+1:n*M),n,M-1)';

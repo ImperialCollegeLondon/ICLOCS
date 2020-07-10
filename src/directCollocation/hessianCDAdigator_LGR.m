@@ -1,4 +1,4 @@
-function hessian=hessianCDAdigator_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
+function [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
 
 %  It evaluates the Hessian of the Lagrangian with Adigator
 %
@@ -171,7 +171,7 @@ end
 
 % Return the Hessian of the Lagrangian
 % -------------------------------------
-hessian=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+% hessian=data.sigma*(Lzz+Ezz)+fgzz+bzz;
 
 % spy(hessc)
 % figure

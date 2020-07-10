@@ -177,16 +177,18 @@ try
             
           if strcmp(data.options.derivatives,'analytic') && (~isfield(data.options,'forceNumericHes') || ~data.options.forceNumericHes)
                 [Lzz,Ezz,fzz,gzz,bzz]=hessianAN(L,f,g,sol{phaseNo}.Jf,sol{phaseNo}.JL,X,U,P,tau,E,b,x0,...
-                                                        xf,u0,uf,p,t0,tf,data);                      
-                hessc=data.sigma*(Lzz+Ezz)+fzz+gzz+bzz;
-                hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
-                sol{phaseNo}.hessian=tril(hessc);        
+                                                        xf,u0,uf,p,t0,tf,data);          
+                fgzz=fzz+gzz;
           elseif strcmp(data.options.derivatives,'adigator')
-                sol{phaseNo}.hessian=hessianCDAdigator(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+                [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
           else
-                sol{phaseNo}.hessian=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+                [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+                fgzz=fzz+gzz;
           end
-
+          hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+          hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
+          sol{phaseNo}.hessian=tril(hessc);    
+          
           if strcmp(data.options.NLPsolver,'builtinSQP')
             sol{phaseNo}.hessian=sol{phaseNo}.hessian+sol{phaseNo}.hessian'-diag([diag(sol{phaseNo}.hessian)]);
           end
@@ -195,6 +197,28 @@ try
           else
               solution=sol{phaseNo}.hessian;
           end
+       
+       case{'constTest'}
+            X_vect=reshape(X',n*M,1);
+            g_vect=reshape(g(X,U,P,t,vdat)',M*ng,1);
+            solution.fc=[(x0-data.x0t)*data.cx0;mp.A*X_vect+mp.B*reshape((tf-t0)*f(X,U,P,t,vdat)',M*n,1)];
+            solution.gc=g_vect(data.gAllidx);
+            solution.avrcc=avrc(X,U,P,t,data)';
+            solution.bc=b(x0,xf,u0,uf,p,t0,tf,vdat);    
+       case{'gradCostTest'}
+            [solution.Lz,solution.Ez,~]=gradientCost(L,X,Xr,U,Ur,P,tau,E,x0,xf,u0,uf,p,t0,tf,data);
+       case{'jacConstTest'}
+            [solution.fzd,solution.gzd,solution.rcz,solution.bz]=jacobianFD(f,g,avrc,X,U,P,tau,b,x0,xf,u0,uf,p,t0,tf,data);
+       case{'hessianTest'}
+            [solution.Lzz,solution.Ezz]=hessianCostCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+
+          
+          
+%           if strcmp(data.options.NLPsolver,'OSQP')
+%               hessc = triu(hessc.',1) + tril(hessc);
+%           end
+            
+
     end
 
 catch

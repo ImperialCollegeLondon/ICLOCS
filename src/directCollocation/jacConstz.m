@@ -91,6 +91,8 @@ end
 
 % Map derivatives to the jacobian
 %---------------------------------
+
+
 jac=[[sparse(n,nt) sparse(n,np) speye(n), sparse(n,(M-1)*n+N*m)]*data.cx0;data.map.A*data.map.Vx+data.map.B*fz;gz;rcz;bz];
 
 

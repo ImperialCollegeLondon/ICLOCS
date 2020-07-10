@@ -1,4 +1,4 @@
-function [grad,JL]=gradientCost(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,t0,tf,data)
+function [varargout]=gradientCost(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,t0,tf,data)
 %GRADIENTCOST - Generate gradient of the cost  when the analytic option has been selected
 %
 % Syntax:  [grad,JL]=gradientCost(L,X,Xr,U,Ur,P,T,E,x0,xf,u0,uf,p,tf,data)
@@ -72,5 +72,13 @@ end
 
 
 % Return the gradient
-grad=Lz+Ez;
+
+if nargout==2
+    varargout{1}=Lz+Ez;
+    varargout{2}=JL;
+elseif nargout==3
+    varargout{1}=Lz;
+    varargout{2}=Ez;
+    varargout{3}=JL;
+end
 

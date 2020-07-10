@@ -265,7 +265,83 @@ switch(data.options.NLPsolver)
         tB=toc(tA);
         solution.z_org=z;
         solution.multipliers.lambda=-Mu';
+    case('OSQP')
+        if isfield(data,'OSQP')
+            % Create an OSQP object
+            prob = osqp;
 
+            if isfield(data.options,'OSQP')
+                if isfield(data.options.OSQP,'alpha')
+                    alpha=data.options.OSQP.alpha;
+                else
+                    alpha=1.6;
+                end
+                if isfield(data.options.OSQP,'rho')
+                    rho=data.options.OSQP.rho;
+                else
+                    rho=0.1;
+                end
+                if isfield(data.options.OSQP,'sigma')
+                    sigma=data.options.OSQP.sigma;
+                else
+                    sigma=1e-06;
+                end
+                if isfield(data.options.OSQP,'max_iter')
+                    max_iter=data.options.OSQP.max_iter;
+                else
+                    max_iter=4000;
+                end
+                if isfield(data.options.OSQP,'eps_abs')
+                    eps_abs=data.options.OSQP.eps_abs;
+                else
+                    eps_abs=1e-03;
+                end
+                if isfield(data.options.OSQP,'eps_prim_inf')
+                    eps_prim_inf=data.options.OSQP.eps_prim_inf;
+                else
+                    eps_prim_inf=1e-04;
+                end
+                if isfield(data.options.OSQP,'eps_dual_inf')
+                    eps_dual_inf=data.options.OSQP.eps_dual_inf;
+                else
+                    eps_dual_inf=1e-04;
+                end
+                if isfield(data.options.OSQP,'eps_rel')
+                    eps_rel=data.options.OSQP.eps_rel;
+                else
+                    eps_rel=1e-03;
+                end
+            else
+                alpha=1.6;
+                rho=0.1;
+                sigma=1e-06;
+                max_iter=4000;
+                eps_abs=1e-03;
+                eps_prim_inf=1e-04;
+                eps_dual_inf=1e-04;
+                eps_rel=1e-03;
+            end
+
+            % Setup workspace and change alpha parameter
+            prob.setup(data.OSQP.P, data.OSQP.q, data.OSQP.A, data.OSQP.l, data.OSQP.u, 'alpha', alpha,'rho', rho, 'sigma', sigma, 'max_iter', max_iter, 'eps_abs', eps_abs, 'eps_prim_inf', eps_prim_inf, 'eps_dual_inf', eps_dual_inf, 'eps_rel', eps_rel);
+
+            % Solve problem
+            res = prob.solve();
+            z=res.x;
+            info=res.info;
+            info.status=info.status_val;
+            status=info;
+            lambda=res.y(length(z)+1:end);
+            if  ((strcmp(data.options.discretization,'globalLGR')) || (strcmp(data.options.discretization,'hpLGR'))) && data.options.reorderLGR
+               solution.z_org=z;
+               z=z(data.reorder.z_idx_back);
+               lambda=lambda(data.reorder.vert_idx_back);
+            end
+            solution.multipliers.lambda=lambda;
+            tB=res.info.solve_time;
+        else
+            error('OSQP solver are designed to solve LP/QP problems only, please ensure your problem is suitable and the corrsponding function types are properly configured in problem defination (e.g with problem.FcnTypes.StageCost). Otherwise please use an NLP solver such as IPOPT.');
+        end
     otherwise
         disp('Unknown NLP solver. Check spelling.');
 

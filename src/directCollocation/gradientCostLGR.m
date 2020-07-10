@@ -1,4 +1,4 @@
-function [grad,JL]=gradientCostLGR(L,X,Xr,U,Ur,P,T,t,E,x0,xf,u0,uf,p,t0,tf,data)
+function [varargout]=gradientCostLGR(L,X,Xr,U,Ur,P,T,t,E,x0,xf,u0,uf,p,t0,tf,data)
 %gradientCostLGR - Generate gradient of the cost  when the analytic option has been selected
 %
 % Syntax:  [grad,JL]=gradientCostLGR(L,X,Xr,U,Ur,P,T,t,E,x0,xf,u0,uf,p,t0,tf,data)
@@ -81,6 +81,13 @@ end
 
 
 
-grad=Lz+Ez;
-
+% grad=Lz+Ez;
+if nargout==2
+    varargout{1}=Lz+Ez;
+    varargout{2}=JL;
+elseif nargout==3
+    varargout{1}=Lz;
+    varargout{2}=Ez;
+    varargout{3}=JL;
+end
 

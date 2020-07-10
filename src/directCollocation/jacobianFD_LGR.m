@@ -1,4 +1,4 @@
-function jac=jacobianFD_LGR(f,g,avrc,X_Np1,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
+function varargout=jacobianFD_LGR(f,g,avrc,X_Np1,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
 
 % jacobianFD_LGR - It evaluates numerically the Jacobian of the constraints
 %
@@ -57,8 +57,18 @@ end
 
 % Map derivatives to the jacobian
 %---------------------------------
-jac=[[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt)]+fz;gz(data.gAllidx,:);rcz;bz];
+fzd=[kron(speye(n),data.map.D_structure) zeros(M*n,M*m+np+nt)]+fz;
+gzd=gz(data.gAllidx,:);
+jac=[fzd;gzd;rcz;bz];
 
+if nargout==1
+    varargout{1}=jac;
+elseif nargout==4
+    varargout{1}=fzd;
+    varargout{2}=gzd;
+    varargout{3}=rcz;
+    varargout{4}=bz;
+end
 
 
 

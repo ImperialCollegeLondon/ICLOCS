@@ -2,7 +2,7 @@
 %  2. Evaluate the Jacobian of the constraints
 % -------------------------------------------------------------------------
 
-function jac=jacobianFD(f,g,avrc,X,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
+function varargout=jacobianFD(f,g,avrc,X,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
 % jacobianFD - It evaluates numerically the Jacobian of the constraints
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
@@ -61,5 +61,19 @@ end
 
 % Map derivatives to the jacobian
 %---------------------------------
-jac=[[sparse(n,nt) sparse(n,np) speye(n), sparse(n,(M-1)*n+N*m)]*data.cx0;data.map.A*data.map.Vx+data.map.B*fz;gz(data.gAllidx,:);rcz;bz];
+fzd=[[sparse(n,nt) sparse(n,np) speye(n), sparse(n,(M-1)*n+N*m)]*data.cx0;data.map.A*data.map.Vx+data.map.B*fz];
+gzd=gz(data.gAllidx,:);
+
+jac=[fzd;gzd;rcz;bz];
+
+if nargout==1
+    varargout{1}=jac;
+elseif nargout==4
+    varargout{1}=fzd;
+    varargout{2}=gzd;
+    varargout{3}=rcz;
+    varargout{4}=bz;
+end
+
+
 

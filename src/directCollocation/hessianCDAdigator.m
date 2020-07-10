@@ -1,4 +1,4 @@
-function hessian=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
+function [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
 %  It evaluates the Hessian of the Lagrangian with Adigator
 %
 % Syntax:  hessian=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
@@ -161,9 +161,9 @@ end
 % -------------------------------------
 
 
-hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
-hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
-hessian=tril(hessc);
+% hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+% hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
+% hessian=tril(hessc);
 
 
 %------------- END OF CODE --------------

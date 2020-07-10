@@ -215,18 +215,20 @@ switch required
        
     
     case{'hessian'}
-      if strcmp(data.options.derivatives,'analytic')
+      if strcmp(data.options.derivatives,'analytic') && (~isfield(data.options,'forceNumericHes') || ~data.options.forceNumericHes)
             [Lzz,Ezz,fzz,gzz,bzz]=hessianAN_LGR(L,f,g,sol{phaseNo}.Jf,sol{phaseNo}.JL,X,U,P,tau_inc,E,b,x0,...
                                                     xf,u0,uf,p,t0,tf,data);
-               hessc=data.sigma*(Lzz+Ezz)-fzz+gzz+bzz;
-               hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
-               sol{phaseNo}.hessian=hessc;     
+            fgzz=-fzz+gzz;
       elseif strcmp(data.options.derivatives,'adigator')
-            sol{phaseNo}.hessian=hessianCDAdigator_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+            [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
       else
-            sol{phaseNo}.hessian=hessianCD_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+            [Lzz,Ezz,fzz,gzz,bzz]=hessianCD_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+            fgzz=-fzz+gzz;
       end
-
+      hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+      hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
+      sol{phaseNo}.hessian=hessc;     
+               
       if data.options.reorderLGR
           sol{phaseNo}.hessian=sol{phaseNo}.hessian(data.reorder.z_idx,data.reorder.z_idx);
       end    
@@ -237,6 +239,19 @@ switch required
       else
           solution=sol{phaseNo}.hessian;
       end
+            
+   case{'constTest'}
+        g_vect=reshape(g(X,U,P,t,vdat),M*ng,1);
+        solution.fc=[reshape(D_structure*X_Np1-diag(t_segment_end)*f(X,U,P,t,vdat),M*n,1)];
+        solution.gc=g_vect(data.gAllidx);
+        solution.avrcc=avrc(X_Np1,U,P,[t;tf],data)';
+        solution.bc=b(x0,xf,u0,uf,p,t0,tf,vdat,data.options,t_segment);
+   case{'gradCostTest'}
+        [solution.Lz,solution.Ez,~]=gradientCostLGR(L,X,Xr,U,Ur,P,tau_inc,t,E,x0,xf,u0,uf,p,t0,tf,data);
+   case{'jacConstTest'}
+        [solution.fzd,solution.gzd,solution.rcz,solution.bz]=jacobianFD_LGR(f,g,avrc,X_Np1,U,P,tau_inc,b,x0,xf,u0,uf,p,t0,tf,data);
+   case{'hessianTest'}
+        [solution.Lzz,solution.Ezz]=hessianCostCD_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
 
 end
 
