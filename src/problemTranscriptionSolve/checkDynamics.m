@@ -30,6 +30,7 @@ constraintFunction(z0,data);
 nt=data.sizes{1};
 
 z_zeros=zeros(size(z0));
+% data.QPSolverCheck= (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
 data.QPSolverCheck= ~nt && (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
 if data.QPSolverCheck
     testout=typeTests(z_zeros,1,data);
@@ -38,13 +39,13 @@ if data.QPSolverCheck
     if data.FD.FcnTypes.Ltype==2 %linear cost
         OSQP.q=OSQP.q+testout.gradCost.Lz; %linear term 
     elseif data.FD.FcnTypes.Ltype==3 %quadratic cost
-        OSQP.P=OSQP.P+testout.hessian.Lzz;
+        OSQP.P=OSQP.P+triu(testout.hessian.Lzz.',1) + tril(testout.hessian.Lzz);
         OSQP.q=OSQP.q+testout.gradCost.Lz; %linear term
     end
     if data.FD.FcnTypes.Etype==2 %linear cost
         OSQP.q=OSQP.q+testout.gradCost.Ez; %linear term 
     elseif data.FD.FcnTypes.Etype==3 %quadratic cost
-        OSQP.P=OSQP.P+testout.hessian.Lzz;
+        OSQP.P=OSQP.P+triu(testout.hessian.Ezz.',1) + tril(testout.hessian.Ezz);
         OSQP.q=OSQP.q+testout.gradCost.Ez; %linear term
     end
     OSQP.A=[speye(length(z0));testout.jacConst.fzd;testout.jacConst.gzd;testout.jacConst.rcz;testout.jacConst.bz];

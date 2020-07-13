@@ -54,7 +54,7 @@ function printSolveInfo(solution,options)
             disp('minimized cost:');disp(solution.cost.J);
         end
 
-        if options.print.relative_local_error
+        if options.print.relative_local_error && ~strcmp(options.discretization,'discrete')
             disp('Maximum absolute local error:');disp(solution.MaxAbsError);
             disp('Maximum relative local error:');disp(solution.MaxRelError);
                 if isfield(options.print,'residual_error') && options.print.residual_error

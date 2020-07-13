@@ -29,9 +29,7 @@ if isfield(solution,'mp')
     printSolveInfo(solution,options);
 else
     [solution]=postSolveAnalysis(problem,solution,options,data);
-    if ~strcmp(options.discretization,'discrete')
-        printSolveInfo(solution,options);
-    end
+    printSolveInfo(solution,options);
 end
 
 end
