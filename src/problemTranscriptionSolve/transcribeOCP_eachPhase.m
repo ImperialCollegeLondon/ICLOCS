@@ -182,7 +182,7 @@ else
                 M=2*M-1;
                 ns=2;
             end
-        elseif strcmp(options.discretization,'trapzoidal')
+        elseif strcmp(options.discretization,'trapezoidal')
             if N==0
                 N=M*2-2;
                 ns=1;

@@ -46,20 +46,15 @@ if isfield(options,'mp')
             
             [solution,status,data]=solveSingleNLP_DirectCollocation_MultiPhase(infoNLP,data);% Solve the NLP
             
-            if isfield(options,'skipPostAnalysis') && options.skipPostAnalysis
-                warning('Post-solve analysis skipped. See problem settings if this is not intended.')
-            else
-                try
-                    [solution] = runPostSolveTasks(problem,solution,options,data); % Output solutions
-                    if isfield(options,'resultRep') && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                        data.options.resultRep='res_min';
-                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
-                    end
-                catch
-                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
+            try
+                [solution] = runPostSolveTasks(problem,solution,options,data); % Output solutions
+                if isfield(options,'resultRep') && (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                    data.options.resultRep='res_min';
+                    [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                 end
+            catch
+                error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
             end
-                
 
             varargout{1}=solution;
             varargout{2}=status;
@@ -278,7 +273,6 @@ else % single phase problem
                             infoNLP=OCP_in.infoNLP;
                             data=OCP_in.data;
                             options=OCP_in.options;
-                            data=checkDynamics( infoNLP.z0,data );
                         else
                             [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
                         end
@@ -308,42 +302,21 @@ else % single phase problem
                     error('Weighting Parameters Not Properly Configured for Residual Minimization with Penalty Method!')
                 end
             else
-                if exist('OCP_in','var') == 1
-                    infoNLP=OCP_in.infoNLP;
-                    data=OCP_in.data;
-                    options=OCP_in.options;
-                    data=checkDynamics( infoNLP.z0,data );
-                else
-                    [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
-                end
-                
+                [infoNLP,data,options]=transcribeOCP(problem,guess,options); % Format for NLP solver
                 [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
                 
-                if nargout==3
-                    OCP_ini.data=data;
-                    OCP_ini.infoNLP=infoNLP;
-                    OCP_ini.options=options;
-                end
-                        
-                
-                if isfield(options,'skipPostAnalysis') && options.skipPostAnalysis
-                    warning('Post-solve analysis skipped. See problem settings if this is not intended.')
-                else
-                    try
-                        [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
-                        if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
-                            data.options.resultRep='res_min';
-                            [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
-                        end
-                    catch
-                        error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
+                try
+                    [solution]=runPostSolveTasks(problem, solution,options,data);          % Output solutions
+                    if (strcmp(options.resultRep,'res_min_final_manual') || strcmp(options.resultRep,'res_min_final_default'))
+                        data.options.resultRep='res_min';
+                        [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                     end
+                catch
+                    error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
+
                 varargout{1}=solution;
                 varargout{2}=status;
-                if nargout==3
-                    varargout{3}=OCP_ini;
-                end
             end
 
             
@@ -379,7 +352,6 @@ else % single phase problem
                     infoNLP=OCP_in.infoNLP;
                     data=OCP_in.data;
                     options=OCP_in.options;
-                    data=checkDynamics( infoNLP.z0,data );
                 else
                     [infoNLP,data,options]=transcribeOCP(problem_iter,guess,options); % Format for NLP solver
                 end
@@ -395,7 +367,6 @@ else % single phase problem
                     OCP_MR.infoNLP=infoNLP;
                     OCP_MR.options=options;
                 end
-                
                 if isfield(options,'regstrategy') && strcmp(options.regstrategy,'simultaneous')
                     if isfield(data.data.penalty,'i') && isfield(data.data.penalty,'values')
                         idx_penalty=i;
@@ -592,12 +563,6 @@ else % single phase problem
             end
             varargout{1}=solution;
             varargout{2}=MeshRefinementHistory;
-            if nargout==3 || nargout==4
-                varargout{3}=OCP_ini;
-            end
-            if nargout==4
-                varargout{4}=OCP_MR;
-            end
         otherwise
             error('Unknown Meshing Strategy Selected!')
     end

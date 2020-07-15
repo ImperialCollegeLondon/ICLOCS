@@ -1,7 +1,7 @@
 function [  Xout] = speval( solution,solType,nidx,T)
 %speval - evaluate the spline functions
 %
-% Syntax:   Xout = speval( Xp,n,varargin)
+% Syntax:   Xout = speval( Xp,solType,nidx,T)
 %
 % Inputs:
 %    solution  - solution to the OCP after post-processing.
