@@ -340,7 +340,7 @@ switch(data.options.NLPsolver)
             solution.multipliers.lambda=lambda;
             tB=res.info.solve_time;
         else
-            error('OSQP solver is designed to solve LP/QP problems only, please ensure your problem is suitable and the corresponding function types are properly configured in problem definition (e.g with problem.FcnTypes.StageCost). The problem must be a single-phase problem and have fixed initial and terminal time (t0 and tf) with these variables removed from problem formulation with options.runWithoutTimeVar=1 in the settings file (currently only support h method discretization). Otherwise please use an NLP solver such as IPOPT.');
+            error('OSQP solver is designed to solve LP/QP problems only, please ensure your problem is suitable and the corresponding function types are properly configured in problem definition (e.g with problem.FcnTypes.StageCost). The problem must be a single-phase problem and have fixed initial and terminal time (t0 and tf) and transcribed with h discretization methods. Otherwise please use an NLP solver such as IPOPT.');
         end
     otherwise
         disp('Unknown NLP solver. Check spelling.');

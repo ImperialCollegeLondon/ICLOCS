@@ -55,6 +55,9 @@ if isempty(options.mp.perturbation.H)
   options.mp.perturbation.H=(8*eps)^(1/3);
 end    
 
+if (strcmp(options.mp.NLPsolver,'OSQP')) 
+   error('OSQP currently not supported for multi-phase problem.')
+end 
 
 
 problem.mp.data.transcription=options.mp.transcription;

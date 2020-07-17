@@ -233,6 +233,14 @@ end
 %          when adaptive method, nt equal to the actual number of time
 %          varibles (>2)
 
+if (strcmp(options.NLPsolver,'OSQP')) 
+   if problem.time.tf_min==problem.time.tf_max && problem.time.t0_min==problem.time.t0_max
+       options.runWithoutTimeVar=1;
+   else
+       error('To solve with OSQP, the problem must have fixed intial time t0 and terminal time tf.')
+   end
+end 
+
 if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
     if options.adaptseg==1
         nt=nps+1;
