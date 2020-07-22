@@ -29,10 +29,14 @@ data.data.resmin=0;
 constraintFunction(z0,data);
 nt=data.sizes{1};
 
-z_zeros=zeros(size(z0));
+
+
 % data.QPSolverCheck= (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
 data.QPSolverCheck= ~nt && (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
 if data.QPSolverCheck
+    
+    z_zeros=zeros(size(z0));
+    
     testout=typeTests(z_zeros,1,data);
     OSQP.P=sparse(size(testout.hessian.Lzz,1),size(testout.hessian.Lzz,2));
     OSQP.q=sparse(size(testout.gradCost.Lz,1),size(testout.gradCost.Lz,2));

@@ -5,15 +5,15 @@ function boundaryCost=E(x0,xf,u0,uf,p,t0,tf,vdat)
 %------------- BEGIN CODE --------------
 E_unscaled=vdat.functions_unscaled{2};
 if isfield(vdat,'Xscale')
-    x0=scale_variables_back( x0', vdat.Xscale, vdat.Xshift );
-    xf=scale_variables_back( xf', vdat.Xscale, vdat.Xshift );
-    u0=scale_variables_back( u0', vdat.Uscale, vdat.Ushift );
-    uf=scale_variables_back( uf', vdat.Uscale, vdat.Ushift );
+    x0=scale_variables_back( x0', vdat.Xscale_back, vdat.Xshift );
+    xf=scale_variables_back( xf', vdat.Xscale_back, vdat.Xshift );
+    u0=scale_variables_back( u0', vdat.Uscale_back, vdat.Ushift );
+    uf=scale_variables_back( uf', vdat.Uscale_back, vdat.Ushift );
     if isfield(vdat,'Pscale')
         if size(p,2)==1
-            p=scale_variables_back( p', vdat.Pscale, vdat.Pshift );
+            p=scale_variables_back( p', vdat.Pscale_back, vdat.Pshift );
         else
-            p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+            p=scale_variables_back( p, vdat.Pscale_back, vdat.Pshift );
         end
     end
     if strcmp(vdat.mode.currentMode,'Feasibility')

@@ -384,6 +384,8 @@ auxdata.mpdata.funcs.jacobian          = @constraintJacobian_mp;
 auxdata.mpdata.funcs.jacobianstructure = @jacobianstructure_mp;
 auxdata.mpdata.linkfunctions=problem.mp.linkfunctions;
 
+% auxdata.mpdata.funcs.jacobian          = @constraintJacobian_mp_parallel;
+
 if isfield(problem.mp,'callback') && ~isempty(problem.mp.callback)
   auxdata.mpdata.funcs.iterfunc=problem.mp.callback;
 end

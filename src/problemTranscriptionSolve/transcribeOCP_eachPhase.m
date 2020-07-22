@@ -604,6 +604,8 @@ data.data.N_tNode=M;
 if options.scaling
     data.data.Xscale=problem.states.scales;
     data.data.Uscale=problem.inputs.scales;
+    data.data.Xscale_back=problem.states.scales_back;
+    data.data.Uscale_back=problem.inputs.scales_back;
     data.data.Tscale=problem.time.scales;
     data.data.Tshift=problem.time.shifts;
     data.data.Xshift=problem.states.shifts;
@@ -612,6 +614,7 @@ if options.scaling
     
     if np
         data.data.Pscale=problem.parameters.scales;
+        data.data.Pscale_back=problem.parameters.scales_back;
         data.data.Pshift=problem.parameters.shifts;
         if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
             data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale data.data.Pscale ];

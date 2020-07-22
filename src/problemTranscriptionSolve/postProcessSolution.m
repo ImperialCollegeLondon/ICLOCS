@@ -183,17 +183,17 @@ if data.options.scaling
     solution.scaledVariables.coll.X=solution.coll.X;
     solution.scaledVariables.coll.x0=solution.coll.x0;
     solution.scaledVariables.coll.U=solution.coll.U;
-    solution.X=scale_variables_back( solution.X, data.data.Xscale, data.data.Xshift );
-    solution.x0=scale_variables_back( solution.x0', data.data.Xscale, data.data.Xshift )';
-    solution.U=scale_variables_back( solution.U, data.data.Uscale, data.data.Ushift );
-    solution.coll.X=scale_variables_back( solution.coll.X, data.data.Xscale, data.data.Xshift );
-    solution.coll.x0=scale_variables_back( solution.coll.x0', data.data.Xscale, data.data.Xshift )';
-    solution.coll.U=scale_variables_back( solution.coll.U, data.data.Uscale, data.data.Ushift );
+    solution.X=scale_variables_back( solution.X, data.data.Xscale_back, data.data.Xshift );
+    solution.x0=scale_variables_back( solution.x0', data.data.Xscale_back, data.data.Xshift )';
+    solution.U=scale_variables_back( solution.U, data.data.Uscale_back, data.data.Ushift );
+    solution.coll.X=scale_variables_back( solution.coll.X, data.data.Xscale_back, data.data.Xshift );
+    solution.coll.x0=scale_variables_back( solution.coll.x0', data.data.Xscale_back, data.data.Xshift )';
+    solution.coll.U=scale_variables_back( solution.coll.U, data.data.Uscale_back, data.data.Ushift );
     if isfield(data.data,'Pscale')
         solution.scaledVariables.p=solution.p;
         solution.scaledVariables.coll.p=solution.coll.p;
-        solution.p=scale_variables_back( solution.p', data.data.Pscale, data.data.Pshift )';
-        solution.coll.p=scale_variables_back( solution.coll.p', data.data.Pscale, data.data.Pshift )';
+        solution.p=scale_variables_back( solution.p', data.data.Pscale_back, data.data.Pshift )';
+        solution.coll.p=scale_variables_back( solution.coll.p', data.data.Pscale_back, data.data.Pshift )';
     else
         solution.scaledVariables.p=[];
         solution.scaledVariables.coll.p=[];

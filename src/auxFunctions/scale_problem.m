@@ -22,9 +22,12 @@ if isfield(problem,'scaling') && isfield(problem.scaling,'states')
      xl(idxeq)=xl(idxeq)-0.1;
      xu(idxeq)=xu(idxeq)+0.1;
 
+%      problem.states.scales=1./(xu-xl);
+%      problem.states.shifts=0.5-xu./(xu-xl);
+     problem.states.shifts=-xl;
      problem.states.scales=1./(xu-xl);
-     problem.states.shifts=0.5-xu./(xu-xl);
-    
+     problem.states.scales_back=xu-xl;
+
 elseif ~isfield(problem.states,'scales')
     
      xl=problem.states.xl;xl(isinf(xl))=-500;
@@ -34,8 +37,10 @@ elseif ~isfield(problem.states,'scales')
      xl(idxeq)=xl(idxeq)-0.1;
      xu(idxeq)=xu(idxeq)+0.1;
 
+     problem.states.shifts=-xl;
      problem.states.scales=1./(xu-xl);
-     problem.states.shifts=0.5-xu./(xu-xl);
+     problem.states.scales_back=xu-xl;
+%      problem.states.shifts=0.5-xu./(xu-xl);
 end
  
  if isfield(problem.states,'x0') && ~isempty(problem.states.x0)
@@ -67,8 +72,10 @@ end
      ul(idxeq)=ul(idxeq)-0.1;
      uu(idxeq)=uu(idxeq)+0.1;
 
+     problem.inputs.shifts=-ul;
      problem.inputs.scales=1./(uu-ul);
-     problem.inputs.shifts=0.5-uu./(uu-ul);
+     problem.inputs.scales_back=(uu-ul);
+%      problem.inputs.shifts=0.5-uu./(uu-ul);
      
  elseif ~isfield(problem.inputs,'scales')
      uu=problem.inputs.uu;uu(isinf(uu))=500;
@@ -78,8 +85,10 @@ end
      ul(idxeq)=ul(idxeq)-0.1;
      uu(idxeq)=uu(idxeq)+0.1;
 
+     problem.inputs.shifts=-ul;
      problem.inputs.scales=1./(uu-ul);
-     problem.inputs.shifts=0.5-uu./(uu-ul);
+     problem.inputs.scales_back=(uu-ul);
+%      problem.inputs.shifts=0.5-uu./(uu-ul);
  end
 
  problem.inputs.ul=scale_variables( problem.inputs.ul, problem.inputs.scales, problem.inputs.shifts );
@@ -108,8 +117,10 @@ end
          pl(idxeq)=pl(idxeq)-0.1;
          pu(idxeq)=pu(idxeq)+0.1;
 
+         problem.parameters.shifts=-pl;
          problem.parameters.scales=1./(pu-pl);
-         problem.parameters.shifts=0.5-pu./(pu-pl);
+         problem.parameters.scales_back=(pu-pl);
+%          problem.parameters.shifts=0.5-pu./(pu-pl);
      end
      problem.parameters.pu = scale_variables( problem.parameters.pu, problem.parameters.scales, problem.parameters.shifts );
      problem.parameters.pl = scale_variables( problem.parameters.pl, problem.parameters.scales, problem.parameters.shifts );

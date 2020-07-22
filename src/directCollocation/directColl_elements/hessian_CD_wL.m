@@ -8,11 +8,12 @@ if data.FD.FcnTypes.Ltype
     nfd=size(idx,2);                               
 
     et0=data.FD.vector.Ly.et0;etf=data.FD.vector.Ly.etf;ep=data.FD.vector.Ly.ep;
-    ex=data.FD.vector.Ly.ex;eu=data.FD.vector.Ly.eu;ez=data.FD.vector.Ly.ez;
+    ex=data.FD.vector.Ly.ex;eu=data.FD.vector.Ly.eu;%ez=data.FD.vector.Ly.ez;
 
 
     for i=1:nfd
-    dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i}*ez(i);dx1=e*ex{i}*ez(i); du1=e*eu{i}*ez(i);
+%     dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i}*ez(i);dx1=e*ex{i}*ez(i); du1=e*eu{i}*ez(i);
+    dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i};dx1=e*ex{i}; du1=e*eu{i};
     for j=1:i
       if j==i
         Lo=DT*L(X,Xr,U,Ur,P,DT*T+t0,vdat);

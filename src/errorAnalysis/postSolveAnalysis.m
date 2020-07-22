@@ -404,8 +404,8 @@ else
         usp=reshape(dataNLP.map.Vu*z,m,N)';
         U=kron(usp,ones((M-1)/N,1));
         if dataNLP.options.scaling
-            X=scale_variables_back( X, dataNLP.data.Xscale, dataNLP.data.Xshift );
-            U=scale_variables_back( U, dataNLP.data.Uscale, dataNLP.data.Ushift );
+            X=scale_variables_back( X, dataNLP.data.Xscale_back, dataNLP.data.Xshift );
+            U=scale_variables_back( U, dataNLP.data.Uscale_back, dataNLP.data.Ushift );
         end
         solution.z_orgscale=[tf*ones(nt);p;zeros(n*M+m*N,1)]+dataNLP.map.xV*reshape(X',M*n,1)+dataNLP.map.uV*reshape(U',m*N,1);
         U=[U;U(end,:)];
@@ -414,8 +414,8 @@ else
         X=reshape(Vx*z,n,M)';
         U=reshape(Vu*z,m,N)';
         if dataNLP.options.scaling
-            X=scale_variables_back( X, dataNLP.data.Xscale, dataNLP.data.Xshift );
-            U=scale_variables_back( U, dataNLP.data.Uscale, dataNLP.data.Ushift );
+            X=scale_variables_back( X, dataNLP.data.Xscale_back, dataNLP.data.Xshift );
+            U=scale_variables_back( U, dataNLP.data.Uscale_back, dataNLP.data.Ushift );
         end
         if strcmp(dataNLP.options.discretization,'discrete') || strcmp(dataNLP.options.discretization,'euler')
             U(end,:)=U(end-1,:);
@@ -1292,7 +1292,7 @@ end
 
 end
 
-function [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data)
+function [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data,ng_eq)
 %estimateConstraintViolation - Estimate the absolute local constraint violation
 %
 % Syntax:  [MaxConstraintError,tg]=estimateConstraintViolation(Xp,Up,p,tf,TSeg_Bar,n,m,problem,data)

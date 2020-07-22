@@ -61,8 +61,8 @@ else
 end
 
 
-ez_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1)];
-ezf_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1);ones(n,1);ones(m,1)];
+% ez_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1)];
+% ezf_scaled=[ones(nt,1);ones(np,1);ones(n,1);ones(m,1);ones(n,1);ones(m,1)];
 
 
 
@@ -117,7 +117,7 @@ end
 
 
 vector.Ly.et0=et0;vector.Ly.etf=etf;vector.Ly.et=et;vector.Ly.ep=ep;
-vector.Ly.ex=ex;vector.Ly.eu=eu;vector.Ly.ez=ez_scaled;
+vector.Ly.ex=ex;vector.Ly.eu=eu;%vector.Ly.ez=ez_scaled;
 index.Ly=idx;
  
 
@@ -174,7 +174,7 @@ end
 index.Ey=idx;
 vector.Ey.et0=et0;vector.Ey.etf=etf;vector.Ey.ep=ep;
 vector.Ey.ex0=ex0;vector.Ey.eu0=eu0;
-vector.Ey.exf=exf;vector.Ey.euf=euf;vector.Ey.ez=ezf_scaled;
+vector.Ey.exf=exf;vector.Ey.euf=euf;%vector.Ey.ez=ezf_scaled;
 % For multiphase linkage constraint
 if nargout==1 || nargout==3
     infoForLinkConst.x0idx=index.Ey(nt+np+1:nt+np+n)-nt-np;
@@ -219,7 +219,7 @@ end
 ex=data.map.Vx*eg;eu=data.map.Vu*eg;
 
 
-vector.f.ex=cell(ngcol,1);vector.f.eu=cell(ngcol,1);vector.f.ep=cell(ngcol,1);vector.f.ez=ez_scaled;
+vector.f.ex=cell(ngcol,1);vector.f.eu=cell(ngcol,1);vector.f.ep=cell(ngcol,1);%vector.f.ez=ez_scaled;
 
 
 for i=1:ngcol
@@ -277,7 +277,7 @@ end
 
 ex=data.map.Vx*eg;eu=data.map.Vu*eg;
 
-vector.g.ex=cell(ngcol,1);vector.g.eu=cell(ngcol,1);vector.g.ep=cell(ngcol,1);vector.g.ez=ez_scaled;
+vector.g.ex=cell(ngcol,1);vector.g.eu=cell(ngcol,1);vector.g.ep=cell(ngcol,1);%vector.g.ez=ez_scaled;
 
 for i=1:ngcol
     vector.g.ex{i}=reshape(ex(:,i)',n,M)';
@@ -329,7 +329,7 @@ end
 
 ex=data.map.Vx*erc;eu=data.map.Vu*erc;
 
-vector.rc.ex=cell(nrccol,1);vector.rc.eu=cell(nrccol,1);vector.rc.ep=cell(nrccol,1);vector.rc.ez=ez_scaled;
+vector.rc.ex=cell(nrccol,1);vector.rc.eu=cell(nrccol,1);vector.rc.ep=cell(nrccol,1);%vector.rc.ez=ez_scaled;
 
 for i=1:nrccol
     vector.rc.ex{i}=reshape(ex(:,i)',n,M)';
@@ -382,7 +382,7 @@ vector.b.ex0=eb(nt+np+1:nt+np+n,:);
 vector.b.eu0=eb(nt+np+n+1:nt+np+n+m,:);
 vector.b.exf=eb(nt+np+n+m+1:nt+np+2*n+m,:);
 vector.b.euf=eb(nt+np+2*n+m+1:nt+np+2*n+2*m,:);
-vector.b.ez=ezf_scaled;
+%vector.b.ez=ezf_scaled;
 end
 
 

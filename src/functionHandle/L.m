@@ -5,16 +5,16 @@ function stageCost=L(x,xr,u,ur,p,t,vdat)
 %------------- BEGIN CODE --------------
 L_unscaled=vdat.functions_unscaled{1};
 if isfield(vdat,'Xscale')
-    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
+    x=scale_variables_back( x, vdat.Xscale_back, vdat.Xshift );
     if ~isempty(xr)
-        xr=scale_variables_back( xr, vdat.Xscale, vdat.Xshift );
+        xr=scale_variables_back( xr, vdat.Xscale_back, vdat.Xshift );
     end
-    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    u=scale_variables_back( u, vdat.Uscale_back, vdat.Ushift );
     if isfield(vdat,'Pscale')
-        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+        p=scale_variables_back( p, vdat.Pscale_back, vdat.Pshift );
     end
     if ~isempty(ur)
-        ur=scale_variables_back( ur, vdat.Uscale, vdat.Ushift );
+        ur=scale_variables_back( ur, vdat.Uscale_back, vdat.Ushift );
     end
     if strcmp(vdat.mode.currentMode,'Feasibility')
         stageCost=0*t;

@@ -6,10 +6,10 @@ fg_unscaled=vdat.InternalDynamics;
 ng_group=nargout(fg_unscaled);
 
 if isfield(vdat,'Xscale')
-    x=scale_variables_back( x, vdat.Xscale, vdat.Xshift );
-    u=scale_variables_back( u, vdat.Uscale, vdat.Ushift );
+    x=scale_variables_back( x, vdat.Xscale_back, vdat.Xshift );
+    u=scale_variables_back( u, vdat.Uscale_back, vdat.Ushift );
     if isfield(vdat,'Pscale')
-        p=scale_variables_back( p, vdat.Pscale, vdat.Pshift );
+        p=scale_variables_back( p, vdat.Pscale_back, vdat.Pshift );
     end
 end
 
