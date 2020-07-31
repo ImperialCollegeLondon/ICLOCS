@@ -84,6 +84,7 @@ else
                     if data.dataNLP.options.resminEarlyStop
                         data.funcs=rmfield(data.funcs,'iterfunc');
                     end
+                    resMin_time=solution.computation_time;
 %                     
 
                     M=data.dataNLP.sizes{7};np=data.dataNLP.sizes{2};
@@ -107,11 +108,15 @@ else
                     switch data.dataNLP.options.meshstrategy
                         case{'fixed','hp_flexible'}
                             ResConst=ResColl;
+                            
+                            idx1=ResColl<data.dataNLP.data.discErrorTol_Full;
+                            ResConst(idx1)=data.dataNLP.data.discErrorTol_Full(idx1);
+                            
                             idx1=1.2*ResColl<data.dataNLP.data.discErrorTol_Full;
                             ResConst(idx1)=ResConst(idx1)*1.2;
-%                             if any(ResConst<1e-04)
-%                                 ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*10;
-%                             end
+                            if any(ResConst<1e-04)
+                                ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*10;
+                            end
                             ResConst(ResConst<sqrt(eps))=sqrt(eps);
 
                         case{'mesh_refinement'}
@@ -164,6 +169,7 @@ else
                     end
                     [solution,status,data]=solveSingleNLP_ResidualMin(NLP,data);
                     solution.cost_resmin=cost_resmin;
+                    solution.computation_time=solution.computation_time+resMin_time;
                 else
                     if mode_min_res && ~strcmp(data.dataNLP.options.errortype,'int_res')
                         data.mode=1;
@@ -181,7 +187,27 @@ else
                         solution.min_res_satisfy=1;
                     end
                     solution.cost_resmin=cost_resmin;
+                    solution.computation_time=solution.computation_time+resMin_time;
                 end
+            elseif strcmp(data.dataNLP.options.min_res_mode,'directCostMin')
+
+                    ResConst=data.dataNLP.data.discErrorTol_Full;
+%                     data.dataNLP.data.discErrorConstScaling=1./sqrt(ResConst)';
+%                     data.dataNLP.data.discErrorTol_FullScaling=data.dataNLP.data.discErrorTol_Full.*data.dataNLP.data.discErrorConstScaling';
+                    ResConstScaleMat=repmat(data.dataNLP.data.discErrorConstScaling, data.nps, 1 );
+                    data.ResConstScaleMat=diag(ResConstScaleMat(:));
+                    data.dataNLP.options.ipopt.constr_viol_tol=min(ResConst);
+
+                    data.mode=1;
+                    data.funcs.jacobianstructure = @(data) sparse(ones(length(NLP.cl),length(NLP.z0)));
+                    switch data.dataNLP.options.discretization
+                        case{'globalLGR','hpLGR'} % p/hp Transcription Method
+                            data.funcs.hessianstructure  = @(data) sparse(tril(ones(length(NLP.z0),length(NLP.z0))));
+                        otherwise % h Transcription Method
+                    end
+                    [solution,status,data]=solveSingleNLP_ResidualMin(NLP,data);
+                    solution.computation_time=solution.computation_time;
+                
             elseif strcmp(data.dataNLP.options.min_res_mode,'weightedCost')
                 data.mode=0;
                 [solution,status,data]=solveSingleNLP_ResidualMin(NLP,data);

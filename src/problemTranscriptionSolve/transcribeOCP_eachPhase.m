@@ -636,47 +636,48 @@ if options.scaling
     data.data.Allscale_fgL_Mat=data.data.Allscale_fgL'*data.data.Allscale_fgL;
     data.data.Allscale_bE_Mat=data.data.Allscale_bE'*data.data.Allscale_bE;
     
-    if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
-        XunscaleMat=1./repmat( data.data.Xscale, M+1, 1 );
-        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,(M+1)*n,(M+1)*n);
-        XscaleMat=repmat( data.data.Xscale, (M+1), 1 );
-        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,(M+1)*n,(M+1)*n);
-        data.scaling.XshiftMat=repmat( data.data.Xshift, (M+1), 1 );
-        
-        UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
-        UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
-        data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
-        if isfield(data.data,'Pscale')
-            PscaleMat=repmat( data.data.Pscale, M, 1 );
-            PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
-            data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
-            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
-        end
-    else
-        XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
-        data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M*n,M*n);
-        XscaleMat=repmat( data.data.Xscale, M, 1 );
-        data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M*n,M*n);
-        data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
-        
-        UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
-        data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
-        UscaleMat=repmat( data.data.Uscale, M, 1 );
-        data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
-        data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
-        
-        if isfield(data.data,'Pscale')
-            PscaleMat=repmat( data.data.Pscale, M, 1 );
-            PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
-            data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
-            data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
-            data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
+    if strcmp(options.derivatives,'adigator') || strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution') 
+        if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
+            XunscaleMat=1./repmat( data.data.Xscale, M+1, 1 );
+            data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,(M+1)*n,(M+1)*n);
+            XscaleMat=repmat( data.data.Xscale, (M+1), 1 );
+            data.scaling.XscaleMat=spdiags(XscaleMat(:),0,(M+1)*n,(M+1)*n);
+            data.scaling.XshiftMat=repmat( data.data.Xshift, (M+1), 1 );
+
+            UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
+            data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
+            UscaleMat=repmat( data.data.Uscale, M, 1 );
+            data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
+            data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
+            if isfield(data.data,'Pscale')
+                PscaleMat=repmat( data.data.Pscale, M, 1 );
+                PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
+                data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
+                data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
+                data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
+            end
+        else
+            XunscaleMat=1./repmat( data.data.Xscale, M, 1 );
+            data.scaling.XunscaleMat=spdiags(XunscaleMat(:),0,M*n,M*n);
+            XscaleMat=repmat( data.data.Xscale, M, 1 );
+            data.scaling.XscaleMat=spdiags(XscaleMat(:),0,M*n,M*n);
+            data.scaling.XshiftMat=repmat( data.data.Xshift, M, 1 );
+
+            UunscaleMat=1./repmat( data.data.Uscale, M, 1 );
+            data.scaling.UunscaleMat=spdiags(UunscaleMat(:),0,M*m,M*m);
+            UscaleMat=repmat( data.data.Uscale, M, 1 );
+            data.scaling.UscaleMat=spdiags(UscaleMat(:),0,M*m,M*m);
+            data.scaling.UshiftMat=repmat( data.data.Ushift, M, 1 );
+
+            if isfield(data.data,'Pscale')
+                PscaleMat=repmat( data.data.Pscale, M, 1 );
+                PunscaleMat=1./repmat( data.data.Pscale, M, 1 );
+                data.scaling.PshiftMat=repmat( data.data.Pshift, M, 1 );
+                data.scaling.PunscaleMat=spdiags(PunscaleMat(:),0,M*np,M*np);
+                data.scaling.PscaleMat=spdiags(PscaleMat(:),0,M*np,M*np);
+            end
         end
     end
-
     
 
 end
@@ -989,64 +990,66 @@ if ~strcmp(options.transcription,'multiple_shooting')
         jS_Hrm=[dfz_Hrm;dgz(gAllidx,:);zeros(size(drcz_rcl));zeros(size(drcz_rcu));zeros(size(drcz_rce));dbz]; %Jacobian structure excluding the Radau differentiation matrix
         data.jacStruct=spones(jS);
         data.jS_noB=spones(jS_noB);
-        data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
-        
-        data.jSidx.org.XUg.row=1:size(jS,1)-nb;
-        data.jSidx.org.XUg.col=1:nz-nt-np;
-        data.jS_XUg=spones(jS(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
-        data.jS_XUg_noB=spones(jS_noB(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
-        if np
-            data.jSidx.org.P.row=1:size(jS,1)-nb;
-            data.jSidx.org.P.col=nz-nt-np+1:nz-nt;
-            data.jS_P=spones(jS(data.jSidx.org.P.row,data.jSidx.org.P.col));
-        else
-            data.jSidx.org.P.row=[];
-            data.jSidx.org.P.col=[];
-            data.jS_P=spones(zeros(size(jS,1)-nb,0));
+        if strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution') 
+            data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
         end
-        if nt
-            data.jSidx.org.T.row=1:size(jS,1)-nb;
-            data.jSidx.org.T.col=nz-nt+1:nz;
-            data.jS_T=spones(jS(data.jSidx.org.T.row,data.jSidx.org.T.col));
-        else
-            data.jSidx.org.T.row=[];
-            data.jSidx.org.T.col=[];
-            data.jS_T=spones(zeros(size(jS,1)-nb,0));
-        end
-        if nb
-            data.jSidx.org.B_XUg.row=size(jS,1)-nb+1:size(jS,1);
-            data.jSidx.org.B_XUg.col=1:nz-nt-np;
-            data.jS_B_XUg=spones(jS(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col));
+        if isfield(problem,'mpflag') && problem.mpflag
+            data.jSidx.org.XUg.row=1:size(jS,1)-nb;
+            data.jSidx.org.XUg.col=1:nz-nt-np;
+            data.jS_XUg=spones(jS(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
+            data.jS_XUg_noB=spones(jS_noB(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
             if np
-                data.jSidx.org.B_P.row=size(jS,1)-nb+1:size(jS,1);
-                data.jSidx.org.B_P.col=nz-nt-np+1:nz-nt;
-                data.jS_B_P=spones(jS(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col));
+                data.jSidx.org.P.row=1:size(jS,1)-nb;
+                data.jSidx.org.P.col=nz-nt-np+1:nz-nt;
+                data.jS_P=spones(jS(data.jSidx.org.P.row,data.jSidx.org.P.col));
             else
+                data.jSidx.org.P.row=[];
+                data.jSidx.org.P.col=[];
+                data.jS_P=spones(zeros(size(jS,1)-nb,0));
+            end
+            if nt
+                data.jSidx.org.T.row=1:size(jS,1)-nb;
+                data.jSidx.org.T.col=nz-nt+1:nz;
+                data.jS_T=spones(jS(data.jSidx.org.T.row,data.jSidx.org.T.col));
+            else
+                data.jSidx.org.T.row=[];
+                data.jSidx.org.T.col=[];
+                data.jS_T=spones(zeros(size(jS,1)-nb,0));
+            end
+            if nb
+                data.jSidx.org.B_XUg.row=size(jS,1)-nb+1:size(jS,1);
+                data.jSidx.org.B_XUg.col=1:nz-nt-np;
+                data.jS_B_XUg=spones(jS(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col));
+                if np
+                    data.jSidx.org.B_P.row=size(jS,1)-nb+1:size(jS,1);
+                    data.jSidx.org.B_P.col=nz-nt-np+1:nz-nt;
+                    data.jS_B_P=spones(jS(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col));
+                else
+                    data.jSidx.org.B_P.row=[];
+                    data.jSidx.org.B_P.col=[];
+                    data.jS_B_P=spones(zeros(nb,0));
+                end
+                if nt
+                    data.jSidx.org.B_T.row=size(jS,1)-nb+1:size(jS,1);
+                    data.jSidx.org.B_T.col=nz-nt+1:nz;
+                    data.jS_B_T=spones(jS(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col));
+                else
+                    data.jSidx.org.B_T.row=[];
+                    data.jSidx.org.B_T.col=[];
+                    data.jS_B_T=spones(zeros(nb,0));
+                end
+            else
+                data.jSidx.org.B_XUg.row=[];
+                data.jSidx.org.B_XUg.col=[];
+                data.jS_B_XUg=spones(zeros(0,nz-nt-np));
                 data.jSidx.org.B_P.row=[];
                 data.jSidx.org.B_P.col=[];
                 data.jS_B_P=spones(zeros(nb,0));
-            end
-            if nt
-                data.jSidx.org.B_T.row=size(jS,1)-nb+1:size(jS,1);
-                data.jSidx.org.B_T.col=nz-nt+1:nz;
-                data.jS_B_T=spones(jS(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col));
-            else
                 data.jSidx.org.B_T.row=[];
                 data.jSidx.org.B_T.col=[];
                 data.jS_B_T=spones(zeros(nb,0));
             end
-        else
-            data.jSidx.org.B_XUg.row=[];
-            data.jSidx.org.B_XUg.col=[];
-            data.jS_B_XUg=spones(zeros(0,nz-nt-np));
-            data.jSidx.org.B_P.row=[];
-            data.jSidx.org.B_P.col=[];
-            data.jS_B_P=spones(zeros(nb,0));
-            data.jSidx.org.B_T.row=[];
-            data.jSidx.org.B_T.col=[];
-            data.jS_B_T=spones(zeros(nb,0));
         end
-
         % Cost (Legrange and mayer) Structure
         dLxu=sparse(M,(M+1)*n+M*m);
         for Li=1:size(sparsity.dLdx,1)
@@ -1074,48 +1077,54 @@ if ~strcmp(options.transcription,'multiple_shooting')
         data.map.spmatsize.hSg=nnz(jS_noB'*jS_noB);
 
         data.hessianStruct=Lz'*Lz+Ez'*Ez+(jS_noB'*jS_noB);
-        data.hessianStruct_resmin=Lz'*Lz+Ez'*Ez+(jS_Hrm'*jS_Hrm);
+        if strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution')
+            data.hessianStruct_resmin=Lz'*Lz+Ez'*Ez+(jS_Hrm'*jS_Hrm);
+        end
         if options.reorderLGR
              data.hessianStruct=data.hessianStruct(data.reorder.z_idx,data.reorder.z_idx);
         end
         data.hessianStruct=tril(data.hessianStruct);
-        data.hessianStruct_resmin=tril(data.hessianStruct_resmin);
+        if strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution')
+            data.hessianStruct_resmin=tril(data.hessianStruct_resmin);
+        end
         
         hS=data.hessianStruct;
-        data.hSidx.org.XUXU.row=1:nz-nt-np;
-        data.hSidx.org.XUXU.col=1:nz-nt-np;
-        data.hS_XUXU=spones(hS(data.hSidx.org.XUXU.row,data.hSidx.org.XUXU.col));
-        if np
-            data.hSidx.org.PXU.row=nz-nt-np+1:nz-nt;
-            data.hSidx.org.PXU.col=1:nz-nt-np;
-            data.hS_PXU=spones(hS(data.hSidx.org.PXU.row,data.hSidx.org.PXU.col));
-            data.hSidx.org.PP.row=nz-nt-np+1:nz-nt;
-            data.hSidx.org.PP.col=nz-nt-np+1:nz-nt;
-            data.hS_PP=spones(hS(data.hSidx.org.PP.row,data.hSidx.org.PP.col));
-        else
-            data.hSidx.org.PXU.row=[];
-            data.hSidx.org.PXU.col=[];
-            data.hS_PXU=zeros(0,nz-nt-np);
-            data.hSidx.org.PP.row=[];
-            data.hSidx.org.PP.col=[];
-            data.hS_PP=zeros(0,0);
+  
+        if isfield(problem,'mpflag') && problem.mpflag
+            data.hSidx.org.XUXU.row=1:nz-nt-np;
+            data.hSidx.org.XUXU.col=1:nz-nt-np;
+            data.hS_XUXU=spones(hS(data.hSidx.org.XUXU.row,data.hSidx.org.XUXU.col));
+            if np
+                data.hSidx.org.PXU.row=nz-nt-np+1:nz-nt;
+                data.hSidx.org.PXU.col=1:nz-nt-np;
+                data.hS_PXU=spones(hS(data.hSidx.org.PXU.row,data.hSidx.org.PXU.col));
+                data.hSidx.org.PP.row=nz-nt-np+1:nz-nt;
+                data.hSidx.org.PP.col=nz-nt-np+1:nz-nt;
+                data.hS_PP=spones(hS(data.hSidx.org.PP.row,data.hSidx.org.PP.col));
+            else
+                data.hSidx.org.PXU.row=[];
+                data.hSidx.org.PXU.col=[];
+                data.hS_PXU=zeros(0,nz-nt-np);
+                data.hSidx.org.PP.row=[];
+                data.hSidx.org.PP.col=[];
+                data.hS_PP=zeros(0,0);
+            end
+            if nt
+                data.hSidx.org.TXU.row=nz-nt+1:nz;
+                data.hSidx.org.TXU.col=1:nz-nt-np;
+                data.hS_TXU=spones(hS(data.hSidx.org.TXU.row,data.hSidx.org.TXU.col));
+                data.hSidx.org.TT.row=nz-nt+1:nz;
+                data.hSidx.org.TT.col=nz-nt+1:nz;
+                data.hS_TT=spones(hS(data.hSidx.org.TT.row,data.hSidx.org.TT.col));
+            else
+                data.hSidx.org.TXU.row=[];
+                data.hSidx.org.TXU.col=[];
+                data.hS_TXU=zeros(0,nz-nt-np);
+                data.hSidx.org.TT.row=[];
+                data.hSidx.org.TT.col=[];
+                data.hS_TT=zeros(0,0);
+            end
         end
-        if nt
-            data.hSidx.org.TXU.row=nz-nt+1:nz;
-            data.hSidx.org.TXU.col=1:nz-nt-np;
-            data.hS_TXU=spones(hS(data.hSidx.org.TXU.row,data.hSidx.org.TXU.col));
-            data.hSidx.org.TT.row=nz-nt+1:nz;
-            data.hSidx.org.TT.col=nz-nt+1:nz;
-            data.hS_TT=spones(hS(data.hSidx.org.TT.row,data.hSidx.org.TT.col));
-        else
-            data.hSidx.org.TXU.row=[];
-            data.hSidx.org.TXU.col=[];
-            data.hS_TXU=zeros(0,nz-nt-np);
-            data.hSidx.org.TT.row=[];
-            data.hSidx.org.TT.col=[];
-            data.hS_TT=zeros(0,0);
-        end
-
         
         data.funcs.hessianstructure  = @hessianstructure;
         data.funcs.hessian           = @computeHessian;
@@ -1206,63 +1215,66 @@ if ~strcmp(options.transcription,'multiple_shooting')
             end
             
            data.jacStruct=spones(jS);
-           data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
+           if strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution')
+                data.jacStruct_resmin=[data.jacStruct(n*M+1:end,:); sparse(ones(n+ng_eq+1,length(infoNLP.zl)))];
+           end
            
-            data.jSidx.org.XUg.row=1:size(jS,1)-nb;
-            data.jSidx.org.XUg.col=1+nt+np:nz;
-            data.jS_XUg=spones(jS(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
-            if np
-                data.jSidx.org.P.row=1:size(jS,1)-nb;
-                data.jSidx.org.P.col=nt+1:nt+np;
-                data.jS_P=spones(jS(data.jSidx.org.P.row,data.jSidx.org.P.col));
-            else
-                data.jSidx.org.P.row=[];
-                data.jSidx.org.P.col=[];
-                data.jS_P=spones(zeros(size(jS,1)-nb,0));
-            end
-            if nt
-                data.jSidx.org.T.row=1:size(jS,1)-nb;
-                data.jSidx.org.T.col=1:nt;
-                data.jS_T=spones(jS(data.jSidx.org.T.row,data.jSidx.org.T.col));
-            else
-                data.jSidx.org.T.row=[];
-                data.jSidx.org.T.col=[];
-                data.jS_T=spones(zeros(size(jS,1)-nb,0));
-            end
-            if nb
-                data.jSidx.org.B_XUg.row=size(jS,1)-nb+1:size(jS,1);
-                data.jSidx.org.B_XUg.col=1+nt+np:nz;
-                data.jS_B_XUg=spones(jS(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col));
+           if isfield(problem,'mpflag') && problem.mpflag
+                data.jSidx.org.XUg.row=1:size(jS,1)-nb;
+                data.jSidx.org.XUg.col=1+nt+np:nz;
+                data.jS_XUg=spones(jS(data.jSidx.org.XUg.row,data.jSidx.org.XUg.col));
                 if np
-                    data.jSidx.org.B_P.row=size(jS,1)-nb+1:size(jS,1);
-                    data.jSidx.org.B_P.col=nt+1:nt+np;
-                    data.jS_B_P=spones(jS(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col));
+                    data.jSidx.org.P.row=1:size(jS,1)-nb;
+                    data.jSidx.org.P.col=nt+1:nt+np;
+                    data.jS_P=spones(jS(data.jSidx.org.P.row,data.jSidx.org.P.col));
                 else
+                    data.jSidx.org.P.row=[];
+                    data.jSidx.org.P.col=[];
+                    data.jS_P=spones(zeros(size(jS,1)-nb,0));
+                end
+                if nt
+                    data.jSidx.org.T.row=1:size(jS,1)-nb;
+                    data.jSidx.org.T.col=1:nt;
+                    data.jS_T=spones(jS(data.jSidx.org.T.row,data.jSidx.org.T.col));
+                else
+                    data.jSidx.org.T.row=[];
+                    data.jSidx.org.T.col=[];
+                    data.jS_T=spones(zeros(size(jS,1)-nb,0));
+                end
+                if nb
+                    data.jSidx.org.B_XUg.row=size(jS,1)-nb+1:size(jS,1);
+                    data.jSidx.org.B_XUg.col=1+nt+np:nz;
+                    data.jS_B_XUg=spones(jS(data.jSidx.org.B_XUg.row,data.jSidx.org.B_XUg.col));
+                    if np
+                        data.jSidx.org.B_P.row=size(jS,1)-nb+1:size(jS,1);
+                        data.jSidx.org.B_P.col=nt+1:nt+np;
+                        data.jS_B_P=spones(jS(data.jSidx.org.B_P.row,data.jSidx.org.B_P.col));
+                    else
+                        data.jSidx.org.B_P.row=[];
+                        data.jSidx.org.B_P.col=[];
+                        data.jS_B_P=spones(zeros(nb,0));
+                    end
+                    if nt
+                        data.jSidx.org.B_T.row=size(jS,1)-nb+1:size(jS,1);
+                        data.jSidx.org.B_T.col=1:nt;
+                        data.jS_B_T=spones(jS(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col));
+                    else
+                        data.jSidx.org.B_T.row=[];
+                        data.jSidx.org.B_T.col=[];
+                        data.jS_B_T=spones(zeros(nb,0));
+                    end
+                else
+                    data.jSidx.org.B_XUg.row=[];
+                    data.jSidx.org.B_XUg.col=[];
+                    data.jS_B_XUg=spones(zeros(0,nz-nt-np));
                     data.jSidx.org.B_P.row=[];
                     data.jSidx.org.B_P.col=[];
                     data.jS_B_P=spones(zeros(nb,0));
-                end
-                if nt
-                    data.jSidx.org.B_T.row=size(jS,1)-nb+1:size(jS,1);
-                    data.jSidx.org.B_T.col=1:nt;
-                    data.jS_B_T=spones(jS(data.jSidx.org.B_T.row,data.jSidx.org.B_T.col));
-                else
                     data.jSidx.org.B_T.row=[];
                     data.jSidx.org.B_T.col=[];
                     data.jS_B_T=spones(zeros(nb,0));
                 end
-            else
-                data.jSidx.org.B_XUg.row=[];
-                data.jSidx.org.B_XUg.col=[];
-                data.jS_B_XUg=spones(zeros(0,nz-nt-np));
-                data.jSidx.org.B_P.row=[];
-                data.jSidx.org.B_P.col=[];
-                data.jS_B_P=spones(zeros(nb,0));
-                data.jSidx.org.B_T.row=[];
-                data.jSidx.org.B_T.col=[];
-                data.jS_B_T=spones(zeros(nb,0));
-            end
-           
+           end
           
            
             %
@@ -1291,40 +1303,42 @@ if ~strcmp(options.transcription,'multiple_shooting')
             data.funcs.hessian           = @computeHessian;
             
             hS=data.hessianStruct;
-            data.hSidx.org.XUXU.row=1+nt+np:nz;
-            data.hSidx.org.XUXU.col=1+nt+np:nz;
-            data.hS_XUXU=spones(hS(data.hSidx.org.XUXU.row,data.hSidx.org.XUXU.col));
-            if np
-                data.hSidx.org.PXU.row=1+nt+np:nz;
-                data.hSidx.org.PXU.col=1+nt:nt+np;
-                data.hS_PXU=spones(hS(data.hSidx.org.PXU.row,data.hSidx.org.PXU.col));
-                data.hSidx.org.PP.row=1+nt:nt+np;
-                data.hSidx.org.PP.col=1+nt:nt+np;
-                data.hS_PP=spones(hS(data.hSidx.org.PP.row,data.hSidx.org.PP.col));
-            else
-                data.hSidx.org.PXU.row=[];
-                data.hSidx.org.PXU.col=[];
-                data.hS_PXU=zeros(0,nz-nt-np);
-                data.hSidx.org.PP.row=[];
-                data.hSidx.org.PP.col=[];
-                data.hS_PP=zeros(0,0);
-            end
-            if nt
-                data.hSidx.org.TXU.row=1+nt+np:nz;
-                data.hSidx.org.TXU.col=1:nt;
-                data.hS_TXU=spones(hS(data.hSidx.org.TXU.row,data.hSidx.org.TXU.col));
-                data.hSidx.org.TT.row=1:nt;
-                data.hSidx.org.TT.col=1:nt;
-                data.hS_TT=spones(hS(data.hSidx.org.TT.row,data.hSidx.org.TT.col));
-            else
-                data.hSidx.org.TXU.row=[];
-                data.hSidx.org.TXU.col=[];
-                data.hS_TXU=zeros(0,nz-nt-np);
-                data.hSidx.org.TT.row=[];
-                data.hSidx.org.TT.col=[];
-                data.hS_TT=zeros(0,0);
-            end
             
+            if isfield(problem,'mpflag') && problem.mpflag
+                data.hSidx.org.XUXU.row=1+nt+np:nz;
+                data.hSidx.org.XUXU.col=1+nt+np:nz;
+                data.hS_XUXU=spones(hS(data.hSidx.org.XUXU.row,data.hSidx.org.XUXU.col));
+                if np
+                    data.hSidx.org.PXU.row=1+nt+np:nz;
+                    data.hSidx.org.PXU.col=1+nt:nt+np;
+                    data.hS_PXU=spones(hS(data.hSidx.org.PXU.row,data.hSidx.org.PXU.col));
+                    data.hSidx.org.PP.row=1+nt:nt+np;
+                    data.hSidx.org.PP.col=1+nt:nt+np;
+                    data.hS_PP=spones(hS(data.hSidx.org.PP.row,data.hSidx.org.PP.col));
+                else
+                    data.hSidx.org.PXU.row=[];
+                    data.hSidx.org.PXU.col=[];
+                    data.hS_PXU=zeros(0,nz-nt-np);
+                    data.hSidx.org.PP.row=[];
+                    data.hSidx.org.PP.col=[];
+                    data.hS_PP=zeros(0,0);
+                end
+                if nt
+                    data.hSidx.org.TXU.row=1+nt+np:nz;
+                    data.hSidx.org.TXU.col=1:nt;
+                    data.hS_TXU=spones(hS(data.hSidx.org.TXU.row,data.hSidx.org.TXU.col));
+                    data.hSidx.org.TT.row=1:nt;
+                    data.hSidx.org.TT.col=1:nt;
+                    data.hS_TT=spones(hS(data.hSidx.org.TT.row,data.hSidx.org.TT.col));
+                else
+                    data.hSidx.org.TXU.row=[];
+                    data.hSidx.org.TXU.col=[];
+                    data.hS_TXU=zeros(0,nz-nt-np);
+                    data.hSidx.org.TT.row=[];
+                    data.hSidx.org.TT.col=[];
+                    data.hS_TT=zeros(0,0);
+                end
+            end
     end
 
     % Format sparsity pattern for Worhp NLP Solver

@@ -61,23 +61,23 @@ if ng
         idx=idx-nt;
     end
     et0=e*dataNLP.FD.vector.g.et0;etf=e*dataNLP.FD.vector.g.etf;ep=dataNLP.FD.vector.g.ep;
-    ex=dataNLP.FD.vector.g.ex;eu=dataNLP.FD.vector.g.eu;ez=dataNLP.FD.vector.g.ez;
+    ex=dataNLP.FD.vector.g.ex;eu=dataNLP.FD.vector.g.eu;%ez=dataNLP.FD.vector.g.ez;
 
     for i=i_st:i_end
        for j=i_st:i
         if j==i
          go=g(X,U,P,DT*T+t0,vdat);
-         gp1=g(X+ex{i}*e*ez(i),U+eu{i}*e*ez(i),P+ep{i}*e*ez(i),(DT+etf(i)-et0(i)).*T+t0+et0(i),vdat);
-         gp2=g(X-ex{j}*e*ez(i),U-eu{j}*e*ez(i),P-ep{j}*e*ez(i),(DT-etf(j)+et0(j)).*T+t0-et0(i),vdat);
+         gp1=g(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i)).*T+t0+et0(i),vdat);
+         gp2=g(X-ex{j}*e,U-eu{j}*e,P-ep{j}*e,(DT-etf(j)+et0(j)).*T+t0-et0(i),vdat);
          gt=(gp2-2*go+gp1).*adjoint_g/e2;
         else
-         gpp=g(X+(ex{i}+ex{j})*e*ez(i),U+(eu{i}+eu{j})*e*ez(i),P+(ep{i}+ep{j})*e*ez(i),...
+         gpp=g(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,...
             (DT+etf(i)+etf(j)-et0(i)-et0(j)).*T+t0+et0(i)+et0(j),vdat);  
-         gpm=g(X+(ex{i}-ex{j})*e*ez(i),U+(eu{i}-eu{j})*e*ez(i),P+(ep{i}-ep{j})*e*ez(i),...
+         gpm=g(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,...
             (DT+etf(i)-etf(j)-et0(i)+et0(j)).*T+t0+et0(i)-et0(j),vdat);
-         gmm=g(X-(ex{i}+ex{j})*e*ez(i),U-(eu{i}+eu{j})*e*ez(i),P-(ep{i}+ep{j})*e*ez(i),...
+         gmm=g(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,...
             (DT-etf(i)-etf(j)+et0(i)+et0(j)).*T+t0-et0(i)-et0(j),vdat);
-         gmp=g(X-(ex{i}-ex{j})*e*ez(i),U-(eu{i}-eu{j})*e*ez(i),P-(ep{i}-ep{j})*e*ez(i),...
+         gmp=g(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,...
             (DT-etf(i)+etf(j)+et0(i)-et0(j)).*T+t0-et0(i)+et0(j),vdat);
          gt=(gpp-gpm+gmm-gmp).*adjoint_g/e2/4;
         end
@@ -90,7 +90,7 @@ end
 % Compute (w'L)zz
 % ----------------
 et0=dataNLP.FD.vector.Ly.et0;etf=dataNLP.FD.vector.Ly.etf;ep=dataNLP.FD.vector.Ly.ep;
-ex=dataNLP.FD.vector.Ly.ex;eu=dataNLP.FD.vector.Ly.eu;ez=dataNLP.FD.vector.Ly.ez;
+ex=dataNLP.FD.vector.Ly.ex;eu=dataNLP.FD.vector.Ly.eu;%ez=dataNLP.FD.vector.Ly.ez;
 
 if nt
     Lzz=spalloc(nz,nz,M*((m+n)*(m+n+1)/2)+nt+np*np);
@@ -106,7 +106,7 @@ else
     idx=idx-nt;
 end
 for i=i_st:i_end
-    dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i}*ez(i);dx1=e*ex{i}*ez(i); du1=e*eu{i}*ez(i);
+    dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i};dx1=e*ex{i}; du1=e*eu{i};
     for j=i_st:i
       if j==i;
         Lo=DT*L(X,Xr,U,Ur,P,DT*T+t0,vdat);
@@ -129,9 +129,9 @@ end
 
 % Compute Ezz
 % ------------
-et0=dataNLP.FD.vector.Ey.et0;etf=dataNLP.FD.vector.Ey.etf;ep=dataNLP.FD.vector.Ey.ep;
-ex0=dataNLP.FD.vector.Ey.ex0;eu0=dataNLP.FD.vector.Ey.eu0;
-exf=dataNLP.FD.vector.Ey.exf;euf=dataNLP.FD.vector.Ey.euf;ez=e*dataNLP.FD.vector.Ey.ez;
+et0=e*dataNLP.FD.vector.Ey.et0;etf=e*dataNLP.FD.vector.Ey.etf;ep=e*dataNLP.FD.vector.Ey.ep;
+ex0=e*dataNLP.FD.vector.Ey.ex0;eu0=e*dataNLP.FD.vector.Ey.eu0;
+exf=e*dataNLP.FD.vector.Ey.exf;euf=e*dataNLP.FD.vector.Ey.euf;%ez=e*dataNLP.FD.vector.Ey.ez;
 
 if nt
     Ezz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
@@ -148,20 +148,20 @@ end
 for i=i_st:i_end
    for j=i_st:i
     if j==i;
-     Ep1=E(x0+ex0(:,i)*ez(i),xf+exf(:,i)*ez(i),u0+eu0(:,i)*ez(i),uf+euf(:,i)*ez(i),p+ep(:,i)*ez(i),t0+et0(:,i),tf+etf(:,i),vdat);
+     Ep1=E(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
      Eo=E(x0,xf,u0,uf,p,t0,tf,vdat);
-     Ep2=E(x0-ex0(:,i)*ez(i),xf-exf(:,i)*ez(i),u0-eu0(:,i)*ez(i),uf-euf(:,i)*ez(i),p-ep(:,i)*ez(i),t0-et0(:,i),tf-etf(:,i),vdat);
+     Ep2=E(x0-ex0(:,i),xf-exf(:,i),u0-eu0(:,i),uf-euf(:,i),p-ep(:,i),t0-et0(:,i),tf-etf(:,i),vdat);
      Ezz(idx(i),idx(j))=(Ep1-2*Eo+Ep2)/e2; 
     else
-     Epp=E(x0+ex0(:,i)*ez(i)+ex0(:,j)*ez(i),xf+exf(:,i)*ez(i)+exf(:,j)*ez(i),u0+eu0(:,i)*ez(i)+eu0(:,j)*ez(i),...
-          uf+euf(:,i)*ez(i)+euf(:,j)*ez(i),p+ep(:,i)*ez(i)+ep(:,j)*ez(i),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
-     Epm=E(x0+ex0(:,i)*ez(i)-ex0(:,j)*ez(i),xf+exf(:,i)*ez(i)-exf(:,j)*ez(i),u0+eu0(:,i)*ez(i)-eu0(:,j)*ez(i),...
-          uf+euf(:,i)*ez(i)-euf(:,j)*ez(i),p+ep(:,i)*ez(i)-ep(:,j)*ez(i),t0+et0(:,i)-et0(:,j),tf+etf(:,i)-etf(:,j),vdat);
+     Epp=E(x0+ex0(:,i)+ex0(:,j),xf+exf(:,i)+exf(:,j),u0+eu0(:,i)+eu0(:,j),...
+          uf+euf(:,i)+euf(:,j),p+ep(:,i)+ep(:,j),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
+     Epm=E(x0+ex0(:,i)-ex0(:,j),xf+exf(:,i)-exf(:,j),u0+eu0(:,i)-eu0(:,j),...
+          uf+euf(:,i)-euf(:,j),p+ep(:,i)-ep(:,j),t0+et0(:,i)-et0(:,j),tf+etf(:,i)-etf(:,j),vdat);
       
-     Emp=E(x0-ex0(:,i)*ez(i)+ex0(:,j)*ez(i),xf-exf(:,i)*ez(i)+exf(:,j)*ez(i),u0-eu0(:,i)*ez(i)+eu0(:,j)*ez(i),...
-          uf-euf(:,i)*ez(i)+euf(:,j)*ez(i),p-ep(:,i)*ez(i)+ep(:,j)*ez(i),t0-et0(:,i)+et0(:,j),tf-etf(:,i)+etf(:,j),vdat);
-     Emm=E(x0-ex0(:,i)*ez(i)-ex0(:,j)*ez(i),xf-exf(:,i)*ez(i)-exf(:,j)*ez(i),u0-eu0(:,i)*ez(i)-eu0(:,j)*ez(i),...
-          uf-euf(:,i)*ez(i)-euf(:,j)*ez(i),p-ep(:,i)*ez(i)-ep(:,j)*ez(i),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
+     Emp=E(x0-ex0(:,i)+ex0(:,j),xf-exf(:,i)+exf(:,j),u0-eu0(:,i)+eu0(:,j),...
+          uf-euf(:,i)+euf(:,j),p-ep(:,i)+ep(:,j),t0-et0(:,i)+et0(:,j),tf-etf(:,i)+etf(:,j),vdat);
+     Emm=E(x0-ex0(:,i)-ex0(:,j),xf-exf(:,i)-exf(:,j),u0-eu0(:,i)-eu0(:,j),...
+          uf-euf(:,i)-euf(:,j),p-ep(:,i)-ep(:,j),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
       
     Ezz(idx(i),idx(j))=(Epp+Emm-Epm-Emp)/e2/4;  
     end
@@ -188,9 +188,9 @@ if nb && (~isfield(dataNLP.options,'resminRep') || ~dataNLP.options.resminRep.co
         i_end=nt+np+(m+n)*2;
         idx=idx-nt;
     end
-    et0=dataNLP.FD.vector.b.et0;etf=dataNLP.FD.vector.b.etf;ep=dataNLP.FD.vector.b.ep;
-    ex0=dataNLP.FD.vector.b.ex0;eu0=dataNLP.FD.vector.b.eu0;
-    exf=dataNLP.FD.vector.b.exf;euf=dataNLP.FD.vector.b.euf;ez=e*dataNLP.FD.vector.b.ez;
+    et0=e*dataNLP.FD.vector.b.et0;etf=e*dataNLP.FD.vector.b.etf;ep=e*dataNLP.FD.vector.b.ep;
+    ex0=e*dataNLP.FD.vector.b.ex0;eu0=e*dataNLP.FD.vector.b.eu0;
+    exf=e*dataNLP.FD.vector.b.exf;euf=e*dataNLP.FD.vector.b.euf;%ez=e*dataNLP.FD.vector.b.ez;
 
     adjoint=lambda(ngActive+nrc+(~~nb):ngActive+nrc+nb).';
 
@@ -198,19 +198,19 @@ if nb && (~isfield(dataNLP.options,'resminRep') || ~dataNLP.options.resminRep.co
        for j=i_st:i
         if j==i
          bo=b(x0,xf,u0,uf,p,t0,tf,vdat);
-         bp1=b(x0+ex0(:,i)*ez(i),xf+exf(:,i)*ez(i),u0+eu0(:,i)*ez(i),uf+euf(:,i)*ez(i),p+ep(:,i)*ez(i),t0+et0(:,i)*ez(i),tf+etf(:,i)*ez(i),vdat);
-         bp2=b(x0-ex0(:,j)*ez(i),xf-exf(:,j)*ez(i),u0-eu0(:,j)*ez(i),uf-euf(:,j)*ez(i),p-ep(:,j)*ez(i),t0-et0(:,i)*ez(i),tf-etf(:,j)*ez(i),vdat);
+         bp1=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
+         bp2=b(x0-ex0(:,j),xf-exf(:,j),u0-eu0(:,j),uf-euf(:,j),p-ep(:,j),t0-et0(:,i),tf-etf(:,j),vdat);
          bt=(bp2-2*bo+bp1).*adjoint'/e2; 
          bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz); 
         else
-        bpp=b(x0+ex0(:,i)*ez(i)+ex0(:,j)*ez(i),xf+exf(:,i)*ez(i)+exf(:,j)*ez(i),u0+eu0(:,i)*ez(i)+eu0(:,j)*ez(i),...
-              uf+euf(:,i)*ez(i)+euf(:,j)*ez(i),p+ep(:,i)*ez(i)+ep(:,j)*ez(i),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
-        bpm=b(x0+ex0(:,i)*ez(i)-ex0(:,j)*ez(i),xf+exf(:,i)*ez(i)-exf(:,j)*ez(i),u0+eu0(:,i)*ez(i)-eu0(:,j)*ez(i),...
-              uf+euf(:,i)*ez(i)-euf(:,j)*ez(i),p+ep(:,i)*ez(i)-ep(:,j)*ez(i),t0+et0(:,i)-et0(:,j),tf+etf(:,i)-etf(:,j),vdat);
-        bmp=b(x0-ex0(:,i)*ez(i)+ex0(:,j)*ez(i),xf-exf(:,i)*ez(i)+exf(:,j)*ez(i),u0-eu0(:,i)*ez(i)+eu0(:,j)*ez(i),...
-              uf-euf(:,i)*ez(i)+euf(:,j)*ez(i),p-ep(:,i)*ez(i)+ep(:,j)*ez(i),t0-et0(:,i)+et0(:,j),tf-etf(:,i)+etf(:,j),vdat);
-        bmm=b(x0-ex0(:,i)*ez(i)-ex0(:,j)*ez(i),xf-exf(:,i)*ez(i)-exf(:,j)*ez(i),u0-eu0(:,i)*ez(i)-eu0(:,j)*ez(i),...
-              uf-euf(:,i)*ez(i)-euf(:,j)*ez(i),p-ep(:,i)*ez(i)-ep(:,j)*ez(i),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
+        bpp=b(x0+ex0(:,i)+ex0(:,j),xf+exf(:,i)+exf(:,j),u0+eu0(:,i)+eu0(:,j),...
+              uf+euf(:,i)+euf(:,j),p+ep(:,i)+ep(:,j),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
+        bpm=b(x0+ex0(:,i)-ex0(:,j),xf+exf(:,i)-exf(:,j),u0+eu0(:,i)-eu0(:,j),...
+              uf+euf(:,i)-euf(:,j),p+ep(:,i)-ep(:,j),t0+et0(:,i)-et0(:,j),tf+etf(:,i)-etf(:,j),vdat);
+        bmp=b(x0-ex0(:,i)+ex0(:,j),xf-exf(:,i)+exf(:,j),u0-eu0(:,i)+eu0(:,j),...
+              uf-euf(:,i)+euf(:,j),p-ep(:,i)+ep(:,j),t0-et0(:,i)+et0(:,j),tf-etf(:,i)+etf(:,j),vdat);
+        bmm=b(x0-ex0(:,i)-ex0(:,j),xf-exf(:,i)-exf(:,j),u0-eu0(:,i)-eu0(:,j),...
+              uf-euf(:,i)-euf(:,j),p-ep(:,i)-ep(:,j),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
         bt=(bpp-bpm+bmm-bmp).*adjoint'/e2/4; 
 
         bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz); 
@@ -223,7 +223,7 @@ end
 % Compute Reszz
 % ----------------                             
 et0=dataNLP.FD.vector.Ly.et0;etf=dataNLP.FD.vector.Ly.etf;ep=dataNLP.FD.vector.Ly.ep;
-ex=dataNLP.FD.vector.Ly.ex;eu=dataNLP.FD.vector.Ly.eu;ez=dataNLP.FD.vector.Ly.ez;
+ex=dataNLP.FD.vector.Ly.ex;eu=dataNLP.FD.vector.Ly.eu;%ez=dataNLP.FD.vector.Ly.ez;
 
 if nt
     ResNormz=spalloc(nz,nz,M*((m+n)*(m+n+1)/2)+nt+np*np);
@@ -246,7 +246,7 @@ adjoint_Res=lambda(ngActive+nrc+nb+2:ngActive+nrc+nb+1+n_res);
 for k1=1:size(data.idx_perturb_hes,2)
     for k2=1:k1
         for i=i_st:i_end
-            dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i}*ez(i);dx1=e*ex{i}*ez(i); du1=e*eu{i}*ez(i);
+            dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i};dx1=e*ex{i}; du1=e*eu{i};
             if k1==k2
                 j_end=i;
             else

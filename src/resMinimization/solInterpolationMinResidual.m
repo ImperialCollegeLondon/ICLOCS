@@ -21,8 +21,11 @@ function [ varargout ] = solInterpolationMinResidual( problem,solution,t_list,op
 
 auxdata = transcribeResMin( t_list,options,dataNLP );
 
-        
-auxdata.cost_org=solution.cost;
+if isfield(solution.cost,'J')
+    auxdata.cost_org=solution.cost.J;
+else
+    auxdata.cost_org=solution.cost;
+end
 auxdata.tf_org=solution.tf;
 
 switch dataNLP.options.discretization
