@@ -46,14 +46,14 @@ Jaf=[];
 
 if df.flag && ng && dg.flag
     [ fz,Jf ] = jacConst_LGR_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0, tf, T, e, DT_ratio_diff, DTLP, vdat, data );
-    [ gz ] = jacConst_LGR_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
+    [ gz ] = jacConst_LGR_AN_G( dg, gz, M, n, m, nt, np, ng, nz, X, U, P, t0, tf, T,  e, vdat, data );
 elseif ~df.flag && ng && ~dg.flag && size(data.FD.index.f,2)==size(data.FD.index.g,2)
     [ fz,gz,Jf ] = jacConst_LGR_FD_FG( fz, gz, M, n, ng, nz, fg, X, U, P, t0, tf, T, e, DT_ratio_diff, DTLP, vdat, data );
 elseif df.flag 
     [ fz,Jf ] = jacConst_LGR_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0, tf, T, e, DT_ratio_diff, DTLP, vdat, data );
     if ng
         if dg.flag
-            [ gz ] = jacConst_LGR_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
+            [ gz ] = jacConst_LGR_AN_G( dg, gz, M, n, m, nt, np, ng, nz, X, U, P, t0, tf, T,  e, vdat, data );
         else
             [ gz ] = jacConst_LGR_FD_G( gz, M, ng, nz, g, X, U, P, t0, tf, T, e, vdat, data );
         end
@@ -62,7 +62,7 @@ elseif ~df.flag
     [ fz,Jf ] = jacConst_LGR_FD_F( fz, M, n, nz, f, X, U, P, t0, tf, T, e, DT_ratio_diff, DTLP, vdat, data );
     if ng
         if dg.flag
-            [ gz ] = jacConst_LGR_AN_G( dg, gz, M, nt, np, ng, nz, T, data );
+            [ gz ] = jacConst_LGR_AN_G( dg, gz, M, n, m, nt, np, ng, nz, X, U, P, t0, tf, T,  e, vdat, data );
         else
             [ gz ] = jacConst_LGR_FD_G( gz, M, ng, nz, g, X, U, P, t0, tf, T, e, vdat, data );
         end

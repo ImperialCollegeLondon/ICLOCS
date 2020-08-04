@@ -616,7 +616,7 @@ if options.scaling
         data.data.Pscale=problem.parameters.scales;
         data.data.Pscale_back=problem.parameters.scales_back;
         data.data.Pshift=problem.parameters.shifts;
-        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
+        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar && nt==0
             data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale data.data.Pscale ];
             data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale data.data.Pscale ];
         else
@@ -624,7 +624,7 @@ if options.scaling
             data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale data.data.Pscale data.data.Tscale data.data.Tscale];
         end
     else
-        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar
+        if isfield(options,'runWithoutTimeVar') && options.runWithoutTimeVar && nt==0
             data.data.Allscale_fgL=[data.data.Xscale data.data.Uscale ];
             data.data.Allscale_bE=[data.data.Xscale data.data.Xscale data.data.Uscale data.data.Uscale ];
         else

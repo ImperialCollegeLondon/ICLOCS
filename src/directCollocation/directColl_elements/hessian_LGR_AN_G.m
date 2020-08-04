@@ -1,4 +1,4 @@
-function [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data )
+function [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, X, U, P, T, DT, k0, adjoint_g, data )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 

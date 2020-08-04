@@ -1,4 +1,4 @@
-function [ gz ] = jacConst_LGR_AN_G( dg, gz, M, nt, np, ng, nz, T, data )
+function [ gz ] = jacConst_LGR_AN_G( dg, gz, M, n, m, nt, np, ng, nz, X, U, P, t0, tf, T, e, vdat, data )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 

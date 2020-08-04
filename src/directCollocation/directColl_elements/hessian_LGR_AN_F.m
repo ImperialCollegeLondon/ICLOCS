@@ -1,10 +1,10 @@
-function [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, adjoint_f, alpha_j, beta_j, vdat, data )
+function [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, DT, adjoint_f, alpha_j, beta_j, vdat, data )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
   idx=data.FD.index.f; 
   nfd=size(idx,2);  % It works when the structure is determined for the worst case (not with random variables)
-  
+  e2=e*e;
   if ~isempty(df{end})
       for i=1:nfd
        for j=1:i

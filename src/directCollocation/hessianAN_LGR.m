@@ -48,7 +48,7 @@ hessianLagrangian=data.analyticDeriv.hessianLagrangian;
 
 
 % Define some useful variables
-[nt,np,n,m,ng,nb,M]=deal(data.sizes{1:7});
+[nt,np,n,m,ng,nb,M,N,ns,npd,npdu,npduidx,nps,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{1:17});
 nz=nt+np+(M+1)*n+M*m;                              % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
 Gamma_1toN=reshape(data.lambda(1:M*n),M,n);
@@ -71,28 +71,28 @@ DT_ratio_diff=repmat(data.tau_segment_ratio_diff,1,n);
 
 if ng
     adjoint_g=zeros(ng,M);
-    adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
+    adjoint_g(logical(data.gActiveIdx'))=data.lambda(n*M+1:n*M+ngActive);
     adjoint_g=adjoint_g';
 end
 
 if ~isempty(Hf) && ng && ~isempty(Hg)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, adjoint_f, alpha_j, beta_j, vdat, data );
+    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, DT, adjoint_f, alpha_j, beta_j, vdat, data );
     [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
-    [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+    [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, X, U, P, T, DT, k0, adjoint_g, data );
 elseif (isempty(Hf)) && ng && (isempty(Hg)) && size(data.FD.index.f,2)==size(data.FD.index.g,2)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
     [ fzz,gzz ] = hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
 elseif ~isempty(Hf) 
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
-    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, adjoint_f, alpha_j, beta_j, vdat, data );
+    [ fzz ] = hessian_LGR_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, T, k0, e, DTLP, DT, adjoint_f, alpha_j, beta_j, vdat, data );
     if ng
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         if ~isempty(Hg) 
             [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
-            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, X, U, P, T, DT, k0, adjoint_g, data );
         else
             [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
         end
@@ -106,7 +106,7 @@ elseif isempty(Hf)
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         if ~isempty(Hg) 
             [~,dg,~]=jacConst(f,g,X,U,P,t,b,x0,xf,u0,uf,p,tf,t0,data);
-            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, T, k0, adjoint_g, data );
+            [ gzz ] = hessian_LGR_AN_G( gzz, dg, Hg, M, nt, ng, nz, X, U, P, T, DT, k0, adjoint_g, data );
         else
             [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
         end
