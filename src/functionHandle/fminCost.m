@@ -35,7 +35,8 @@ if nargout>1
     GC=costGradient(z,data);
     
     if nargout>2
-        HC=costHessian(z,data,sol.JL);
+%         HC=costHessian(z,data,sol.JL);
+        HC=computeCostHessian(z,data);
     end
     
 end

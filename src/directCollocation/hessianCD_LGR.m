@@ -1,4 +1,4 @@
-function [Lzz,Ezz,fzz,gzz,bzz]=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
+function [varargout]=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
 %  It evaluates the Hessian of the Lagrangian with finite diferences
 %  considering central difference formula
 %
@@ -31,11 +31,7 @@ function [Lzz,Ezz,fzz,gzz,bzz]=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;                              % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
-Gamma_1toN=reshape(data.lambda(1:M*n),M,n);
-adjoint_f=Gamma_1toN;
-adjoint_g=zeros(M,ng);
-adjoint_g(logical(data.gActiveIdx))=data.lambda(n*M+1:n*M+ngActive);
-adjoint_b=data.lambda((M*n+ngActive+nrc+1):end);
+
 
 vdat=data.data;
 fg=vdat.functionfg;
@@ -49,59 +45,78 @@ DT_ratio_diff=repmat(data.tau_segment_ratio_diff,1,n);
 e=data.options.perturbation.H;
 e2=e*e;                     % Pertubation size
 
-% Compute fzz and gzz
-% ------------
 
-
-
-if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-    fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-    gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-    [ fzz,gzz ] =hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
-else
-    fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-   [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
-
-    if ng
-        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-        [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
+if nargout==2 || nargout==5
+    % Compute (w'L)zz
+    % ----------------
+    if data.FD.FcnTypes.Ltype
+        Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
+        [ Lzz ] = hessian_LGR_CD_wL( Lzz, nz, L, X, Xr, U, Ur, P, k0, T, DT, e, e2, vdat, data );
     else
-        gzz=sparse(nz,nz);
+        Lzz=sparse(nz,nz);
+    end
+
+    % Compute Ezz
+    % ------------
+    if data.FD.FcnTypes.Etype
+        Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
+        [ Ezz ] = hessian_LGR_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
+    else
+        Ezz=sparse(nz,nz);
     end
 end
-  
-% Compute (w'L)zz
-% ----------------
-if data.FD.FcnTypes.Ltype
-    Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
-    [ Lzz ] = hessian_LGR_CD_wL( Lzz, nz, L, X, Xr, U, Ur, P, k0, T, DT, e, e2, vdat, data );
-else
-    Lzz=sparse(nz,nz);
-end
 
-% Compute Ezz
-% ------------
-if data.FD.FcnTypes.Etype
-    Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
-    [ Ezz ] = hessian_LGR_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
-else
-    Ezz=sparse(nz,nz);
-end
+if nargout==3 || nargout==5
+    Gamma_1toN=reshape(data.lambda(1:M*n),M,n);
+    adjoint_f=Gamma_1toN;
+    adjoint_g=zeros(M,ng);
+    adjoint_g(logical(data.gActiveIdx))=data.lambda(n*M+1:n*M+ngActive);
+    adjoint_b=data.lambda((M*n+ngActive+nrc+1):end);
+    % Compute fzz and gzz
+    % ------------
+    if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
+        fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
+        [ fzz,gzz ] =hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+    else
+        fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+       [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
 
-% Compute bzz
-% ------------
-if nb
-    bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-    [ bzz ] = hessian_LGR_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
-else
-    bzz=sparse(nz,nz);
-end
+        if ng
+            gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
+            [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
+        else
+            gzz=sparse(nz,nz);
+        end
+    end
 
+    % Compute bzz
+    % ------------
+    if nb
+        bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+        [ bzz ] = hessian_LGR_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
+    else
+        bzz=sparse(nz,nz);
+    end
+end
 
 % Return the Hessian of the Lagrangian
 % -------------------------------------
 % hessian=data.sigma*(Lzz+Ezz)-fzz+gzz+bzz;
-
-
+switch nargout
+    case 2
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+    case 3
+        varargout{1}=fzz;
+        varargout{2}=gzz; 
+        varargout{3}=bzz; 
+    case 5
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fzz;
+        varargout{4}=gzz; 
+        varargout{5}=bzz; 
+end
 %------------- END OF CODE --------------
 

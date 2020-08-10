@@ -172,7 +172,19 @@ try
             else
                 solution=sol{phaseNo}.jacConst;
             end
-
+            
+        case{'costHessian'}
+            
+          if strcmp(data.options.derivatives,'analytic') && (~isfield(data.options,'forceNumericHes') || ~data.options.forceNumericHes)
+                [Lzz,Ezz]=hessianAN(L,f,g,sol{phaseNo}.Jf,sol{phaseNo}.JL,X,U,P,tau,E,b,x0,...
+                                                        xf,u0,uf,p,t0,tf,data);          
+          elseif strcmp(data.options.derivatives,'adigator')
+                [Lzz,Ezz]=hessianCDAdigator(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+          else
+                [Lzz,Ezz]=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+          end
+          solution=Lzz+Ezz;
+          
         case{'hessian'}
             
           if strcmp(data.options.derivatives,'analytic') && (~isfield(data.options,'forceNumericHes') || ~data.options.forceNumericHes)
@@ -222,6 +234,6 @@ try
     end
 
 catch
-    warning(['Error encountered when evaluating' required 'function'])
+    warning(['Error encountered when evaluating ' required ' function'])
     pause
 end

@@ -1,4 +1,4 @@
-function [C,Ceq,jacC,jacCeq]=fminConst(z,data,nlp)
+function [Hout]=fminHessian(z,lambda,data,nlp)
 %FMINCONST - Return the constraints and jacobian of the constraints for fmincon
 %
 % Syntax:  [C Ceq jacC jacCeq]=fminConst(z,data,NLP)
@@ -32,36 +32,13 @@ function [C,Ceq,jacC,jacCeq]=fminConst(z,data,nlp)
 
 
 [nt,np,n,m,ng,nb,M]=deal(data.sizes{1:7}); % Get some parameters
-const=constraintFunction(z,data);          % Evaluate the constraints
-jac=constraintJacobian(z,data);          % Evaluate the constraint jacobian
-% nnod=n*M;
-nci=(ng || nb);
-% 
-% Ceq=const(1:nnod);
-% 
-% if nci
-%  flag_eq=(nlp.cu(nnod+1:end)-nlp.cl(nnod+1:end)==0);
-%  ind_eq=find(flag_eq); 
-%  ind_ineq=find(~flag_eq);
-%  Ceq=[Ceq;const(nnod+ind_eq)-nlp.cu(nnod+ind_eq)]; 
-%  C=[const(nnod+ind_ineq)-nlp.cu(nnod+ind_ineq);-const(nnod+ind_ineq)+nlp.cl(nnod+ind_ineq)];
-% else
-%  C=[];   
-% end    
+lambda_full=zeros(size(nlp.cl,1),1);
+lambda_full([nlp.ind_eqODE;nlp.ind_eq])=lambda.eqnonlin;
+n_neq=length(nlp.ind_ineq);
+lambda_full(nlp.ind_ineq)=lambda.ineqnonlin(1:n_neq)+lambda.ineqnonlin(1+n_neq:n_neq*2);
  
-Ceq=[const(nlp.ind_eqODE);const(nlp.nnod+nlp.ind_eq)-nlp.cu(nlp.nnod+nlp.ind_eq)];
-C=[const(nlp.nnod+nlp.ind_ineq)-nlp.cu(nlp.nnod+nlp.ind_ineq);-const(nlp.nnod+nlp.ind_ineq)+nlp.cl(nlp.nnod+nlp.ind_ineq)];
+Hes=computeHessian(z,1,lambda_full,data);          % Evaluate the constraints
+Hout = triu(Hes.',1) + tril(Hes) ;
 
-
-
-if nargout>2
-    jacCeq=jac(1:nlp.nnod,:)';
-    if  nci
-     jacCeq=[jacCeq,jac(nlp.nnod+nlp.ind_eq,:)' ];
-     jacC=jac(nlp.nnod+nlp.ind_ineq,:)'; 
-    else
-     jacC=[];
-    end
-end
 
 

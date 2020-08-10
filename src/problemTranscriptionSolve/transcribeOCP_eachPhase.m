@@ -806,6 +806,8 @@ if strcmp(options.transcription,'multiple_shooting')
 elseif strcmp(options.transcription,'direct_collocation')
     infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
     infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
+%     infoNLP.cl=[kron(ones(M,1),zeros(n,1));glAll(gAllidx);rcl(:);bl(:)];
+%     infoNLP.cu=[kron(ones(M,1),zeros(n,1));guAll(gAllidx);rcu(:);bu(:)];
 else
 %     if options.scaling 
 %         discErrorTol_Full= scale_variables( discErrorTol_Full, data.data.Xscale, 0 ).^2;
@@ -816,7 +818,7 @@ else
         discErrorTol_Full=discErrorTol_Full.^2;
 %     end
     if any(discErrorTol_Full<eps)
-        error('Integral of the residual errors allowed must be strictly larger than machine precision');
+        error('Integral of the residual errors squared allowed must be strictly larger than machine precision');
     else
         if strcmp(options.min_res_mode,'directCostMin')
             discErrorTol_Full=discErrorTol_Full';
@@ -1525,6 +1527,14 @@ end
       data.jacStruct=data.jacStruct(data.reorder.vert_idx,data.reorder.z_idx);
   end
   
+  % Separate Ceq and Cneq
+    infoNLP.nnod=n*M;
+    flag_eq=(infoNLP.cu(infoNLP.nnod+1:end)-infoNLP.cl(infoNLP.nnod+1:end)==0);
+    infoNLP.ind_eqODE=1:infoNLP.nnod;
+    infoNLP.ind_eq=find(flag_eq); 
+    infoNLP.ind_ineq=find(~flag_eq);
+
+  
   data.infoNLP=infoNLP;
 
   if strcmp(options.transcription,'integral_res_min')
@@ -1569,6 +1579,9 @@ end
   end
 
   
+  
+
+ 
 % Check syntax of user defined dynamics and path constraints.
 data=checkDynamics( infoNLP.z0,data );
 

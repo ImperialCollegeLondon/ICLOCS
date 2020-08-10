@@ -31,11 +31,6 @@ function [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,d
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;                           % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
-lambda=data.lambda(:);
-adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)';
-adjoint_g=zeros(ng,M);
-adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
-adjoint_g=adjoint_g';
 vdat=data.data;
 DT=tf-t0;
 fg=vdat.functionfg;
@@ -44,65 +39,89 @@ e=data.options.perturbation.H;
 e2=e*e;                     % Pertubation size
 %
 
-% Compute fzz and gzz
-% ------------
-
-
-
-if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-    fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-    gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-    [ fzz,gzz ] = hessian_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, t0, T, DT, e, e2, vdat, data );
-else
-   fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-   [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT, e, e2, vdat, data );
-
-    if ng
-        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-        [ gzz ] = hessian_CD_G( gzz, M, ng, nz, g, X, U, P, t0, T, DT, e, e2, adjoint_g, vdat, data );
+if nargout==2 || nargout==5
+    % Compute (w'L)zz
+    % ----------------
+    if data.FD.FcnTypes.Ltype
+        Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
+        [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
     else
-        gzz=sparse(nz,nz);
+        Lzz=sparse(nz,nz);
+    end
+
+
+    % Compute Ezz
+    % ------------
+    if data.FD.FcnTypes.Etype
+        Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
+        [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
+    else
+        Ezz=sparse(nz,nz);
     end
 end
 
-% Compute (w'L)zz
-% ----------------
-if data.FD.FcnTypes.Ltype
-    Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
-    [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
-else
-    Lzz=sparse(nz,nz);
+
+if nargout==3 || nargout==5
+    
+    lambda=data.lambda(:);
+    adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)';
+    adjoint_g=zeros(ng,M);
+    adjoint_g(logical(data.gActiveIdx'))=lambda(n*M+1:n*M+ngActive);
+    adjoint_g=adjoint_g';
+    % Compute fzz and gzz
+    % ------------
+
+    if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
+        fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
+        [ fzz,gzz ] = hessian_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, t0, T, DT, e, e2, vdat, data );
+    else
+       fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+       [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT, e, e2, vdat, data );
+
+        if ng
+            gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
+            [ gzz ] = hessian_CD_G( gzz, M, ng, nz, g, X, U, P, t0, T, DT, e, e2, adjoint_g, vdat, data );
+        else
+            gzz=sparse(nz,nz);
+        end
+    end
+
+
+
+
+    % Compute bzz
+    % ------------
+
+    if nb
+        bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+        adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
+        [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
+    else
+        bzz=sparse(nz,nz);
+    end
 end
-
-
-% Compute Ezz
-% ------------
-if data.FD.FcnTypes.Etype
-    Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
-    [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
-else
-    Ezz=sparse(nz,nz);
-end
-
-
-% Compute bzz
-% ------------
-
-if nb
-    bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-    adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
-    [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
-else
-    bzz=sparse(nz,nz);
-end
-
 
 % Return the Hessian of the Lagrangian
 % -------------------------------------
 % hessc=data.sigma*(Lzz+Ezz)+fzz+gzz+bzz;
 % hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
 % hessian=tril(hessc);
-
+switch nargout
+    case 2
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+    case 3
+        varargout{1}=fzz;
+        varargout{2}=gzz; 
+        varargout{3}=bzz; 
+    case 5
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fzz;
+        varargout{4}=gzz; 
+        varargout{5}=bzz; 
+end
 
 %------------- END OF CODE --------------
 

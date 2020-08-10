@@ -33,7 +33,7 @@ nt=data.sizes{1};
 
 % data.QPSolverCheck= (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
 data.QPSolverCheck= ~nt && (data.FD.FcnTypes.Ltype~=1) && (data.FD.FcnTypes.Etype~=1) && (data.FD.FcnTypes.Ftype~=1 && data.FD.FcnTypes.Ftype~=3) && (data.FD.FcnTypes.Gtype~=1 && data.FD.FcnTypes.Gtype~=3) && (data.FD.FcnTypes.Btype~=1 && data.FD.FcnTypes.Btype~=3);
-if data.QPSolverCheck
+if data.QPSolverCheck && strcmp(data_org.options.transcription,'direct_collocation')
     
     z_zeros=zeros(size(z0));
     

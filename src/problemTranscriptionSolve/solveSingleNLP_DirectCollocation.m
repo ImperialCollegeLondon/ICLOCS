@@ -76,8 +76,11 @@ switch(data.options.NLPsolver)
             error('To enable the use of fmincon, see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html on how to get it configured')
         else
             tA=tic;
+            if isfield(data.options.fmincon,'hessian_approximation') && strcmp(data.options.fmincon.hessian_approximation,'exact')
+                data.options.fmincon.optimoptions=optimoptions(data.options.fmincon.optimoptions,'HessianFcn',@(z,lambda)fminHessian(z,lambda,data,NLP));
+            end
             [z,cost,status,output,multipliers]=fmincon(@(z)fminCost(z,data),NLP.z0,...
-                [],[],[],[],NLP.zl,NLP.zu,@(z)fminConst(z,data,NLP),data.options.fmincon);
+                [],[],[],[],NLP.zl,NLP.zu,@(z)fminConst(z,data,NLP),data.options.fmincon.optimoptions);
             tB=toc(tA);
             if  ((strcmp(data.options.discretization,'globalLGR')) || (strcmp(data.options.discretization,'hpLGR'))) && data.options.reorderLGR
                solution.z_org=z;
@@ -87,7 +90,7 @@ switch(data.options.NLPsolver)
             ni=output.iterations;
             solution.multipliers.lambda=multipliers.eqnonlin;
             solution.iterates=ni;
-            solution.cost=cost;
+            solution.cost.J=cost;
         end
     case{'NOMAD'}                               % Solve the NLP using FMINCON
         tA=tic;
@@ -110,7 +113,7 @@ switch(data.options.NLPsolver)
         end
         ni=output.iter;
         solution.iterates=ni;
-        solution.cost=cost;
+        solution.cost.J=cost;
         
     case{'builtinSQP'}
         SQPoptions=data.options.SQP;
