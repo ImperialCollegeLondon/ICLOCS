@@ -79,7 +79,7 @@ switch(data.options.NLPsolver)
             if isfield(data.options.fmincon,'hessian_approximation') && strcmp(data.options.fmincon.hessian_approximation,'exact')
                 data.options.fmincon.optimoptions=optimoptions(data.options.fmincon.optimoptions,'HessianFcn',@(z,lambda)fminHessian(z,lambda,data,NLP));
             end
-            [z,cost,status,output,multipliers]=fmincon(@(z)fminCost(z,data),NLP.z0,...
+            [z,cost,status.status,output,multipliers]=fmincon(@(z)fminCost(z,data),NLP.z0,...
                 [],[],[],[],NLP.zl,NLP.zu,@(z)fminConst(z,data,NLP),data.options.fmincon.optimoptions);
             tB=toc(tA);
             if  ((strcmp(data.options.discretization,'globalLGR')) || (strcmp(data.options.discretization,'hpLGR'))) && data.options.reorderLGR
