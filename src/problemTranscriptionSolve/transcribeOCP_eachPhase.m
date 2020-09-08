@@ -208,7 +208,7 @@ else
             end
         elseif strcmp(options.discretization,'discrete')
             if N==0
-                M=M+1;
+                M=M;
                 N=M;
                 ns=1;
             end

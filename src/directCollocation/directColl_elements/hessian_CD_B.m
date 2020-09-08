@@ -1,4 +1,5 @@
 function [ bzz ] = hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint, vdat, data )
+
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -26,7 +27,7 @@ for i=1:nfd
           uf-euf(:,i)-euf(:,j),p-ep(:,i)-ep(:,j),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
     bt=(bpp-bpm+bmm-bmp).*adjoint'/e2/4; 
    
-    bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz); 
+    bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz);
     end
    end
 end
