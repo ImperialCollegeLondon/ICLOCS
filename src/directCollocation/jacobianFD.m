@@ -42,6 +42,9 @@ else
     end
 end
 
+if ng && strcmp(data.options.discretization,'discrete')
+    gz(end-ng+1:end,:)=0;
+end
 % Compute rcz
 %------------
 
