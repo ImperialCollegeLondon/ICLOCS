@@ -384,7 +384,12 @@ else
         t0=dataNLP.t0;
     end
 
-    T=(tf-t0)*[0;dataNLP.tau_inc]*dataNLP.Nm/ns+t0;
+    if strcmp(dataNLP.options.discretization,'discrete') 
+         T=(tf-t0)*[0;dataNLP.tau_inc]*(dataNLP.Nm-1)/ns+t0;
+    else
+         T=(tf-t0)*[0;dataNLP.tau_inc]*dataNLP.Nm/ns+t0;
+    end
+   
     Tdec=T(1:ns:end);
     solution.Tdec=Tdec;
     
@@ -1025,7 +1030,7 @@ end
 
 F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
 if ng_eq
-    G_eq=g(Xg,Ug,P,tg,vdat);
+    G_eq=g_eq(Xg,Ug,P,tg,vdat);
     G_eq=G_eq(:,1:ng_eq);
 else
     G_eq=[];
@@ -1366,7 +1371,7 @@ end
 
 F=f(Xg,Ug,P,tg,vdat);           % Function evaluations.
 if ng_eq
-    G_eq=g(Xg,Ug,P,tg,vdat);
+    G_eq=g_eq(Xg,Ug,P,tg,vdat);
     G_eq=G_eq(:,1:ng_eq);
 else
     G_eq=[];
@@ -1374,6 +1379,9 @@ end
 
 Res=[dXg-F,G_eq];
 
+if size(DT,2)==1
+    DT=DT';
+end
 r_seg=DT/2.*transpose(sum_nps_quad*(repmat([LGRweights{1, idx_quad(1)};0],nps,1).*(Res.^2)));
 r=sum(r_seg,2);
 

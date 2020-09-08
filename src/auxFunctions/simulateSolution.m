@@ -55,6 +55,18 @@ elseif nargin==5
     solution.Xp(state_rem)=[];
     x0=solution.x0;
     x0(state_rem)=[];
+elseif nargin==6
+    problem=varargin{1};
+    solution=varargin{2};
+    odesolver=varargin{3};
+    tstep=varargin{4};
+    T=solution.t0:tstep:solution.tf;
+    s_i_swarp=varargin{6};
+    state_add=s_i_swarp(2,:);
+    input_add=s_i_swarp(1,:);
+    solution.Xp(state_add)=solution.Up(input_add);
+    solution.Up(input_add)=solution.dUp(input_add);
+    x0=[solution.x0 solution.U(1,input_add)];
 else
     error('Number of input parameter to the simulation function not vaild');
 end

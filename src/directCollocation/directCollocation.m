@@ -85,7 +85,11 @@ try
 
 
     % if strcmp(data.options.transcription,'discrete'); tf=1; t0=0; end
-    tau=[0;data.tau_inc]*data.Nm/ns;
+    if strcmp(data.options.discretization,'discrete') 
+        tau=[0;data.tau_inc]*(data.Nm-1)/ns;
+    else
+        tau=[0;data.tau_inc]*data.Nm/ns;
+    end
     t=(tf-t0)*tau+t0;
     % t=(tf-t0)*tau+k0;
 
@@ -234,6 +238,7 @@ try
     end
 
 catch
+    
     warning(['Error encountered when evaluating ' required ' function'])
     pause
 end

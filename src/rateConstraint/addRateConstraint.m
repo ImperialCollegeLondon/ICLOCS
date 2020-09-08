@@ -111,15 +111,27 @@ if nrc
         end
         for i=1:nu
             if ~isinf(data.data.url(i)) && data.data.url(i)~=data.data.uru(i)
-                cl(:,k)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.url(i);
+                if size(AxLGR,2)==size(u,1)
+                    cl(:,k)=AxLGR*u(:,i)-0.5*DT_seg.*data.data.url(i);
+                else
+                    cl(:,k)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.url(i);
+                end
                 k=k+1;
             end
             if ~isinf(data.data.url(i)) && data.data.url(i)==data.data.uru(i)
-                ce(:,l)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.url(i);
+                if size(AxLGR,2)==size(u,1)
+                    ce(:,l)=AxLGR*u(:,i)-0.5*DT_seg.*data.data.url(i);
+                else
+                    ce(:,l)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.url(i);
+                end
                 l=l+1;
             end
             if ~isinf(data.data.uru(i)) && data.data.url(i)~=data.data.uru(i)
-                cu(:,m)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.uru(i);
+                if size(AxLGR,2)==size(u,1)
+                    cu(:,m)=AxLGR*u(:,i)-0.5*DT_seg.*data.data.uru(i);
+                else
+                    cu(:,m)=AxLGR*[u(:,i);u(end,i)]-0.5*DT_seg.*data.data.uru(i);
+                end
                 m=m+1;
             end
         end

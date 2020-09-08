@@ -14,10 +14,10 @@ function [ ResNorm, Res_int ] = costResidualMin_ModeMinRes( X,U,P,T,data)
 
 % scale variable back
 if isfield(data.dataNLP.data,'Xscale')
-    X=scale_variables_back( X, data.dataNLP.data.Xscale, data.dataNLP.data.Xshift );
-    U=scale_variables_back( U, data.dataNLP.data.Uscale, data.dataNLP.data.Ushift );
+    X=scale_variables_back( X, data.dataNLP.data.Xscale_back, data.dataNLP.data.Xshift );
+    U=scale_variables_back( U, data.dataNLP.data.Uscale_back, data.dataNLP.data.Ushift );
     if isfield(data.dataNLP.data,'Pscale')
-        P=scale_variables_back( P, data.dataNLP.data.Pscale, data.dataNLP.data.Pshift );
+        P=scale_variables_back( P, data.dataNLP.data.Pscale_back, data.dataNLP.data.Pshift );
     end
 end
 

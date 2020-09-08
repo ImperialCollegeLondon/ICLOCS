@@ -249,12 +249,12 @@ switch dataNLP.options.discretization
         if dataNLP.options.scaling
             scaled_solution.X=X;
             scaled_solution.U=U;
-            X_quad=scale_variables_back( X_quad, dataNLP.data.Xscale, dataNLP.data.Xshift );
-            U_quad=scale_variables_back( U_quad, dataNLP.data.Uscale, dataNLP.data.Ushift );
-            dX_quad=scale_variables_back( dX_quad, dataNLP.data.Xscale, 0 );
+            X_quad=scale_variables_back( X_quad, dataNLP.data.Xscale_back, dataNLP.data.Xshift );
+            U_quad=scale_variables_back( U_quad, dataNLP.data.Uscale_back, dataNLP.data.Ushift );
+            dX_quad=scale_variables_back( dX_quad, dataNLP.data.Xscale_back, 0 );
             if isfield(dataNLP.data,'Pscale')
                 scaled_solution.p=p;
-                p=scale_variables_back( p', dataNLP.data.Pscale, dataNLP.data.Pshift )';
+                p=scale_variables_back( p', dataNLP.data.Pscale_back, dataNLP.data.Pshift )';
             end
         else
             scaled_solution=[];
@@ -306,12 +306,12 @@ switch dataNLP.options.discretization
         if dataNLP.options.scaling
             scaled_solution.X=X;
             scaled_solution.U=U;
-            X=scale_variables_back( X, dataNLP.data.Xscale, dataNLP.data.Xshift );
-            U=scale_variables_back( U, dataNLP.data.Uscale, dataNLP.data.Ushift );
-            F=scale_variables_back( F, dataNLP.data.Xscale, 0 );
+            X=scale_variables_back( X, dataNLP.data.Xscale_back, dataNLP.data.Xshift );
+            U=scale_variables_back( U, dataNLP.data.Uscale_back, dataNLP.data.Ushift );
+            F=scale_variables_back( F, dataNLP.data.Xscale_back, 0 );
             if isfield(dataNLP.data,'Pscale')
                 scaled_solution.p=p;
-                p=scale_variables_back( p', dataNLP.data.Pscale, dataNLP.data.Pshift )';
+                p=scale_variables_back( p', dataNLP.data.Pscale_back, dataNLP.data.Pshift )';
             end
         else
             scaled_solution=[];

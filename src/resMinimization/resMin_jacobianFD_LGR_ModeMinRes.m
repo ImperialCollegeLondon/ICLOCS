@@ -85,7 +85,7 @@ if nrc
             rcz=rcz+sparse(1:nrc,idx(:,i),(rcp-rcm)/(2*e),nrc,nz);
         end
     end
-    rcz=rcz+[dataNLP.map.Acl(:,1:end-nt);dataNLP.map.Ae(:,1:end-nt);dataNLP.map.Acu(:,1:end-nt)];
+    rcz=rcz+[[dataNLP.map.Acl(:,1:end-nt);dataNLP.map.Ae(:,1:end-nt);dataNLP.map.Acu(:,1:end-nt)],zeros(nrc,nt)];
 end
 
 
@@ -341,7 +341,7 @@ for i=i_st:i_end
                  end
             elseif j==2
                  if mod(data.nps,2)
-                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_neq,1)];
+                    dRes=dRes(:,1:2:end)+[dRes(:,2:2:end) zeros(n+ng_eq,1)];
                  else
                     dRes=dRes(:,1:2:end)+dRes(:,2:2:end);
                  end

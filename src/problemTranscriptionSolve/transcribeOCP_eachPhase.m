@@ -206,6 +206,12 @@ else
                 M=2*M-1;
                 ns=2;
             end
+        elseif strcmp(options.discretization,'discrete')
+            if N==0
+                M=M+1;
+                N=M;
+                ns=1;
+            end
         else
             if N==0
                 N=M;
@@ -412,7 +418,11 @@ end
 if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR')
     [ data, tau_inc, tau_seg, tau, LGR ] = genTimeMeshLGR( problem,options, data, nps, npdu, npd, npduidx, M );
 else
-    [ data, tau ] = genTimeMesh( problem, options, data, ns, M );
+    if strcmp(options.discretization,'discrete')
+        [ data, tau ] = genTimeMesh( problem, options, data, ns, M );
+    else
+        [ data, tau ] = genTimeMesh( problem, options, data, ns, M );
+    end
 end
 
 
@@ -817,7 +827,7 @@ else
 %     else
         discErrorTol_Full=discErrorTol_Full.^2;
 %     end
-    if any(discErrorTol_Full<eps)
+    if any(discErrorTol_Full<eps^2)
         error('Integral of the residual errors squared allowed must be strictly larger than machine precision');
     else
         if strcmp(options.min_res_mode,'directCostMin')

@@ -133,7 +133,12 @@ else
             usp=usp(data.t_zone_map,:);
         end
         solution.coll.U=kron(usp,ones((M)/N,1));
-        solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;data.tau_inc*data.Nm/ns]+solution.coll.t0;
+        if strcmp(data.options.discretization,'discrete') 
+             solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;data.tau_inc*(data.Nm-1)/ns]+solution.coll.t0;
+        else
+             solution.coll.T=(solution.coll.tf-solution.coll.t0)*[0;data.tau_inc*data.Nm/ns]+solution.coll.t0;
+        end
+        
 
         if ~strcmp(data.options.NLPsolver,'NOMAD') 
             solution.multipliers.lambdaNLP=solution.multipliers.lambda;

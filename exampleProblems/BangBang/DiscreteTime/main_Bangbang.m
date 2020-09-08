@@ -23,7 +23,7 @@
 %% Solve with mesh refinement
 clear all;close all;format compact;
 [problem,guess]=BangBang;          % Fetch the problem definition
-options= problem.settings(3001);                  % Get options and solver settings 
+options= problem.settings(3000);                  % Get options and solver settings 
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 genSolutionPlots(options, solution);
 
