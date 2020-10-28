@@ -153,7 +153,9 @@ if isfield(options,'mp')
                     timeHistory(i)=solution.mp.computation_time;
                     solutionHistory{i}=solution;
                     statusHistory{i}=status;
-                    iterHistory(i)=status.iter;
+                    if isfield(status,'iter')
+                        iterHistory(i)=status.iter;
+                    end
                     runCondition_MR=0;
                     switch options.mp.errortype
                     case{'local_abs'}
@@ -173,7 +175,9 @@ if isfield(options,'mp')
                             timeHistory(i)=solution.mp.computation_time;
                             solutionHistory{i}=solution;
                             statusHistory{i}=status;
-                            iterHistory(i)=status.iter;
+                            if isfield(status,'iter')
+                                iterHistory(i)=status.iter;
+                            end
                         end
 
                     end
@@ -218,7 +222,9 @@ if isfield(options,'mp')
                             timeHistory(i)=solution.mp.computation_time;
                             solutionHistory{i}=solution;
                             statusHistory{i}=status;
-                            iterHistory(i)=status.iter;
+                            if isfield(status,'iter')
+                                iterHistory(i)=status.iter;
+                            end
 
                             for k=1:length(solution.phaseSol)
                                 data.phasedata{k}.multipliers.lambda=solution.phaseSol{k}.multipliers.lambdaNLP;
@@ -422,7 +428,10 @@ else % single phase problem
                     timeHistory(i)=solution.computation_time;
                     solutionHistory{i,1}=solution;
                     statusHistory{i,1}=status;
-                    iterHistory(i)=status.iter;
+                    if isfield(status,'iter')
+                        iterHistory(i)=status.iter;
+                    end
+                    
 
 
                     switch options.errortype
@@ -442,7 +451,9 @@ else % single phase problem
                                 resError=solution.residuals.r;
                                 resErrorHistory{i,1}=resError;
                             end
-                            iterHistory(i)=status.iter;
+                            if isfield(status,'iter')
+                                iterHistory(i)=status.iter;
+                            end
                         end
                         if i>1
                               MRiterCheck(i)=(any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
@@ -504,7 +515,9 @@ else % single phase problem
                                 resError=solution.residuals.r;
                                 resErrorHistory{i,1}=resError;
                             end
-                            iterHistory(i)=status.iter;
+                            if isfield(status,'iter')
+                                iterHistory(i)=status.iter;
+                            end
 
                            runCondition_MR=(any(resError*0.99>problem.states.xErrorTol_integral'.^2) || any(maxAbsError>problem.states.xErrorTol_local) || any(maxAbsConstraintError>problem.constraintErrorTol)) && i<=imax;
                         end
@@ -564,7 +577,9 @@ else % single phase problem
                                 resError=solution.residuals.r;
                                 resErrorHistory{i,1}=resError;
                             end
-                            iterHistory(i)=status.iter;
+                            if isfield(status,'iter')
+                                iterHistory(i)=status.iter;
+                            end
 
                             data.multipliers.lambda=solution.multipliers.lambdaNLP;
                             infoNLP.z0=solution.z;

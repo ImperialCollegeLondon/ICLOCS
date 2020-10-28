@@ -1450,7 +1450,7 @@ end
 % Format initial guess/reference for NLP
 %---------------------------------------
 infoNLP.z0=zeros(nz,1);
-
+data.data.map_w=data.map.w;
 
 if isempty(guess.states)
    
