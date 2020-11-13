@@ -10,10 +10,10 @@ function [HL,HE,Hf,Hg,Hb]=hessianLagrangian_myProblem(X,U,P,t,E,x0,xf,u0,uf,p,t0
 %
 % Outputs:
 %    HL -  hessian of L wrt wz or a subset of its variables
-%    HE -  hessian of E wrt [x0 xf u0 uf p t0 pf] or a subset of its variables
+%    HE -  hessian of E wrt [x0 xf u0 uf p t0 tf] or a subset of its variables
 %    Hf -  hessian of f wrt  wz or a subset of its variables
 %    Hg -  hessian of g wrt wz or a subset of its variables
-%    Hb -  hessian of b wrt [x0 xf u0 uf p t0 pf]  or a subset of its variables
+%    Hb -  hessian of b wrt [x0 xf u0 uf p t0 tf]  or a subset of its variables
 %
 %   If the hessian of some component of the Lagrangian is not available set
 %   the corresponding output term equal to the empty matrix. 

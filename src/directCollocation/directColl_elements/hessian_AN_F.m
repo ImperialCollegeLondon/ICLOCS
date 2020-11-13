@@ -1,4 +1,4 @@
-function [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, DT, adjoint_f, vdat, data )
+function [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, e2, DT, adjoint_f, vdat, data )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 

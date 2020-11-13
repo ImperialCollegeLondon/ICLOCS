@@ -71,7 +71,7 @@ end
 if ~isempty(Hf) && ng && ~isempty(Hg)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
     gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-    [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, DT, adjoint_f, vdat, data );
+    [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, e2, DT, adjoint_f, vdat, data );
     [ gzz ] = hessian_AN_G( gzz, Hg, M, nt, ng, nz, T, adjoint_g, data );
 elseif (isempty(Hf)) && ng && (isempty(Hg)) && size(data.FD.index.f,2)==size(data.FD.index.g,2)
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
@@ -79,7 +79,7 @@ elseif (isempty(Hf)) && ng && (isempty(Hg)) && size(data.FD.index.f,2)==size(dat
     [ fzz,gzz ] = hessian_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, t0, T, DT, e, e2, vdat, data );
 elseif ~isempty(Hf) 
     fzz=spalloc(nz,nz,data.map.spmatsize.hSf);  % Allocate some memory
-    [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, DT, adjoint_f, vdat, data );
+    [ fzz ] = hessian_AN_F( df, Hf, fzz, M, n, nt, nz, f, X, U, P, t0, T, e, e2, DT, adjoint_f, vdat, data );
     if ng
         gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
         if ~isempty(Hg) 

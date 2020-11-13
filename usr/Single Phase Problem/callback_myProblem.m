@@ -1,8 +1,8 @@
-function b=callback_myProblem(t,f,vdat)
+function b=callback_myProblem(t,f,data)
 
 % t is the current iteration of the algorithm. 
 % f is the current value of the objective 
-% vdat contains the extra information  passed  to ipopt.
+% data contains the extra information  passed  to ipopt.
 % global variable sol contain solution information regarding current iteration
 
 % b returns true for solver to continue, retures false to terminate

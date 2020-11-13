@@ -1,5 +1,5 @@
 
-function [dx] = myProblem_Dynamics_Sim(x,u,p,t,vdat)
+function [dx] = myProblem_Dynamics_Sim(x,u,p,t,data)
 % Template for specifying the dynamics for simulation 
 %
 % Syntax:  
@@ -10,7 +10,7 @@ function [dx] = myProblem_Dynamics_Sim(x,u,p,t,vdat)
 %    u  - input
 %    p  - parameter
 %    t  - time
-%    vdat - structured variable containing the values of additional data used inside
+%    data - structured variable containing the values of additional data used inside
 %          the function%      
 % Output:
 %    dx - time derivative of x

@@ -351,9 +351,11 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
     solution.NumActiveConstraint=NumActiveConstraint;
 
     solution.MaxAbsError=max(solution.Error);
+    solution.MeanAbsError=mean(solution.Error);
     solution.MaxRelError=max(solution.ErrorRelative);
     solution.MaxConstVioError=max(solution.ConstraintError);
-
+    solution.MeanConstVioError=mean(solution.ConstraintError);
+    
     if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
         [r,r_seg]=estimateResidual_LGR(solution,p,t0,tf,n,m,data,ng_eq);
         solution.residuals.r=r;
@@ -655,9 +657,11 @@ else
         solution.NumActiveConstraint=NumActiveConstraint;
 
         solution.MaxAbsError=max(solution.Error);
+        solution.MeanAbsError=mean(solution.Error);
         solution.MaxRelError=max(solution.ErrorRelative);
         solution.MaxConstVioError=max(solution.ConstraintError);
-
+        solution.MeanConstVioError=mean(solution.ConstraintError);
+        
         if isfield(dataNLP.options.print,'residual_error') && dataNLP.options.print.residual_error
             if strcmp(dataNLP.options.discretization,'hermite')
                 [r,r_seg]=estimateResidual(solution,p,t0,tf,n,m,data,ng_eq);

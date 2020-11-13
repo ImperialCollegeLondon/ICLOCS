@@ -153,7 +153,7 @@ problem.constraintErrorTol=[problem.constraints.gTol_eq,problem.constraints.gTol
 
 %------------- END OF CODE --------------
 
-function stageCost=L_unscaled(x,xr,u,ur,p,t,vdat)
+function stageCost=L_unscaled(x,xr,u,ur,p,t,data)
 
 % L_unscaled - Returns the stage cost.
 % The function must be vectorized and
@@ -221,7 +221,7 @@ boundaryCost=...;
 
 %------------- END OF CODE --------------
 
-function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,vdat,varargin)
+function bc=b_unscaled(x0,xf,u0,uf,p,t0,tf,data,varargin)
 
 % b_unscaled - Returns a column vector containing the evaluation of the boundary constraints: bl =< bf(x0,xf,u0,uf,p,t0,tf) =< bu
 %
