@@ -208,7 +208,6 @@ else
             end
         elseif strcmp(options.discretization,'discrete')
             if N==0
-                M=M;
                 N=M;
                 ns=1;
             end
@@ -403,14 +402,15 @@ if nrc
 %         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.AuHS4([2:2:end,end],:)=[];
     elseif (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR'))
-    else
-
+    elseif strcmp(options.discretization,'trapezoidal')
         data.RCmap.Ax=spdiags([-ones(M,1) ones(M,1)],[0 1],M,M);
 %         diag(-ones(M,1))+diag(ones(M-1,1),1);
         data.RCmap.Ax(end,:)=[];
         data.RCmap.Au=spdiags([-ones(N,1) ones(N,1)],[0 1],N,M);
 %         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.Au(end,:)=[];
+    else
+        error('Rate constraints not supported with the chosen discretization method') 
     end
 end
 
@@ -816,6 +816,10 @@ if strcmp(options.transcription,'multiple_shooting')
 elseif strcmp(options.transcription,'direct_collocation')
     infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
     infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
+    if strcmp(options.discretization,'discrete') || strcmp(options.discretization,'euler')
+        infoNLP.cl(end-length([rcl(:);bl(:)])-ng+1:end-length([rcl(:);bl(:)]),1)=0;
+        infoNLP.cu(end-length([rcl(:);bl(:)])-ng+1:end-length([rcl(:);bl(:)]),1)=0;
+    end
 %     infoNLP.cl=[kron(ones(M,1),zeros(n,1));glAll(gAllidx);rcl(:);bl(:)];
 %     infoNLP.cu=[kron(ones(M,1),zeros(n,1));guAll(gAllidx);rcu(:);bu(:)];
 else
