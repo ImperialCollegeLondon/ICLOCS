@@ -4,9 +4,9 @@ function [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat,
 
 if data.FD.FcnTypes.Etype~=0 %&& data.FD.FcnTypes.Etype~=2
     idx=data.FD.index.Ey;nfd=size(idx,2);                               
-    et0=data.FD.vector.Ey.et0;etf=data.FD.vector.Ey.etf;ep=data.FD.vector.Ey.ep;
-    ex0=data.FD.vector.Ey.ex0;eu0=data.FD.vector.Ey.eu0;
-    exf=data.FD.vector.Ey.exf;euf=data.FD.vector.Ey.euf;%ez=e*data.FD.vector.Ey.ez;
+    et0=e*data.FD.vector.Ey.et0;etf=e*data.FD.vector.Ey.etf;ep=e*data.FD.vector.Ey.ep;
+    ex0=e*data.FD.vector.Ey.ex0;eu0=e*data.FD.vector.Ey.eu0;
+    exf=e*data.FD.vector.Ey.exf;euf=e*data.FD.vector.Ey.euf;%ez=e*data.FD.vector.Ey.ez;
 
     for i=1:nfd
        for j=1:i
