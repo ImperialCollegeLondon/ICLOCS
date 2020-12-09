@@ -156,6 +156,9 @@ else
         else
             solution.X=solution.coll.X;
             solution.U=solution.coll.U;
+            if strcmp(data.options.discretization,'discrete')  || strcmp(data.options.discretization,'euler') 
+              solution.U(end,:)=solution.U(end-1,:);
+            end
             solution.T=solution.coll.T;
             solution.multipliers.lambdaNLP_1toN=solution.multipliers.lambdaNLP_1toM;
         end

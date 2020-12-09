@@ -20,7 +20,6 @@ for i=1:nfd
   (tf-etf{i}*e-t0+et0{i}*e)*L(X-ex{i}*e,Xr,U-eu{i}*e,Ur,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,vdat))/(2*e);
   Lz=Lz+sparse(1,idx(:,i),data.map.W*dL,1,nz);
   JL{i}=sparse(dL);
-
 end
 
 if ~nfd

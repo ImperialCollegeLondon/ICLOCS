@@ -38,7 +38,7 @@ try
 
     % Define some useful variables
     [nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(data.sizes{1:13});
-
+    [ng_eq,ng_neq]=deal(data.sizes{15:16});
 
     % Get function definitions
     [L,E,f,g,avrc,b]=deal(data.functions{:});
@@ -98,7 +98,12 @@ try
     x0=z(nt+np+1:nt+np+n);
     u0=z(nt+np+(M)/N*n+1:nt+np+(M)/N*n+m);
     xf=z(end-m-n+1:end-m);
-    uf=z(end-m+1:end);
+    if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
+        uf=U(end,:)';
+    else
+        uf=z(end-m+1:end);
+    end
+    
 
     if strcmp(data.options.derivatives,'adigator') 
         if strcmp(data.options.discretization,'discrete') 
@@ -151,7 +156,7 @@ try
                 X_vect=reshape(X',n*M,1);
                 g_mat=g(X,U,P,t,vdat);
                 if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
-                    g_mat(end-ng+1:end,:)=0;
+                    g_mat(end,:)=0;
                 end
                 g_vect=reshape(g_mat',M*ng,1);
                 sol{phaseNo}.const=[(x0-data.x0t)*data.cx0;mp.A*X_vect+mp.B*reshape((tf-t0)*f(X,U,P,t,vdat)',M*n,1);

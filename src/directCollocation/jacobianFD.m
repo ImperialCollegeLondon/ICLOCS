@@ -18,6 +18,7 @@ function varargout=jacobianFD(f,g,avrc,X,U,P,T,b,x0,xf,u0,uf,p,t0,tf,data)
 
 e=data.options.perturbation.J;                                 % pertubation size
 [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,~]=deal(data.sizes{1:13});
+[ng_eq,ng_neq]=deal(data.sizes{15:16});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;
 vdat=data.data;
@@ -43,7 +44,7 @@ else
 end
 
 if ng && (strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler'))
-    gz(end-ng+1:end,:)=0;
+    gz(end-ng+1:end-ng_neq,:)=0;
 end
 % Compute rcz
 %------------
