@@ -30,6 +30,10 @@ else
     end
 end
 
+if strcmp(vdat.discretization,'euler') || strcmp(vdat.discretization,'discrete')
+    c(end,:)=0;
+end
+
 if isfield(vdat,'gFilter')
     c(:,vdat.gFilter)=[];
 end

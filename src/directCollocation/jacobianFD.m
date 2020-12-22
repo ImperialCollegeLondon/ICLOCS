@@ -43,9 +43,6 @@ else
     end
 end
 
-if ng && (strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler'))
-    gz(end-ng+1:end-ng_neq,:)=0;
-end
 % Compute rcz
 %------------
 

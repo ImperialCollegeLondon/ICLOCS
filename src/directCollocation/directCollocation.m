@@ -37,7 +37,7 @@ sol{phaseNo}.z=z;
 try
 
     % Define some useful variables
-    [nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(data.sizes{1:13});
+    [nt,np,n,m,ng,nb,M,N,ns,~,~,~,~]=deal(data.sizes{1:13});
     [ng_eq,ng_neq]=deal(data.sizes{15:16});
 
     % Get function definitions
@@ -155,11 +155,9 @@ try
             else
                 X_vect=reshape(X',n*M,1);
                 g_mat=g(X,U,P,t,vdat);
-                if strcmp(data.options.discretization,'discrete') || strcmp(data.options.discretization,'euler')
-                    g_mat(end,:)=0;
-                end
                 g_vect=reshape(g_mat',M*ng,1);
-                sol{phaseNo}.const=[(x0-data.x0t)*data.cx0;mp.A*X_vect+mp.B*reshape((tf-t0)*f(X,U,P,t,vdat)',M*n,1);
+                sol{phaseNo}.const=[(x0-data.x0t)*data.cx0;
+                          mp.A*X_vect+mp.B*reshape((tf-t0)*f(X,U,P,t,vdat)',M*n,1);
                           g_vect(data.gAllidx);
                           avrc(X,U,P,t,data)';
                           b(x0,xf,u0,uf,p,t0,tf,vdat)];

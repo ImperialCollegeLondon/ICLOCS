@@ -26,6 +26,10 @@ if isfield(vdat,'Xscale')
     dx = scale_variables( dx, vdat.Xscale, 0 );
 end
 
+if strcmp(vdat.discretization,'euler') || strcmp(vdat.discretization,'discrete')
+    c(end,:)=0;
+end
+
 if isfield(vdat,'gFilter')
     c(:,vdat.gFilter)=[];
 end
