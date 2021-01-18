@@ -22,7 +22,7 @@ clear all;close all;format compact;
 
 [problem,guess]=ShuttleReentryTrajectory;          % Fetch the problem definition
 % options= problem.settings(6,4);
-options= problem.settings(30);                  % Get options and solver settings 
+options= problem.settings(40);                  % Get options and solver settings 
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 [ tv, xv, uv ] = simulateSolution( problem, solution, 'ode113', 0.1 );
 

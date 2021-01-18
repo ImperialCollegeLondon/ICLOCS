@@ -70,10 +70,10 @@ switch(data.options.NLPsolver)
        
     
     case{'fmincon'}                               % Solve the NLP using FMINCON
-        prompt = 'WARNING: Use of fmincon is NOT ADVISABLE because the solution speed can be significantly slower with a higher chance of failure. \n We would recommend to use fmincon only for sanity checks. \n For solving, please consider use IPOPT (see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html). \n Press any key to continue...\n ';
-        input(prompt)
+        %prompt = 'WARNING: Use of fmincon is NOT ADVISABLE because the solution speed can be significantly slower with a higher chance of failure. \n We would recommend to use fmincon only for sanity checks. \n For solving, please consider use IPOPT (see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html). \n Press any key to continue...\n ';
+        %input(prompt)
         if ~isfield(data.options,'fmincon')
-            error('To enable the use of fmincon, see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html on how to get it configured')
+           error('To enable the use of fmincon, see http://www.ee.ic.ac.uk/ICLOCS/Downloads.html on how to get it configured')
         else
             tA=tic;
             if isfield(data.options.fmincon,'hessian_approximation') && strcmp(data.options.fmincon.hessian_approximation,'exact')
@@ -88,8 +88,14 @@ switch(data.options.NLPsolver)
                multipliers.eqnonlin=multipliers.eqnonlin(data.reorder.vert_idx_back);
             end
             ni=output.iterations;
-            solution.multipliers.lambda=multipliers.eqnonlin;
-            solution.iterates=ni;
+            n_neq_lb=length(NLP.ind_ineq_lb);
+            n_neq_ub=length(NLP.ind_ineq_ub);
+            lambda_full=zeros(NLP.nnod+length(NLP.ind_eq)+n_neq_lb+n_neq_ub,1);
+            lambda_full([NLP.ind_eqODE,NLP.nnod+NLP.ind_eq'])=multipliers.eqnonlin;
+            lambda_full(NLP.nnod+NLP.ind_ineq_ub)=lambda_full(NLP.nnod+NLP.ind_ineq_ub)+multipliers.ineqnonlin(1:n_neq_ub);
+            lambda_full(NLP.nnod+NLP.ind_ineq_lb)=lambda_full(NLP.nnod+NLP.ind_ineq_lb)-multipliers.ineqnonlin(1+n_neq_ub:n_neq_ub+n_neq_lb);
+            solution.multipliers.lambda=lambda_full;
+            status.iter=ni;
             solution.cost.J=cost;
         end
     case{'NOMAD'}                               % Solve the NLP using FMINCON
@@ -112,7 +118,7 @@ switch(data.options.NLPsolver)
            z=z(data.reorder.z_idx_back);
         end
         ni=output.iter;
-        solution.iterates=ni;
+        status.iter=ni;
         solution.cost.J=cost;
         
     case{'builtinSQP'}

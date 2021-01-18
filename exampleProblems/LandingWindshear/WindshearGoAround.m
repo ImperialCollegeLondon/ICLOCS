@@ -31,19 +31,19 @@ function [problem,guess] = WindshearGoAround
 a=6e-8;
 b_var=-4e-11;
 c=-log(25/30.6)*10^(-12);
-e=6.280834899e-11;
-d=-8.028808625e-8;
+e=6.28083e-11;
+d=-8.02881e-8;
 beta_0=0.3825;
 beta_0_dot=0.2;
 A_0=0.4456e05;
 A_1=-0.2398e02;
 A_2=0.1442e-01;
-B_0=0.15523333333;
-B_1=0.1236914764;
-B_2=2.420265075;
+B_0=0.1552;
+B_1=0.12369;
+B_2=2.4203;
 C_0=0.7125;
-C_1=6.087676573;
-C_2=-9.027717451;
+C_1=6.0877;
+C_2=-9.0277;
 mg=150000;
 g_var=3.2172e01;
 delta=deg2rad(2);
@@ -64,6 +64,8 @@ W1_dot_2= [zeros(1,3) double(sym2poly(diff((x+500-2300)/40)))];
 W1_dot_3= double(sym2poly(diff(50-a*(4600-(x+4100))^3-b_var*(4600-(x+4100))^4)));
 W1_dot_4= [0 0 0 0];
 W1_dot_poly = mkpp([0,500,4100,4600,20000],[W1_dot_1;W1_dot_2;W1_dot_3;W1_dot_4]);
+
+
 
 xp=500:200:4100;
 y=-51.*exp(-c.*(xp-2300).^4);
@@ -139,6 +141,7 @@ fpamin = -inf; fpamax = inf;
 alphamin = -alpha_max; alphamax = alpha_max;
 umin = -0.05236; umax = 0.05236;
 
+
 %%
 
 %------------- BEGIN CODE --------------
@@ -170,37 +173,39 @@ problem.parameters.pu=inf;
 guess.parameters=502;
 
 % Initial conditions for system.
-problem.states.x0=[pos0 alt0 speed0 fpa0];
+problem.states.x0=[]; 
 
 % Initial conditions for system. Bounds if x0 is free s.t. x0l=< x0 <=x0u
-problem.states.x0l=[pos0 alt0 speed0 fpa0]; 
-problem.states.x0u=[pos0 alt0 speed0 fpa0]; 
+problem.states.x0l=[pos0 alt0 speed0 fpa0 ppval(W1_poly,pos0) ppval(W2_poly,pos0)*alt0/1000]; 
+problem.states.x0u=[pos0 alt0 speed0 fpa0 ppval(W1_poly,pos0) ppval(W2_poly,pos0)*alt0/1000]; 
 
 % State bounds. xl=< x <=xu
-problem.states.xl=[posmin altmin speedmin fpamin]; 
-problem.states.xu=[posmax altmax speedmax fpamax]; 
+problem.states.xl=[posmin altmin speedmin fpamin -60 -60]; 
+problem.states.xu=[posmax altmax speedmax fpamax 60 60]; 
 
 % State rate bounds. xrl=< x <=xru
-problem.states.xrl=[-inf -inf -inf -inf]; 
-problem.states.xru=[inf inf inf inf]; 
+problem.states.xrl=[-inf -inf -inf -inf -inf -inf]; 
+problem.states.xru=[inf inf inf inf inf inf]; 
 
 % State error bounds
-problem.states.xErrorTol_local=[1 0.5 0.1 deg2rad(0.5)];
-problem.states.xErrorTol_integral=[1 0.5 0.1 deg2rad(0.5)];
+problem.states.xErrorTol_local=[1 0.5 0.1 deg2rad(0.5)  1 1]; 
+problem.states.xErrorTol_integral=[1 0.5 0.1 deg2rad(0.5)  1 1];
 
 % State constraint error bounds
-problem.states.xConstraintTol=[1 0.5 0.1 deg2rad(0.5)];
-problem.states.xrConstraintTol=[1 0.5 0.1 deg2rad(0.5)];
+problem.states.xConstraintTol=[1 0.5 0.1 deg2rad(0.5)  1 1];
+problem.states.xrConstraintTol=[1 0.5 0.1 deg2rad(0.5)  1 1];
 
 % Terminal state bounds. xfl=< xf <=xfu
-problem.states.xfl=[posmin altmin speedmin fpaf]; 
-problem.states.xfu=[posmax altmax speedmax fpaf];
+problem.states.xfl=[posmin altmin speedmin fpaf -60 -60]; 
+problem.states.xfu=[posmax altmax speedmax fpaf 60 60];
 
 % Guess the state trajectories with [x0 xf]
 guess.states(:,1)=[pos0 9000];
 guess.states(:,2)=[alt0 850];
 guess.states(:,3)=[speed0 speed0];
 guess.states(:,4)=[fpa0 fpaf];
+guess.states(:,5)=[-50 50];
+guess.states(:,6)=[0 0];
 
 % Number of control actions N 
 % Set problem.inputs.N=0 if N is equal to the number of integration steps.  

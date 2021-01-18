@@ -171,6 +171,8 @@ options.ipopt.limited_memory_max_skipping=1;  % Threshold for successive iterati
 % fmincon settings (NOT RECOMMENDED!)
 %---------------------------------------
 % See website for detailed info
+options.fmincon.optimoptions = optimoptions('fmincon','Display','iter','SpecifyObjectiveGradient',true,'SpecifyConstraintGradient',true,'MaxIterations',5000);
+options.fmincon.hessian_approximation='exact';
 
 % WORHP settings
 %---------------------------------------

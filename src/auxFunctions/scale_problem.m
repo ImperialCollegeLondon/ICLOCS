@@ -24,7 +24,7 @@ if isfield(problem,'scaling') && isfield(problem.scaling,'states')
 
 %      problem.states.scales=1./(xu-xl);
 %      problem.states.shifts=0.5-xu./(xu-xl);
-     problem.states.shifts=-xl;
+     problem.states.shifts=-xl-(xu-xl)/2;
      problem.states.scales=1./(xu-xl);
      problem.states.scales_back=xu-xl;
 
@@ -37,7 +37,7 @@ elseif ~isfield(problem.states,'scales')
      xl(idxeq)=xl(idxeq)-0.1;
      xu(idxeq)=xu(idxeq)+0.1;
 
-     problem.states.shifts=-xl;
+     problem.states.shifts=-xl-(xu-xl)/2;
      problem.states.scales=1./(xu-xl);
      problem.states.scales_back=xu-xl;
 %      problem.states.shifts=0.5-xu./(xu-xl);
@@ -72,7 +72,7 @@ end
      ul(idxeq)=ul(idxeq)-0.1;
      uu(idxeq)=uu(idxeq)+0.1;
 
-     problem.inputs.shifts=-ul;
+     problem.inputs.shifts=-ul-(uu-ul)/2;
      problem.inputs.scales=1./(uu-ul);
      problem.inputs.scales_back=(uu-ul);
 %      problem.inputs.shifts=0.5-uu./(uu-ul);
@@ -85,7 +85,7 @@ end
      ul(idxeq)=ul(idxeq)-0.1;
      uu(idxeq)=uu(idxeq)+0.1;
 
-     problem.inputs.shifts=-ul;
+     problem.inputs.shifts=-ul-(uu-ul)/2;
      problem.inputs.scales=1./(uu-ul);
      problem.inputs.scales_back=(uu-ul);
 %      problem.inputs.shifts=0.5-uu./(uu-ul);
@@ -109,7 +109,18 @@ end
 
  if ~isempty(guess.parameters)
      
-     if ~isfield(problem.parameters,'scales')
+     if isfield(problem,'scaling') && isfield(problem.scaling,'parameters')
+         pu=problem.scaling.parameters.ub;
+         pl=problem.scaling.parameters.lb;
+
+         idxeq=pl==pu;
+         pl(idxeq)=pl(idxeq)-0.1;
+         pu(idxeq)=pu(idxeq)+0.1;
+
+         problem.parameters.shifts=-pl-(pu-pl)/2;
+         problem.parameters.scales=1./(pu-pl);
+         problem.parameters.scales_back=(pu-pl);
+     elseif ~isfield(problem.parameters,'scales')
          pu=problem.parameters.pu;pu(isinf(pu))=500;
          pl=problem.parameters.pl;pl(isinf(pl))=-500;
 
@@ -117,7 +128,7 @@ end
          pl(idxeq)=pl(idxeq)-0.1;
          pu(idxeq)=pu(idxeq)+0.1;
 
-         problem.parameters.shifts=-pl;
+         problem.parameters.shifts=-pl-(pu-pl)/2;
          problem.parameters.scales=1./(pu-pl);
          problem.parameters.scales_back=(pu-pl);
 %          problem.parameters.shifts=0.5-pu./(pu-pl);

@@ -37,11 +37,8 @@ grid on
 
 figure
 hold on
-if length(solution.T)==length(solution.dU)
-    plot(solution.T(:,1),solution.dU(:,1),'b-' );
-else
-    plot(solution.T(1:end-1,1),solution.dU(:,1),'b-' );
-end
+plot(xx,speval(solution,'dU',1,xx),'b-' )
+
 plot([solution.T(1,1); solution.tf],[problem.inputs.ul, problem.inputs.ul],'r-' )
 plot([solution.T(1,1); solution.tf],[problem.inputs.uu, problem.inputs.uu],'r-' )
 xlabel('Time [s]')

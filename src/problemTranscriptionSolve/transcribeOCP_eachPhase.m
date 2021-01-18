@@ -1542,11 +1542,15 @@ end
   end
   
   % Separate Ceq and Cneq
+  
     infoNLP.nnod=n*M;
     flag_eq=(infoNLP.cu(infoNLP.nnod+1:end)-infoNLP.cl(infoNLP.nnod+1:end)==0);
+    flag_inf_ub=isinf(infoNLP.cu(infoNLP.nnod+1:end));
+    flag_inf_lb=isinf(infoNLP.cl(infoNLP.nnod+1:end));
     infoNLP.ind_eqODE=1:infoNLP.nnod;
     infoNLP.ind_eq=find(flag_eq); 
-    infoNLP.ind_ineq=find(~flag_eq);
+    infoNLP.ind_ineq_ub=find(~flag_eq & ~flag_inf_ub);
+    infoNLP.ind_ineq_lb=find(~flag_eq & ~flag_inf_lb);
 
   
   data.infoNLP=infoNLP;

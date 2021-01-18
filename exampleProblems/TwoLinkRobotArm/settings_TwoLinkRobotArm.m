@@ -198,7 +198,7 @@ options.MeshRefinement='Auto';
 %---------------------------------------
 % Prioritize MR time               ('aggressive')   A relative aggressive scheme that aim to reduce the number of MR iterations and the total MR time
 % Prioritize MR efficiency         ('efficient')   A relative aggressive scheme that aim to reduce the size of the problem at the end of MR iterations, making it potentially more efficient for online re-computations
-options.MRstrategy='aggressive';
+options.MRstrategy='efficient';
 
 % Maximum number of mesh refinement iterations
 %---------------------------------------

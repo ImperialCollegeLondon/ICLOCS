@@ -27,7 +27,7 @@ function [problem,guess] = MinTimeClimbBryson
 % iclocs@imperial.ac.uk
 
 %------------- BEGIN CODE --------------
-% Lookup Table 1: U.S. 1976 Standard Atmosphere (altitude, density and pressure)
+% Lookup Table 1: U.S. 1976 Standard Atmosphere (altitude, density and speed of sound)
 AtomsData = [-2000 1.478e+00 3.479e+02
 0 1.225e+00 3.403e+02
 2000 1.007e+00 3.325e+02

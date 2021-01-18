@@ -32,10 +32,12 @@ function [Hout]=fminHessian(z,lambda,data,nlp)
 
 
 [nt,np,n,m,ng,nb,M]=deal(data.sizes{1:7}); % Get some parameters
-lambda_full=zeros(size(nlp.cl,1),1);
-lambda_full([nlp.ind_eqODE;nlp.ind_eq])=lambda.eqnonlin;
-n_neq=length(nlp.ind_ineq);
-lambda_full(nlp.ind_ineq)=lambda.ineqnonlin(1:n_neq)+lambda.ineqnonlin(1+n_neq:n_neq*2);
+n_neq_lb=length(nlp.ind_ineq_lb);
+n_neq_ub=length(nlp.ind_ineq_ub);
+lambda_full=zeros(nlp.nnod+length(nlp.ind_eq)+n_neq_lb+n_neq_ub,1);
+lambda_full([nlp.ind_eqODE,nlp.nnod+nlp.ind_eq'])=lambda.eqnonlin;
+lambda_full(nlp.nnod+nlp.ind_ineq_ub)=lambda_full(nlp.nnod+nlp.ind_ineq_ub)+lambda.ineqnonlin(1:n_neq_ub);
+lambda_full(nlp.nnod+nlp.ind_ineq_lb)=lambda_full(nlp.nnod+nlp.ind_ineq_lb)-lambda.ineqnonlin(1+n_neq_ub:n_neq_ub+n_neq_lb);
  
 Hes=computeHessian(z,1,lambda_full,data);          % Evaluate the constraints
 Hout = triu(Hes.',1) + tril(Hes) ;

@@ -115,8 +115,10 @@ problem.constraintErrorTol=[problem.constraints.gTol_eq,problem.constraints.gTol
 
 if isfield(data.data,'Xscale')
     problem.states.scales=data.data.Xscale;
+    problem.states.scales_back=data.data.Xscale_back;
     problem.states.shifts=data.data.Xshift;
     problem.inputs.scales=data.data.Uscale;
+    problem.inputs.scales_back=data.data.Uscale_back;
     problem.inputs.shifts=data.data.Ushift;
 end
 

@@ -30,7 +30,7 @@ else
     end
 end
 
-if strcmp(vdat.discretization,'euler') || strcmp(vdat.discretization,'discrete')
+if (strcmp(vdat.discretization,'euler') || strcmp(vdat.discretization,'discrete')) && ~isempty(c)
     c(end,:)=0;
 end
 

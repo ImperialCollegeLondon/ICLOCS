@@ -23,8 +23,8 @@
 clear all;close all;format compact;
 
 [problem,guess]=WindshearGoAround;          % Fetch the problem definition
-options= problem.settings(6,8);                  % for hp method
-% options= problem.settings(40);                  % for h method
+% options= problem.settings(6,8);                  % for hp method
+options= problem.settings(80);                  % for h method
 [solution,MRHistory]=solveMyProblem( problem,guess,options);
 [ tv, xv, uv ] = simulateSolution( problem, solution, 'ode113', 0.01 );
 
@@ -80,11 +80,7 @@ ylabel('Angle of attack [deg]');
 grid on
 
 figure
-if length(solution.T)==length(solution.dU)
-    plot(solution.T(1:end,1),solution.dU*180/pi,'-b')
-else
-    plot(solution.T(1:end-1,1),solution.dU*180/pi,'-b')
-end
+plot(xx,speval(solution,'dU',1,xx)*180/pi,'b-' )
 hold on
 plot([solution.T(1,1); solution.tf],[problem.inputs.url, problem.inputs.url]*180/pi,'r--' )
 plot([solution.T(1,1); solution.tf],[problem.inputs.uru, problem.inputs.uru]*180/pi,'r--' )
