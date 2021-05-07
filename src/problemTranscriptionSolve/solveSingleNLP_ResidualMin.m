@@ -446,16 +446,16 @@ if data.dataNLP.options.scaling
     solution.scaledVariables.coll.X=solution.coll.X;
     solution.scaledVariables.coll.x0=solution.coll.x0;
     solution.scaledVariables.coll.U=solution.coll.U;
-    solution.X=scale_variables_back( solution.X, data.dataNLP.data.Xscale, data.dataNLP.data.Xshift );
-    solution.x0=scale_variables_back( solution.x0', data.dataNLP.data.Xscale, data.dataNLP.data.Xshift )';
-    solution.U=scale_variables_back( solution.U, data.dataNLP.data.Uscale, data.dataNLP.data.Ushift );
-    solution.coll.X=scale_variables_back( solution.coll.X, data.dataNLP.data.Xscale, data.dataNLP.data.Xshift );
-    solution.coll.x0=scale_variables_back( solution.coll.x0', data.dataNLP.data.Xscale, data.dataNLP.data.Xshift )';
-    solution.coll.U=scale_variables_back( solution.coll.U, data.dataNLP.data.Uscale, data.dataNLP.data.Ushift );
+    solution.X=scale_variables_back( solution.X, data.dataNLP.data.Xscale_back, data.dataNLP.data.Xshift );
+    solution.x0=scale_variables_back( solution.x0', data.dataNLP.data.Xscale_back, data.dataNLP.data.Xshift )';
+    solution.U=scale_variables_back( solution.U, data.dataNLP.data.Uscale_back, data.dataNLP.data.Ushift );
+    solution.coll.X=scale_variables_back( solution.coll.X, data.dataNLP.data.Xscale_back, data.dataNLP.data.Xshift );
+    solution.coll.x0=scale_variables_back( solution.coll.x0', data.dataNLP.data.Xscale_back, data.dataNLP.data.Xshift )';
+    solution.coll.U=scale_variables_back( solution.coll.U, data.dataNLP.data.Uscale_back, data.dataNLP.data.Ushift );
     if isfield(data.dataNLP.data,'Pscale')
         solution.scaledVariables.p=solution.p;
         solution.scaledVariables.coll.p=solution.coll.p;
-        solution.p=scale_variables_back( solution.p', data.dataNLP.data.Pscale, data.dataNLP.data.Pshift )';
+        solution.p=scale_variables_back( solution.p', data.dataNLP.data.Pscale_back, data.dataNLP.data.Pshift )';
     else
         solution.scaledVariables.p=[];
         solution.scaledVariables.coll.p=[];

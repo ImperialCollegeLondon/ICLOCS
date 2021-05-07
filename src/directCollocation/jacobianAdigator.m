@@ -29,40 +29,18 @@ fgdz=sparse(const_vec_Adigator.dY_location(:,1),const_vec_Adigator.dY_location(:
 % Compute rcz
 %------------
 
-rcz=spalloc(nrc,nz,nrc*(n+m+np+nt));
+rcz=spalloc(nrc,nz,data.map.spmatsize.jSrc);
 if nrc
-
-    idx=data.FD.index.rc;nfd=size(idx,2);
-    et0=e*data.FD.vector.rc.et0;etf=e*data.FD.vector.rc.etf;ep=data.FD.vector.rc.ep;
-    ex=data.FD.vector.rc.ex;eu=data.FD.vector.rc.eu;
-
-   
-for i=1:nfd
-    if ~any(ex{i}(:)) && ~any(eu{i}(:))
-        rcp=avrc(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(tf+etf(i)-t0-et0(i)).*T+t0+et0(i),data);
-        rcm=avrc(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(tf-etf(i)-t0+et0(i)).*T+t0-et0(i),data);
-        rcz=rcz+sparse(1:nrc,idx(:,i),(rcp-rcm)/(2*e),nrc,nz);
-    end
-end
-    rcz=rcz+[data.map.Acl;data.map.Ae;data.map.Acu];
+    [ rcz ] = jacConst_RC( rcz, nrc, nz, avrc, X, U, P, t0, tf, T, e, data );
 end
 
 % Compute bz
 %------------
-bz=spalloc(nb,nz,(2*m+2*n+nt+np)*nb);
+bz=spalloc(nb,nz,data.map.spmatsize.jSb);
 if nb
-
-idx=data.FD.index.b;nfd=size(idx,2);
-et0=e*data.FD.vector.b.et0;etf=e*data.FD.vector.b.etf;ep=e*data.FD.vector.b.ep;
-ex0=e*data.FD.vector.b.ex0;eu0=e*data.FD.vector.b.eu0;
-exf=e*data.FD.vector.b.exf;euf=e*data.FD.vector.b.euf;
-
-for i=1:nfd
-    bp=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(i),tf+etf(i),vdat);
-    bm=b(x0-ex0(:,i),xf-exf(:,i),u0-eu0(:,i),uf-euf(:,i),p-ep(:,i),t0-et0(i),tf-etf(i),vdat);
-    bz=bz+sparse(1:nb,idx(:,i),(bp-bm)/(2*e),nb,nz);
+    [ bz ] = jacConst_FD_B( bz, nb, nz, b, x0, xf, u0, uf, p, t0, tf, e, vdat, data );
 end
-end
+
 
 
 

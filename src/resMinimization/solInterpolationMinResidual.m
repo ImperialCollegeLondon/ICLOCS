@@ -209,7 +209,7 @@ if options.resminEarlyStop
 end
 
 % Run IPOPT.
-[z,~] = ipopt_auxdata(z0,data.funcs,options);
+[z,info_minres] = ipopt_auxdata(z0,data.funcs,options);
 
 switch dataNLP.options.discretization
     
@@ -271,6 +271,7 @@ switch dataNLP.options.discretization
         varargout{9}=p;
         varargout{10}=scaled_solution;
         varargout{11}=auxdata.D_mat;
+        varargout{12}=info_minres.cpu;
     case{'hermite'} % h Transcription Method
         [nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(dataNLP.sizes{1:13});
         if nt==1
@@ -336,7 +337,7 @@ switch dataNLP.options.discretization
         varargout{6}=p;
         varargout{7}=minres_solution;
         varargout{8}=scaled_solution;
-        
+        varargout{9}=info_minres.cpu;
     otherwise
         [nt,np,n,m,ng,~,M,N,ns,~,~,~,~]=deal(dataNLP.sizes{:});
         z=[zeros(np+nt,1);z];

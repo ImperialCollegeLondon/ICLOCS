@@ -111,13 +111,20 @@ else
                             
                             idx1=ResColl<data.dataNLP.data.discErrorTol_Full;
                             ResConst(idx1)=data.dataNLP.data.discErrorTol_Full(idx1);
-                            
-                            idx1=1.2*ResColl<data.dataNLP.data.discErrorTol_Full;
-                            ResConst(idx1)=ResConst(idx1)*1.2;
-                            if any(ResConst<1e-04)
-                                ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*10;
+                            if isfield(data.dataNLP.options,'minresRelaxPct')
+                                ResConst(~idx1)=(1+data.dataNLP.options.minresRelaxPct)*ResConst(~idx1);
+                            else
+                                ResConst(~idx1)=1.2*ResConst(~idx1);
                             end
-                            ResConst(ResConst<sqrt(eps))=sqrt(eps);
+                            if isfield(data.dataNLP.options,'minresErrorEps') 
+                                ResConst(ResConst<sqrt(data.dataNLP.options.minresErrorEps))=sqrt(data.dataNLP.options.minresErrorEps);
+                            end
+%                             idx1=1.2*ResColl<data.dataNLP.data.discErrorTol_Full;
+%                             ResConst(idx1)=ResConst(idx1)*1.2;
+%                             if any(ResConst<1e-04)
+%                                 ResConst(ResConst<1e-04)=ResConst(ResConst<1e-04)*10;
+%                             end
+%                             ResConst(ResConst<sqrt(eps))=sqrt(eps);
 
                         case{'mesh_refinement'}
                             if data.dataNLP.options.scaling

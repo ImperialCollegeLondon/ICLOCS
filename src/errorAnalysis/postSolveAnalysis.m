@@ -191,7 +191,7 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
         
     else
         if strcmp(dataNLP.options.resultRep,'res_min') % Direct Min-Residual Representation
-            [ X_quad, dX_quad, U_quad, t_quad, LGR_points_quad, npd_quad, t0_minres, tf_minres, p_minres, scaled_solution, D_mat_quad ]  = solInterpolationMinResidual( problem,solution,TSeg_Bar,options,dataNLP );
+            [ X_quad, dX_quad, U_quad, t_quad, LGR_points_quad, npd_quad, t0_minres, tf_minres, p_minres, scaled_solution, D_mat_quad, minresrep_ctime ]  = solInterpolationMinResidual( problem,solution,TSeg_Bar,options,dataNLP );
             npd_quad_p1=npd_quad+1;
             TSeg_Bar=TSeg_Bar/TSeg_Bar(end)*tf_minres;
             T=(T-t0_minres)/solution.tf*tf_minres+t0_minres;
@@ -238,7 +238,8 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
             solution.X=speval(solution,'X',1:n,[T;tf]);
             solution.U=speval(solution,'U',1:m,T);
             solution.T=T;
-
+            solution.computation_time=solution.computation_time+minresrep_ctime;
+            
             dataNLP.minres_auxdata.D_mat_quad=D_mat_quad;
             dataNLP.minres_auxdata.npd_quad=npd_quad;
 
@@ -486,7 +487,7 @@ else
     else
 
         if strcmp(dataNLP.options.resultRep,'res_min') % Direct Min-Residual Construction
-            [ Xp, dXp, Up, t0_minres, tf_minres, p_minres, minres_solution, scaled_solution ]  = solInterpolationMinResidual( problem,solution,solution.T,options,dataNLP );
+            [ Xp, dXp, Up, t0_minres, tf_minres, p_minres, minres_solution, scaled_solution, minresrep_ctime ]  = solInterpolationMinResidual( problem,solution,solution.T,options,dataNLP );
 
             if dataNLP.options.scaling
                 solution.scaledVariables.resmin.X=scaled_solution.X;
@@ -510,6 +511,7 @@ else
             solution.U=minres_solution.U(1:ns:end,:);
             solution.T=minres_solution.T(1:ns:end,:);
             solution.x0=minres_solution.X(1,:);
+            solution.computation_time=solution.computation_time+minresrep_ctime;
             t0=t0_minres;
             tf=tf_minres;
         elseif strcmp(dataNLP.options.resultRep,'default') || strcmp(dataNLP.options.resultRep,'res_min_final_default')

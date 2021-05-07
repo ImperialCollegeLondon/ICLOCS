@@ -231,7 +231,7 @@ options.start='Cold';
 
 % Automatic scaling (recommended)
 %---------------------------------------
-options.scaling=1;
+options.scaling=0;
 
 % Reorder of LGR Method
 %---------------------------------------

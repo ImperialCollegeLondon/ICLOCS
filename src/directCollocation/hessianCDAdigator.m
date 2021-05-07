@@ -52,105 +52,31 @@ fgzz=sparse(const_vec_Adigator.dYdY_location(:,2),const_vec_Adigator.dYdY_locati
 % Compute (w'L)zz
 % ----------------
 
-idx=data.FD.index.Ly;
-nfd=size(idx,2);                               
-
-et0=data.FD.vector.Ly.et0;etf=data.FD.vector.Ly.etf;ep=data.FD.vector.Ly.ep;
-ex=data.FD.vector.Ly.ex;eu=data.FD.vector.Ly.eu;%ez=data.FD.vector.Ly.ez;
-
-Lzz=spalloc(nz,nz,M*((m+n)*(m+n+1)/2)+nt+np*np);
-
-for i=1:nfd
-dt01=e*et0{i};dtf1=e*etf{i};dp1=e*ep{i};dx1=e*ex{i}; du1=e*eu{i};
-for j=1:i
-  if j==i
-    Lo=DT*L(X,Xr,U,Ur,P,DT*T+t0,vdat);
-    Lp1=(DT+dtf1-dt01)*L(X+dx1,Xr,U+du1,Ur,P+dp1,(DT+dtf1-dt01)*T+t0+dt01,vdat);
-    Lp2=(DT-dtf1+dt01)*L(X-dx1,Xr,U-du1,Ur,P-dp1,(DT-dtf1+dt01)*T+t0-dt01,vdat);
-    Lt=(Lp2-2*Lo+Lp1).*data.map.w/e2;
-  else
-    dt02=e*et0{j};dtf2=e*etf{j};dp2=e*ep{j};dx2=e*ex{j}; du2=e*eu{j};
-    Lpp=(DT+dtf1+dtf2-dt01-dt02)*L(X+dx1+dx2,Xr,U+du1+du2,Ur,P+dp1+dp2,(DT+dtf1+dtf2-dt01-dt02)*T+t0+dt01+dt02,vdat);
-    Lpm=(DT+dtf1-dtf2-dt01+dt02)*L(X+dx1-dx2,Xr,U+du1-du2,Ur,P+dp1-dp2,(DT+dtf1-dtf2-dt01+dt02)*T+t0+dt01-dt02,vdat);
-    Lmp=(DT-dtf1+dtf2+dt01-dt02)*L(X-dx1+dx2,Xr,U-du1+du2,Ur,P-dp1+dp2,(DT-dtf1+dtf2+dt01-dt02)*T+t0-dt01+dt02,vdat);
-    Lmm=(DT-dtf1-dtf2+dt01+dt02)*L(X-dx1-dx2,Xr,U-du1-du2,Ur,P-dp1-dp2,(DT-dtf1-dtf2+dt01+dt02)*T+t0-dt01-dt02,vdat);
-    Lt=(Lpp-Lmp+Lmm-Lpm).*data.map.w/e2/4;
-  end
-   Lzz=Lzz+sparse(idx(:,i),idx(:,j),reshape(Lt',M,1),nz,nz);
+if data.FD.FcnTypes.Ltype
+    Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
+    [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
+else
+    Lzz=sparse(nz,nz);
 end
-end
-
 
 
 % Compute Ezz
 % ------------
-
-Ezz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-idx=data.FD.index.Ey;nfd=size(idx,2);                               
-et0=e*data.FD.vector.Ey.et0;etf=e*data.FD.vector.Ey.etf;ep=e*data.FD.vector.Ey.ep;
-ex0=e*data.FD.vector.Ey.ex0;eu0=e*data.FD.vector.Ey.eu0;
-exf=e*data.FD.vector.Ey.exf;euf=e*data.FD.vector.Ey.euf;%ez=e*data.FD.vector.Ey.ez;
-
-for i=1:nfd
-   for j=1:i
-    if j==i;
-     Ep1=E(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
-     Eo=E(x0,xf,u0,uf,p,t0,tf,vdat);
-     Ep2=E(x0-ex0(:,i),xf-exf(:,i),u0-eu0(:,i),uf-euf(:,i),p-ep(:,i),t0-et0(:,i),tf-etf(:,i),vdat);
-     Ezz(idx(i),idx(j))=(Ep1-2*Eo+Ep2)/e2; 
-    else
-     Epp=E(x0+ex0(:,i)+ex0(:,j),xf+exf(:,i)+exf(:,j),u0+eu0(:,i)+eu0(:,j),...
-          uf+euf(:,i)+euf(:,j),p+ep(:,i)+ep(:,j),t0+et0(:,i)+et0(:,j),tf+etf(:,i)+etf(:,j),vdat);
-     Epm=E(x0+ex0(:,i)-ex0(:,j),xf+exf(:,i)-exf(:,j),u0+eu0(:,i)-eu0(:,j),...
-          uf+euf(:,i)-euf(:,j),p+ep(:,i)-ep(:,j),t0+et0(:,i)-et0(:,j),tf+etf(:,i)-etf(:,j),vdat);
-      
-     Emp=E(x0-ex0(:,i)+ex0(:,j),xf-exf(:,i)+exf(:,j),u0-eu0(:,i)+eu0(:,j),...
-          uf-euf(:,i)+euf(:,j),p-ep(:,i)+ep(:,j),t0-et0(:,i)+et0(:,j),tf-etf(:,i)+etf(:,j),vdat);
-     Emm=E(x0-ex0(:,i)-ex0(:,j),xf-exf(:,i)-exf(:,j),u0-eu0(:,i)-eu0(:,j),...
-          uf-euf(:,i)-euf(:,j),p-ep(:,i)-ep(:,j),t0-et0(:,i)-et0(:,j),tf-etf(:,i)-etf(:,j),vdat);
-      
-    Ezz(idx(i),idx(j))=(Epp+Emm-Epm-Emp)/e2/4;  
-    end
-  end
+if data.FD.FcnTypes.Etype
+    Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
+    [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
+else
+    Ezz=sparse(nz,nz);
 end
 
 % Compute bzz
 % ------------
-bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
 if nb
-
-
-idx=data.FD.index.b;nfd=size(idx,2);
-et0=e*data.FD.vector.b.et0;etf=e*data.FD.vector.b.etf;ep=e*data.FD.vector.b.ep;
-ex0=e*data.FD.vector.b.ex0;eu0=e*data.FD.vector.b.eu0;
-exf=e*data.FD.vector.b.exf;euf=e*data.FD.vector.b.euf;%ez=e*data.FD.vector.b.ez;
-
-adjoint=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
-
-
-
-for i=1:nfd
-   for j=1:i
-    if j==i
-     bo=b(x0,xf,u0,uf,p,t0,tf,vdat);
-     bp1=b(x0+ex0(:,i),xf+exf(:,i),u0+eu0(:,i),uf+euf(:,i),p+ep(:,i),t0+et0(:,i),tf+etf(:,i),vdat);
-     bp2=b(x0-ex0(:,j),xf-exf(:,j),u0-eu0(:,j),uf-euf(:,j),p-ep(:,j),t0-et0(:,i),tf-etf(:,j),vdat);
-     bt=(bp2-2*bo+bp1).*adjoint'/e2; 
-     bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz); 
-    else
-    bpp=b(x0+ex0(:,i)+ex0(:,j)*ez(j),xf+exf(:,i)+exf(:,j)*ez(j),u0+eu0(:,i)+eu0(:,j)*ez(j),...
-          uf+euf(:,i)+euf(:,j)*ez(j),p+ep(:,i)+ep(:,j)*ez(j),t0+et0(:,i)+et0(:,j)*ez(j),tf+etf(:,i)+etf(:,j)*ez(j),vdat);
-    bpm=b(x0+ex0(:,i)-ex0(:,j)*ez(j),xf+exf(:,i)-exf(:,j)*ez(j),u0+eu0(:,i)-eu0(:,j)*ez(j),...
-          uf+euf(:,i)-euf(:,j)*ez(j),p+ep(:,i)-ep(:,j)*ez(j),t0+et0(:,i)-et0(:,j)*ez(j),tf+etf(:,i)-etf(:,j)*ez(j),vdat);
-    bmp=b(x0-ex0(:,i)+ex0(:,j)*ez(j),xf-exf(:,i)+exf(:,j)*ez(j),u0-eu0(:,i)+eu0(:,j)*ez(j),...
-          uf-euf(:,i)+euf(:,j)*ez(j),p-ep(:,i)+ep(:,j)*ez(j),t0-et0(:,i)+et0(:,j)*ez(j),tf-etf(:,i)+etf(:,j)*ez(j),vdat);
-    bmm=b(x0-ex0(:,i)-ex0(:,j)*ez(j),xf-exf(:,i)-exf(:,j)*ez(j),u0-eu0(:,i)-eu0(:,j)*ez(j),...
-          uf-euf(:,i)-euf(:,j)*ez(j),p-ep(:,i)-ep(:,j)*ez(j),t0-et0(:,i)-et0(:,j)*ez(j),tf-etf(:,i)-etf(:,j)*ez(j),vdat);
-    bt=(bpp-bpm+bmm-bmp).*adjoint'/e2/4; 
-   
-    bzz=bzz+sparse(idx(:,i),idx(:,j),bt,nz,nz); 
-    end
-   end
+    bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+    adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
+    [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
+else
+    bzz=sparse(nz,nz);
 end
 
 end

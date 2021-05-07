@@ -25,12 +25,15 @@ dimX1=size(X,1);dimX2=size(X,2);
 dimU1=size(U,1);dimU2=size(U,2);
 XshiftMat=data.scaling.XshiftMat;
 UshiftMat=data.scaling.UshiftMat;
-X=data.scaling.XunscaleMat*(X(:)-XshiftMat(:));
-U=data.scaling.UunscaleMat*(U(:)-UshiftMat(:));
+X=data.scaling.XunscaleMat*X(:)-XshiftMat(:);
+U=data.scaling.UunscaleMat*U(:)-UshiftMat(:);
+% X=data.scaling.XunscaleMat*(X(:)-XshiftMat(:));
+% U=data.scaling.UunscaleMat*(U(:)-UshiftMat(:));
 X=reshape(X,dimX1,dimX2);
 U=reshape(U,dimU1,dimU2);
 if isfield(data.data,'Pscale')
-    p=(p-data.data.Pshift)./data.data.Pscale;
+%     p=(p-data.data.Pshift)./data.data.Pscale;
+    p=p./data.data.Pscale-data.data.Pshift;
 end
 
 n=data.sizes{3};

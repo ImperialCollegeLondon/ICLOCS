@@ -31,7 +31,8 @@ U=dataNLP.scaling.UunscaleMat*U(:)-UshiftMat(:);
 X=reshape(X,dimX1,dimX2);
 U=reshape(U,dimU1,dimU2);
 if isfield(dataNLP.data,'Pscale')
-    p=(p-dataNLP.data.Pshift)./dataNLP.data.Pscale;
+%     p=(p-dataNLP.data.Pshift)./dataNLP.data.Pscale;
+    p=p./dataNLP.data.Pscale-dataNLP.data.Pshift;
 end
 
         

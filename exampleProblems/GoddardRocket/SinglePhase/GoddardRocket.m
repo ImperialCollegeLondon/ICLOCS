@@ -32,11 +32,11 @@ v_0=0;
 m_0=3;
 
 h_max=23800;
-v_max=2500;
+v_max=900;
 m_max=3;
 
 h_min=0;
-v_min=-2500;
+v_min=-10;
 m_min=1;
 
 
