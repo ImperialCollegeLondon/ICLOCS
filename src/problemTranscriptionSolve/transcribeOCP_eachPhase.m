@@ -307,11 +307,11 @@ if (strcmp(options.discretization,'hermite'))
         data.RCmap.rcxe=rcxe;
         data.RCmap.rcue=rcue;
         
-        vnrcl=(sum(~isinf(problem.states.xrl))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3+sum(~isinf(problem.inputs.url))*2;
-        vnrcu=(sum(~isinf(problem.states.xru))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3+sum(~isinf(problem.inputs.uru))*2;
+        vnrcl=(sum(~isinf(problem.states.xrl))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3+(sum(~isinf(problem.inputs.url))-sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru))))*2;
+        vnrcu=(sum(~isinf(problem.states.xru))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3+(sum(~isinf(problem.inputs.uru))-sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru))))*2;
         vnrce=sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru)))*2+sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru)))*2;
-        nrcl=(sum(~isinf(problem.states.xrl))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3*(nps)+sum(~isinf(problem.inputs.url))*2*(nps);
-        nrcu=(sum(~isinf(problem.states.xru))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3*(nps)+sum(~isinf(problem.inputs.uru))*2*(nps);
+        nrcl=(sum(~isinf(problem.states.xrl))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3*(nps)+(sum(~isinf(problem.inputs.url))-sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru))))*2*(nps);
+        nrcu=(sum(~isinf(problem.states.xru))-sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru))))*3*(nps)+(sum(~isinf(problem.inputs.uru))-sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru))))*2*(nps);
         nrce=sum(problem.states.xrl(~isinf(problem.states.xrl))==problem.states.xru(~isinf(problem.states.xru)))*2*(nps)+sum(problem.inputs.url(~isinf(problem.inputs.url))==problem.inputs.uru(~isinf(problem.inputs.uru)))*2*(nps);
     else
         vnrcl=0;vnrcu=0;vnrce=0;nrcl=0;nrcu=0;nrce=0;
@@ -379,35 +379,27 @@ if nrc
     if strcmp(options.discretization,'hermite')
 
         data.RCmap.AxHS1=spdiags([-3*ones(M,1) 4*ones(M,1) -ones(M,1)],0:2,M,M);
-%         diag(-3*ones(M,1))+diag(4*ones(M-1,1),1)+diag(-ones(M-2,1),2);
         data.RCmap.AxHS1([2:2:end,end],:)=[];
         data.RCmap.AxHS2=spdiags([ones(M,1) -4*ones(M,1) 3*ones(M,1)],0:2,M,M);
         data.RCmap.AxHS2([2:2:end,end],:)=[];
         data.RCmap.AxHS3=spdiags([-ones(M,1) ones(M,1)],[0 2],M,M);
         data.RCmap.AxHS3([2:2:end,end],:)=[];
         data.RCmap.AxHS4=spdiags([-ones(M,1) ones(M,1)],[0 1],M,M);
-%         diag(-ones(M,1))+diag(ones(M-1,1),1);
         data.RCmap.AxHS4([2:2:end,end],:)=[];
 
         data.RCmap.AuHS1=spdiags([-3*ones(N,1) 4*ones(N,1) -ones(N,1)],0:2,N,N);
-%         diag(-3*ones(N,1))+diag(4*ones(N-1,1),1)+diag(-ones(N-2,1),2);
         data.RCmap.AuHS1([2:2:end,end],:)=[];
         data.RCmap.AuHS2=spdiags([ones(N,1) -4*ones(N,1) 3*ones(N,1)],0:2,N,N);
-%         diag(ones(N,1))+diag(-4*ones(N-1,1),1)+diag(3*ones(N-2,1),2);
         data.RCmap.AuHS2([2:2:end,end],:)=[];
         data.RCmap.AuHS3=spdiags([-ones(N,1) ones(N,1)],[0 2],N,N);
-%         diag(-ones(N,1))+diag(ones(N-2,1),2);
         data.RCmap.AuHS3([2:2:end,end],:)=[];
         data.RCmap.AuHS4=spdiags([-ones(N,1) ones(N,1)],[0 1],N,M);
-%         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.AuHS4([2:2:end,end],:)=[];
     elseif (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR'))
     elseif strcmp(options.discretization,'trapezoidal')
         data.RCmap.Ax=spdiags([-ones(M,1) ones(M,1)],[0 1],M,M);
-%         diag(-ones(M,1))+diag(ones(M-1,1),1);
         data.RCmap.Ax(end,:)=[];
         data.RCmap.Au=spdiags([-ones(N,1) ones(N,1)],[0 1],N,M);
-%         diag(-ones(N,1))+diag(ones(N-1,1),1);
         data.RCmap.Au(end,:)=[];
     else
         error('Rate constraints not supported with the chosen discretization method') 
@@ -587,8 +579,8 @@ data.gAllidx=find(gAllidx);
 
 % Get bounds for the constraint functions
 if nrc
-    rcl=[zeros(1,nrcl),-inf*ones(1,nrcu),zeros(nrce)];
-    rcu=[inf*ones(1,nrcl),zeros(1,nrcu),zeros(nrce)];
+    rcl=[zeros(1,nrcl),-inf*ones(1,nrcu),zeros(1,nrce)];
+    rcu=[inf*ones(1,nrcl),zeros(1,nrcu),zeros(1,nrce)];
 else 
     rcl=[];
     rcu=[];

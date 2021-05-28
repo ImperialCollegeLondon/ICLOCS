@@ -49,7 +49,7 @@ if nrc
                 k=k+3;
             end
             if ~isinf(data.data.xrl(i)) && data.data.xrl(i)==data.data.xru(i)
-                ce(:,l:l+1)=[data.RCmap.AxHS3*x(:,i)-data.RCmap.DT.*data.data.xrl(i),data.RCmap.AxHS4*x(:,i)-0.5*DT.*data.data.xrl(i)];
+                ce(:,l:l+1)=[data.RCmap.AxHS3*x(:,i)-DT.*data.data.xrl(i),data.RCmap.AxHS4*x(:,i)-0.5*DT.*data.data.xrl(i)];
                 l=l+2;
             end
             if ~isinf(data.data.xru(i)) && data.data.xrl(i)~=data.data.xru(i)

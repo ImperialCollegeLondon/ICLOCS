@@ -15,7 +15,7 @@ function [ rcz ] = jacConst_RC( rcz, nrc, nz, avrc, X, U, P, t0, tf, T, e, data 
             rcz=rcz+sparse(1:nrc,idx(:,i),(rcp-rcm)/(2*e),nrc,nz);
         end
     end
-    rcz=rcz+[data.map.Acl;data.map.Ae;data.map.Acu];
+    rcz=rcz+[data.map.Acl;data.map.Acu;data.map.Ae];
 
 
 
