@@ -27,9 +27,11 @@ function [ fz,Jf ] = jacConst_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0,
         end
         Jaf=[cell(1,1)];
    end
-  if np
+  if np 
   for i=1:np
-    fz=fz+sparse(1:M*n,idx(:,nt+i),reshape((tf-t0)*df.dp{i},M*n,1),M*n,nz);
+      if ~isempty(df.dp{i})
+            fz=fz+sparse(1:M*n,idx(:,nt+i),reshape((tf-t0)*df.dp{i},M*n,1),M*n,nz);
+      end
   end
    Jaf=[Jaf, df.dp];
   end

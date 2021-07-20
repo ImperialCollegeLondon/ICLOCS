@@ -12,7 +12,7 @@ elseif nt==2
     JaL{1}=dL.dt(:);
     JaL{2}=dL.dt(:);
 end
-if np
+if np && ~isempty(dL.dp)
     for i=nt+1:nt+np
         dLp=data.map.W*(tf-t0)*dL.dp(:,i-nt);
         Lz=Lz+sparse(1,idx(:,i),dLp,1,nz);
