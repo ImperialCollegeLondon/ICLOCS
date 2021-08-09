@@ -118,7 +118,7 @@ if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretizatio
         end
     end
     costL=Lcost(X,[],U,[],P,T,vdat);
-    costE=Ecost(X(1,:),X(end,:),U(1,:),U(end,:),P,t0,tf,vdat);
+    costE=Ecost(X(1,:)',X(end,:)',U(1,:)',U(end,:)',P,t0,tf,vdat);
     solution.cost.J=J;
     solution.cost.E=costE;
     solution.cost.L=costL;
@@ -445,7 +445,7 @@ else
     % Compute the objective values
     J=costFunction(z,data);
     costL=Lcost(X,[],U,[],P,T,vdat);
-    costE=Ecost(X(1,:),X(end,:),U(1,:),U(end,:),P,t0,tf,vdat);
+    costE=Ecost(X(1,:)',X(end,:)',U(1,:)',U(end,:)',P,t0,tf,vdat);
     solution.cost.J=J;
     solution.cost.E=costE;
     solution.cost.L=costL;

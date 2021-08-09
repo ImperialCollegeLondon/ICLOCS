@@ -18,6 +18,7 @@ function [ auxdata ] = transcribeResErrorAnalysis(t_list,options,dataNLP )
 
 switch dataNLP.options.discretization
     case{'globalLGR','hpLGR'} % p/hp Transcription Method
+        ng_eq=dataNLP.sizes{18};
         t0_list=t_list(1:end-1)'./t_list(end); tf_list=t_list(2:end)'./t_list(end); 
         if isfield(options,'pdegree') 
                 npd=options.pdegree*ones(1,options.nsegment);
@@ -29,6 +30,7 @@ switch dataNLP.options.discretization
                 nps=length(options.npsegment);                
         end
     case{'hermite'} 
+        ng_eq=dataNLP.sizes{15};
         if M<5
             error('Direct interpolation with minimum residual not supported when the number of mesh nodes is less than 3 for Hermite-Simpson (h) method');
         end
@@ -278,7 +280,7 @@ switch dataNLP.options.discretization
                 auxdata.PshiftMat=repmat( dataNLP.data.Pshift, M, 1 );
                 auxdata.PscaleMat=diag(PscaleMat(:));
             end
-            auxdata.ResNormScale=dataNLP.data.Xscale.*dataNLP.data.resNormCusWeight;
+            auxdata.ResNormScale=[dataNLP.data.Xscale ones(1,ng_eq)].*dataNLP.data.resNormCusWeight;
             ResNormScaleMat=repmat(auxdata.ResNormScale , nps, 1 );
             auxdata.ResNormScaleMat=diag(ResNormScaleMat(:));
         else

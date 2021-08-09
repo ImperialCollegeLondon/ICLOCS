@@ -458,17 +458,20 @@ else % single phase problem
                         if i>1
                               MRiterCheck(i)=(any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
                         end
-                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                            waitAnswer=1;
-                            while waitAnswer
-                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                                if strcmp(keepMR, 'Yes')
-                                    waitAnswer=0;
-                                elseif strcmp(keepMR, 'No')
-                                    runCondition_MR=false(1); 
-                                    waitAnswer=0;
-                                else
-                                    disp('Answer not recognized, please enter again!')
+                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i)) 
+                            if isfield(options,'DisableMRConvergenceCheck') && options.DisableMRConvergenceCheck
+                            else
+                                waitAnswer=1;
+                                while waitAnswer
+                                    keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                    if strcmp(keepMR, 'Yes')
+                                        waitAnswer=0;
+                                    elseif strcmp(keepMR, 'No')
+                                        runCondition_MR=false(1); 
+                                        waitAnswer=0;
+                                    else
+                                        disp('Answer not recognized, please enter again!')
+                                    end
                                 end
                             end
                         end
@@ -483,16 +486,19 @@ else % single phase problem
                               MRiterCheck(i)=(any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
                         end
                         if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                            waitAnswer=1;
-                            while waitAnswer
-                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                                if strcmp(keepMR, 'Yes')
-                                    waitAnswer=0;
-                                elseif strcmp(keepMR, 'No')
-                                    runCondition_MR=false(1); 
-                                    waitAnswer=0;
-                                else
-                                    disp('Answer not recognized, please enter again!')
+                            if isfield(options,'DisableMRConvergenceCheck') && options.DisableMRConvergenceCheck
+                            else
+                                waitAnswer=1;
+                                while waitAnswer
+                                    keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                    if strcmp(keepMR, 'Yes')
+                                        waitAnswer=0;
+                                    elseif strcmp(keepMR, 'No')
+                                        runCondition_MR=false(1); 
+                                        waitAnswer=0;
+                                    else
+                                        disp('Answer not recognized, please enter again!')
+                                    end
                                 end
                             end
                         end
@@ -526,16 +532,19 @@ else % single phase problem
                               MRiterCheck(i)=((any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(resErrorHistory(1:i-1)))-resErrorHistory{i})./min(cell2mat(resErrorHistory(1:i-1)))<0.05))) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
                         end
                         if runCondition_MR && i>5 && all(MRiterCheck(i-4:i))
-                            waitAnswer=1;
-                            while waitAnswer
-                                keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                                if strcmp(keepMR, 'Yes')
-                                    waitAnswer=0;
-                                elseif strcmp(keepMR, 'No')
-                                    runCondition_MR=false(1); 
-                                    waitAnswer=0;
-                                else
-                                    disp('Answer not recognized, please enter again!')
+                            if isfield(options,'DisableMRConvergenceCheck') && options.DisableMRConvergenceCheck
+                            else
+                                waitAnswer=1;
+                                while waitAnswer
+                                    keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
+                                    if strcmp(keepMR, 'Yes')
+                                        waitAnswer=0;
+                                    elseif strcmp(keepMR, 'No')
+                                        runCondition_MR=false(1); 
+                                        waitAnswer=0;
+                                    else
+                                        disp('Answer not recognized, please enter again!')
+                                    end
                                 end
                             end
                         end
