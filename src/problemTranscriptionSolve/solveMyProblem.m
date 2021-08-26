@@ -187,7 +187,10 @@ if isfield(options,'mp')
                         end
                     else
                         if isfield(options.mp,'regstrategy') && strcmp(options.mp.regstrategy,'simultaneous') && data.mpdata.data.penalty.i<length(data.mpdata.data.penalty.values)
-                            prepareWarmStart(options,guess,solution,OCP)
+                            for j=1:nphase
+                                [ options.phaseoptions{j}, guess.phases{j}] = doWarmStart( OCP.options.phaseoptions{j}, guess.phases{j}, solution.phaseSol{j}, OCP.data.phasedata{j} );
+                                guess.mp.lambda_nbl=solution.mp.multipliers.lambda(end-OCP.data.mpdata.mpsizes.nbl_l+1:end);
+                            end
                             runCondition=1;
                         end
                     end
