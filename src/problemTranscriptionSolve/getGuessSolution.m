@@ -37,9 +37,9 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
         if isfield(guess,'time') && ~isempty(guess.time)
             Tx=linspace(guess.time(1),guess.time(end), M+1);
             Tu=linspace(guess.time(1),guess.time(end), M);
-            x_guess=interp1(guess.time, guess.states,Tx,'linear');
+            x_guess=interp1(guess.time, guess.states,Tx,'linear','extrap');
             x_guess=x_guess(:);
-            u_guess=interp1(guess.time, guess.inputs,Tu,'linear');
+            u_guess=interp1(guess.time, guess.inputs,Tu,'linear','extrap');
             u_guess=u_guess(:);
         else
             for i=1:n
@@ -136,9 +136,9 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
                 if isfield(guess,'time_org')
-                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear','extrap');
                 else
-                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear');
+                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear','extrap');
                 end
                 data.multipliers.lambda=data.multipliers.lambda(:);
             else
@@ -146,7 +146,7 @@ if strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'
             end
 
             if ng
-                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+                lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear','extrap');
                 data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];
             end
             if nb
@@ -169,9 +169,9 @@ else
         if isfield(guess,'time') && ~isempty(guess.time)
             Tx=linspace(guess.time(1),guess.time(end), M);
             Tu=linspace(guess.time(1),guess.time(end-1), N);
-            x_guess=interp1(guess.time, guess.states,Tx,'linear');
+            x_guess=interp1(guess.time, guess.states,Tx,'linear','extrap');
             x_guess=reshape(x_guess',M*n,1);
-            u_guess=interp1(guess.time, guess.inputs,Tu,'linear');
+            u_guess=interp1(guess.time, guess.inputs,Tu,'linear','extrap');
             u_guess=reshape(u_guess',N*m,1);
         else
             for i=1:n
@@ -268,9 +268,9 @@ else
         else
             if isfield(guess.multipliers,'lambda') && ~isempty(guess.multipliers.lambda)
                 if isfield(guess,'time_org')
-                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear');
+                    data.multipliers.lambda=interp1(guess.time_org, guess.multipliers.lambda,T,'linear','extrap');
                 else
-                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear');
+                    data.multipliers.lambda=interp1(guess.time, guess.multipliers.lambda,T,'linear','extrap');
                 end
                 data.multipliers.lambda=reshape(data.multipliers.lambda',M*n,1);
             else
@@ -278,9 +278,9 @@ else
             end
             if ng 
                 if ~isempty(guess.multipliers.lambda_g)
-                    lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear');
+                    lambda_g=interp1(guess.timeFull, guess.multipliers.lambda_g,T,'linear','extrap');
                 else
-                    lambda_g=interp1(guess.timeFull, zeros(length(guess.multipliers.lambda_g),1),T,'linear');
+                    lambda_g=interp1(guess.timeFull, zeros(length(guess.multipliers.lambda_g),1),T,'linear','extrap');
                 end
                 lambda_g=reshape(lambda_g',M*ng,1);
                 data.multipliers.lambda=[data.multipliers.lambda;lambda_g(data.gAllidx)];

@@ -41,7 +41,7 @@ switch(data.mpdata.options.mp.NLPsolver)
 
     case{'ipopt'} 
        if isfield(data.mpdata.multipliers,'lambda') && ~isempty(data.mpdata.multipliers.lambda)
-            opt.lambda=data.multipliers.lambda;              % Solve the NLP using IPOPT
+            opt.lambda=data.mpdata.multipliers.lambda;              % Solve the NLP using IPOPT
             data.options.ipopt.warm_start_init_point ='yes'; 
        else
             data.mpdata.options.ipopt.warm_start_init_point ='no'; 

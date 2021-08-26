@@ -104,7 +104,7 @@ if isfield(options,'mp')
                     end
                 end
 
-                if exist('OCP_in','var') == 1
+                if i==1 && exist('OCP_in','var') == 1
                     infoNLP=OCP_in.infoNLP;
                     data=OCP_in.data;
                     options=OCP_in.options;
@@ -118,11 +118,9 @@ if isfield(options,'mp')
                     OCP_ini.options=options;
                 end
                 
-                if nargout==4
-                    OCP_MR.data=data;
-                    OCP_MR.infoNLP=infoNLP;
-                    OCP_MR.options=options;
-                end
+                OCP_MR.data=data;
+                OCP_MR.infoNLP=infoNLP;
+                OCP_MR.options=options;
                 
                 if isfield(options.mp,'regstrategy') && strcmp(options.mp.regstrategy,'simultaneous')
                     if isfield(data.mpdata.data.penalty,'i') && isfield(data.mpdata.data.penalty,'values')
@@ -185,12 +183,11 @@ if isfield(options,'mp')
                     if runCondition_MR
                         for j=1:nphase
                             [ options.phaseoptions{j}, guess.phases{j} ] = doMeshRefinement( options.phaseoptions{j}, problem.phases{j}, guess.phases{j}, data.phasedata{j}, solution.phaseSol{j}, i );
+                            guess.mp.lambda_nbl=solution.mp.multipliers.lambda(end-data.mpdata.mpsizes.nbl_l+1:end);
                         end
                     else
                         if isfield(options.mp,'regstrategy') && strcmp(options.mp.regstrategy,'simultaneous') && data.mpdata.data.penalty.i<length(data.mpdata.data.penalty.values)
-                            for j=1:nphase
-                                [ options.phaseoptions{j}, guess.phases{j}] = doWarmStart( options.phaseoptions{j}, guess.phases{j}, solution.phaseSol{j}, data.phasedata{j} );
-                            end
+                            prepareWarmStart(options,guess,solution,OCP)
                             runCondition=1;
                         end
                     end
@@ -381,7 +378,7 @@ else % single phase problem
                     problemHistory{i}=problem_iter;
                 end
                 
-                if exist('OCP_in','var') == 1
+                if i==1 && exist('OCP_in','var') == 1
                     infoNLP=OCP_in.infoNLP;
                     data=OCP_in.data;
                     options=OCP_in.options;
@@ -396,11 +393,9 @@ else % single phase problem
                     OCP_ini.options=options;
                 end
                 
-                if nargout==4
-                    OCP_MR.data=data;
-                    OCP_MR.infoNLP=infoNLP;
-                    OCP_MR.options=options;
-                end
+                OCP_MR.data=data;
+                OCP_MR.infoNLP=infoNLP;
+                OCP_MR.options=options;
                 
                 if isfield(options,'regstrategy') && strcmp(options.regstrategy,'simultaneous')
                     if isfield(data.data.penalty,'i') && isfield(data.data.penalty,'values')

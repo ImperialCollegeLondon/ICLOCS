@@ -72,6 +72,9 @@ infoNLP_XUg.cu=[];
 infoNLP_b.cl=[];
 infoNLP_b.cu=[];
 
+mutiplierGuess_XUg=[];
+mutiplierGuess_b=[];
+
 
 phaseinfoNLP=cell(1,length(problem.phases));
 phasedata=cell(1,length(problem.phases));
@@ -138,6 +141,11 @@ for i=1:data.mpsizes.nphase
     infoNLP_XUg.cu=[infoNLP_XUg.cu;phaseinfoNLP{i}.cu(data_phase.jSidx.org.XUg.row,1)];
     infoNLP_b.cl=[infoNLP_b.cl;phaseinfoNLP{i}.cl(data_phase.jSidx.org.B_XUg.row,1)];
     infoNLP_b.cu=[infoNLP_b.cu;phaseinfoNLP{i}.cu(data_phase.jSidx.org.B_XUg.row,1)];
+
+    if ~isempty(phasedata{i}.multipliers)
+        mutiplierGuess_XUg=[mutiplierGuess_XUg;phasedata{i}.multipliers.lambda(data_phase.jSidx.org.XUg.row,1)];
+        mutiplierGuess_b=[mutiplierGuess_b;phasedata{i}.multipliers.lambda(data_phase.jSidx.org.B_XUg.row,1)];
+    end
     
     if strcmp(options.mp.transcription,'integral_res_min')
         phasedata{i}.dataNLP=data_phase;
@@ -369,8 +377,11 @@ mpinfoNLP.z0=[infoNLP_XU.z0;infoNLP_P.z0;infoNLP_T.z0];
 mpinfoNLP.cl=[infoNLP_XUg.cl;infoNLP_b.cl;problem.mp.constraints.bll.linear';problem.mp.constraints.bll.nonlinear'];
 mpinfoNLP.cu=[infoNLP_XUg.cu;infoNLP_b.cu;problem.mp.constraints.blu.linear';problem.mp.constraints.blu.nonlinear'];
 
-data.multipliers.lambda=[];
-
+if isempty(mutiplierGuess_XUg)
+    data.multipliers.lambda=[];
+else
+    data.multipliers.lambda=[mutiplierGuess_XUg;mutiplierGuess_b;guess.mp.lambda_nbl];
+end
 
 auxdata.mpdata=data;
 auxdata.mpdata.options=options;
