@@ -251,10 +251,10 @@ if isfield(options,'mp')
             varargout{1}=solution;
             varargout{2}=MeshRefinementHistory;
             if nargout==3 || nargout==4
-                varargout{3}=OCP_ini;
+                varargout{3}=OCP_MR;
             end
             if nargout==4
-                varargout{4}=OCP_MR;
+                varargout{4}=OCP_ini;
             end
         otherwise
             error('Unknown Meshing Strategy Selected!')
@@ -612,10 +612,10 @@ else % single phase problem
             varargout{1}=solution;
             varargout{2}=MeshRefinementHistory;
             if nargout==3 || nargout==4
-                varargout{3}=OCP_ini;
+                varargout{3}=OCP_MR;
             end
             if nargout==4
-                varargout{4}=OCP_MR;
+                varargout{4}=OCP_ini;
             end
         otherwise
             error('Unknown Meshing Strategy Selected!')
