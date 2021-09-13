@@ -14,17 +14,32 @@ function genSolutionPlots(options, solution)
 % 
 %------------- BEGIN CODE --------------
 
+
+
 if isfield(solution,'mp')
     
     plotid=options.mp.plot;
-
+    
+    if plotid==1 || plotid==2
+        figstates=figure;
+        figinputs=figure;
+    end
+    if (plotid==1 || plotid==3) && (strcmp(options.mp.transcription,'direct_collocation'))
+        figadjoints=figure;
+    end
+    if plotid==1 || plotid==4
+         figMABE=figure;
+         figMARE=figure;
+         figMACE=figure;
+    end
+            
     for pidx=1:length(solution.phaseSol)
 
             if (strcmp(options.phaseoptions{pidx}.discretization,'globalLGR')) || (strcmp(options.phaseoptions{pidx}.discretization,'hpLGR'))
                % Figure generation
                 if plotid==1 || plotid==2
                     % Plot state trajectory
-                        figure(1)
+                        figure(figstates);
                         for i=1:size(solution.phaseSol{pidx}.X,2)
                             hold on
                             plot([solution.phaseSol{pidx}.T;solution.phaseSol{pidx}.tf],speval(solution.phaseSol{pidx},'X',i,[solution.phaseSol{pidx}.T;solution.phaseSol{pidx}.tf]));
@@ -34,7 +49,7 @@ if isfield(solution,'mp')
                         grid on; axis tight;
 
                     % Plot inputs trajectory
-                        figure(2)
+                        figure(figinputs)
                         for i=1:size(solution.phaseSol{pidx}.U,2)
                             hold on
                             plot([solution.phaseSol{pidx}.T;solution.phaseSol{pidx}.tf],speval(solution.phaseSol{pidx},'U',i,[solution.phaseSol{pidx}.T;solution.phaseSol{pidx}.tf]));
@@ -47,7 +62,7 @@ if isfield(solution,'mp')
                 if (plotid==1 || plotid==3) && (strcmp(options.mp.transcription,'direct_collocation'))
                     % Plot multipliers
 
-                      figure(3)
+                      figure(figadjoints)
                       for i=1:size(solution.phaseSol{pidx}.X,2)
                           hold on
                           plot(solution.phaseSol{pidx}.Tdec,solution.phaseSol{pidx}.multipliers.lambda_1toN(:,i))
@@ -62,21 +77,21 @@ if isfield(solution,'mp')
                 % constraints
                 if plotid==1 || plotid==4
 
-                      figure(4)
+                      figure(figMABE)
                         hold on
                         plot(solution.phaseSol{pidx}.T,max(solution.phaseSol{pidx}.Error,[],2))
                         xlabel('Time')
                         title('Maximum absolute Local error') 
                         grid on; axis tight; 
 
-                       figure(5)
+                       figure(figMARE)
                         hold on
                         plot(solution.phaseSol{pidx}.T,max(solution.phaseSol{pidx}.ErrorRelative,[],2))
                         xlabel('Time')
                         title('Maximum relative Local error') 
                         grid on; axis tight; 
 
-                        figure(6)
+                        figure(figMACE)
                         hold on
                         plot(solution.phaseSol{pidx}.T_ConstraintError,max(solution.phaseSol{pidx}.ConstraintError,[],2))
                         xlabel('Time')
@@ -90,7 +105,7 @@ if isfield(solution,'mp')
                 % Figure generation
                  if plotid==1 || plotid==2
                     % Plot states
-                        figure(1)
+                        figure(figstates)
                         for i=1:size(solution.phaseSol{pidx}.X,2)
                             hold on
                             plot(solution.phaseSol{pidx}.T,speval(solution.phaseSol{pidx},'X',i,solution.phaseSol{pidx}.T))
@@ -101,7 +116,7 @@ if isfield(solution,'mp')
 
 
                     % Plot inputs
-                        figure(2)
+                        figure(figinputs)
                         for i=1:size(solution.phaseSol{pidx}.U,2)
                             hold on
                             plot(solution.phaseSol{pidx}.T,speval(solution.phaseSol{pidx},'U',i,solution.phaseSol{pidx}.T))
@@ -113,7 +128,7 @@ if isfield(solution,'mp')
 
                 if (plotid==1 || plotid==3) && (strcmp(options.mp.transcription,'direct_collocation'))
                     % Plot multipliers
-                        figure(3)
+                        figure(figadjoints)
                         for i=1:size(solution.phaseSol{pidx}.X,2)
                             hold on
                             plot(solution.phaseSol{pidx}.Tdec,solution.phaseSol{pidx}.multipliers.lambda_1toN(:,i))
@@ -126,21 +141,21 @@ if isfield(solution,'mp')
                 % Plot discretization error, constaint violation and number of active
                 % constraints
                 if plotid==1 || plotid==4
-                      figure(4)
+                        figure(figMABE)
                         hold on
                         plot(solution.phaseSol{pidx}.T_error(2:end),max(solution.phaseSol{pidx}.Error,[],2))
                         xlabel('Time')
                         title('Maximum absolute local error') 
                         grid on; axis tight; 
 
-                        figure(5)
+                        figure(figMARE)
                         hold on
                         plot(solution.phaseSol{pidx}.T_error(2:end),max(solution.phaseSol{pidx}.ErrorRelative,[],2))
                         xlabel('Time')
                         title('Maximum relative local error') 
                         grid on; axis tight; 
 
-                        figure(6)
+                        figure(figMACE)
                         hold on
                         plot(solution.phaseSol{pidx}.T_ConstraintError,max(solution.phaseSol{pidx}.ConstraintError,[],2))
                         xlabel('Time')
@@ -163,7 +178,7 @@ else
        % Figure generation
         if plotid==1 || plotid==2
             % Plot state trajectory
-                figure(1)
+                 figure(figstates)
                 for i=1:size(solution.X,2)
                     hold on
                     plot([solution.T;solution.tf],speval(solution,'X',i,[solution.T;solution.tf]));
@@ -173,7 +188,7 @@ else
                 grid on; axis tight;
 
             % Plot inputs trajectory
-                figure(2)
+                figure(figinputs)
                 for i=1:size(solution.U,2)
                     hold on
                     plot([solution.T;solution.tf],speval(solution,'U',i,[solution.T;solution.tf]));
@@ -186,7 +201,7 @@ else
         if (plotid==1 || plotid==3) && (strcmp(options.transcription,'direct_collocation'))
             % Plot multipliers
 
-              figure(3)
+              figure(figadjoints)
               for i=1:size(solution.X,2)
                   hold on
                   plot(solution.Tdec,solution.multipliers.lambda_1toN(:,i))
@@ -201,21 +216,21 @@ else
         % constraints
         if plotid==1 || plotid==4
 
-              figure(4)
+              figure(figMABE)
                 hold on
                 plot(solution.T,max(solution.Error,[],2))
                 xlabel('Time')
                 title('Maximum absolute Local error') 
                 grid on; axis tight; 
 
-               figure(5)
+               figure(figMARE)
                 hold on
                 plot(solution.T,max(solution.ErrorRelative,[],2))
                 xlabel('Time')
                 title('Maximum relative Local error') 
                 grid on; axis tight; 
 
-                figure(6)
+                figure(figMACE)
                 hold on
                 plot(solution.T_ConstraintError,max(solution.ConstraintError,[],2))
                 xlabel('Time')
@@ -229,7 +244,7 @@ else
         % Figure generation
          if plotid==1 || plotid==2
             % Plot states
-                figure(1)
+                 figure(figstates)
                 for i=1:size(solution.X,2)
                     hold on
                     plot(solution.T,speval(solution,'X',i,solution.T))
@@ -240,7 +255,7 @@ else
 
 
             % Plot inputs
-                figure(2)
+                figure(figinputs)
                 for i=1:size(solution.U,2)
                     hold on
                     plot(solution.T,speval(solution,'U',i,solution.T))
@@ -252,7 +267,7 @@ else
 
         if (plotid==1 || plotid==3) && (strcmp(options.transcription,'direct_collocation'))
             % Plot multipliers
-                figure(3)
+                figure(figadjoints)
                 for i=1:size(solution.X,2)
                     hold on
                     plot(solution.Tdec,solution.multipliers.lambda_1toN(:,i))
@@ -265,21 +280,21 @@ else
         % Plot discretization error, constaint violation and number of active
         % constraints
         if plotid==1 || plotid==4
-              figure(4)
+              figure(figMABE)
                 hold on
                 plot(solution.T_error(2:end),max(solution.Error,[],2))
                 xlabel('Time')
                 title('Maximum absolute local error') 
                 grid on; axis tight; 
 
-                figure(5)
+                figure(figMARE)
                 hold on
                 plot(solution.T_error(2:end),max(solution.ErrorRelative,[],2))
                 xlabel('Time')
                 title('Maximum relative local error') 
                 grid on; axis tight; 
 
-                figure(6)
+                figure(figMACE)
                 hold on
                 plot(solution.T_ConstraintError,max(solution.ConstraintError,[],2))
                 xlabel('Time')
