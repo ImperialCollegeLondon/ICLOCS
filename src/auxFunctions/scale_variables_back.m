@@ -14,7 +14,8 @@ function [ scaledvari ] = scale_variables_back( vari, vscales_back, vshifts )
 % 
 %------------- BEGIN CODE --------------
 
-scaledvari= bsxfun(@minus, bsxfun(@times, vari, vscales_back),vshifts);
+% scaledvari= bsxfun(@minus, bsxfun(@times, vari, vscales_back),vshifts);
 
+scaledvari=vari.*vscales_back-vshifts;
 end
 

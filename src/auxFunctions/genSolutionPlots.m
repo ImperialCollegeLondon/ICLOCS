@@ -173,7 +173,20 @@ if isfield(solution,'mp')
 else
     
     plotid=options.plot;
-
+    
+    if plotid==1 || plotid==2
+        figstates=figure;
+        figinputs=figure;
+    end
+    if (plotid==1 || plotid==3) && (strcmp(options.transcription,'direct_collocation'))
+        figadjoints=figure;
+    end
+    if plotid==1 || plotid==4
+         figMABE=figure;
+         figMARE=figure;
+         figMACE=figure;
+    end
+    
     if (strcmp(options.discretization,'globalLGR')) || (strcmp(options.discretization,'hpLGR'))
        % Figure generation
         if plotid==1 || plotid==2
