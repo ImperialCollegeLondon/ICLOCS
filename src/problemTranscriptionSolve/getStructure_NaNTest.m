@@ -40,8 +40,8 @@ for i=1:n
     X_temp(1,i)=NaN;
     dfdx(:,i)=f(X_temp,U_test1,P_test1,1,problem.data)';
     dLdx(1,i)=L(X_temp,[],U_test1,[],P_test1,1,problem.data);
-    dEdx0(1,i)=E(X_temp,X_test2,U_test1,U_test2,P_test1,1,1,problem.data);
-    dEdxf(1,i)=E(X_test2,X_temp,U_test1,U_test2,P_test1,1,1,problem.data);
+    dEdx0(1,i)=E(X_temp',X_test2',U_test1',U_test2',P_test1,1,1,problem.data);
+    dEdxf(1,i)=E(X_test2',X_temp',U_test1',U_test2',P_test1,1,1,problem.data);
     if ng
         dgdx(:,i)=g(X_temp,U_test1,P_test1,1,problem.data)';
     end
@@ -67,8 +67,8 @@ for i=1:m
     U_temp(1,i)=NaN;
     dfdu(:,i)=f(X_test1,U_temp,P_test1,1,problem.data)';
     dLdu(1,i)=L(X_test1,[],U_temp,[],P_test1,1,problem.data);
-    dEdu0(1,i)=E(X_test1,X_test2,U_temp,U_test2,P_test1,1,1,problem.data);
-    dEduf(1,i)=E(X_test1,X_test2,U_test2,U_temp,P_test1,1,1,problem.data);
+    dEdu0(1,i)=E(X_test1',X_test2',U_temp',U_test2',P_test1,1,1,problem.data);
+    dEduf(1,i)=E(X_test1',X_test2',U_test2',U_temp',P_test1,1,1,problem.data);
     if ng
         dgdu(:,i)=g(X_test1,U_temp,P_test1,1,problem.data)';
     end
