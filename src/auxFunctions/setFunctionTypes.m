@@ -37,7 +37,7 @@ if isfield(problem,'FcnTypes')
         data.FD.FcnTypes.Ftype=0;
     elseif (strcmp(problem.FcnTypes.Dynamics,'Linear'))
         data.FD.FcnTypes.Ftype=2;
-    elseif (strcmp(problem.FcnTypes.Dynamics,'Quadratic'))
+    elseif (strcmp(problem.FcnTypes.Dynamics,'Quadratic')) || (strcmp(problem.FcnTypes.Dynamics,'Bilinear'))
         data.FD.FcnTypes.Ftype=3;
     else
         data.FD.FcnTypes.Ftype=1;
@@ -60,10 +60,54 @@ else
     data.FD.FcnTypes.Gtype=1;
 end
 
+if isfield(problem,'FcnDetails') 
+    if (strcmp(problem.FcnDetails.StageCost,'NotExplicitFcnOfT'))
+        data.FD.FcnTypes.LTRelation=0;
+    else
+        data.FD.FcnTypes.LTRelation=1;
+    end
+    
+    if (strcmp(problem.FcnTypes.TerminalCost,'NotExplicitFcnOfT'))
+        data.FD.FcnTypes.ETRelation=0;
+    else
+        data.FD.FcnTypes.ETRelation=1;
+    end
+    
+    if (strcmp(problem.FcnTypes.TerminalConst,'NotExplicitFcnOfT'))
+        data.FD.FcnTypes.BTRelation=0;
+    else
+        data.FD.FcnTypes.BTRelation=1;
+    end
+
+    if (strcmp(problem.FcnTypes.Dynamics,'NotExplicitFcnOfT'))
+        data.FD.FcnTypes.FTRelation=0;
+    else
+        data.FD.FcnTypes.FTRelation=1;
+    end
+
+    if (strcmp(problem.FcnTypes.PathConstraint,'NotExplicitFcnOfT'))
+        data.FD.FcnTypes.GTRelation=0;
+    else
+        data.FD.FcnTypes.GTRelation=1;
+    end
+else
+    data.FD.FcnTypes.LTRelation=1;
+    data.FD.FcnTypes.ETRelation=1;
+    data.FD.FcnTypes.BTRelation=1;
+    data.FD.FcnTypes.FTRelation=1;
+    data.FD.FcnTypes.GTRelation=1;
+end
+
 % problem.FcnTypes.Dynamics='Nonlinear';
 % problem.FcnTypes.PathConstraint='None';
 % problem.FcnTypes.StageCost='Constant';
 % problem.FcnTypes.TerminalCost='Constant';
 % problem.FcnTypes.TerminalConst='None';
+
+% problem.FcnDetails.StageCost='NotExplicitFcnOfT';
+% problem.FcnDetails.TerminalCost='NotExplicitFcnOfT';
+% problem.FcnDetails.TerminalConst='NotExplicitFcnOfT';
+% problem.FcnDetails.Dynamics='NotExplicitFcnOfT';
+% problem.FcnDetails.PathConstraint='NotExplicitFcnOfT';
 end
 

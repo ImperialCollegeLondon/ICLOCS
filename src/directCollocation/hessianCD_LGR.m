@@ -75,18 +75,26 @@ if nargout==3 || nargout==5
     % Compute fzz and gzz
     % ------------
     if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-        fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-        gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
-        [ fzz,gzz ] =hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+        if (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2) && (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2)
+            fzz=sparse(nz,nz);
+            gzz=sparse(nz,nz);
+        else
+            fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+            gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
+            [ fzz,gzz ] =hessian_LGR_CD_FG( fzz, gzz, adjoint_f, adjoint_g, M, n, ng, nz, fg, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+        end
     else
-        fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
-       [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
-
-        if ng
+        if data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2
+            fzz=sparse(nz,nz);
+        else
+            fzz=spalloc(nz,nz,data.map.spmatsize.hSf);
+            [ fzz ] = hessian_LGR_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, T, k0, DTLP, DT, DT_ratio_diff, e, e2, vdat, data );
+        end
+        if ~ng || data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2
+            gzz=sparse(nz,nz);
+        else
             gzz=spalloc(nz,nz,data.map.spmatsize.hSg);
             [ gzz ] = hessian_LGR_CD_G( gzz, M, ng, nz, g, X, U, P, T, k0, DT, e, e2, adjoint_g, vdat, data );
-        else
-            gzz=sparse(nz,nz);
         end
     end
 

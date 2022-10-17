@@ -291,7 +291,7 @@ switch(data.dataNLP.options.NLPsolver)
 end
 
 
-    
+clearIntermVariables;
 
 % Store the results in solution structure:
 %solution.status=status;

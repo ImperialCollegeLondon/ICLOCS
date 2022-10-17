@@ -41,18 +41,24 @@ end
 if abs(sum(tau)-ns)>sqrt(eps);error('Time vector (tau) should sum to 1');end
 data.tau=tau;
 
-if isfield(problem.inputs,'t_zone') && problem.inputs.t_zone>0
+
    if problem.time.t0_min==problem.time.t0_min && problem.time.tf_min==problem.time.tf_min
-       t0=problem.time.t0_min;
-       tf=problem.time.tf_min;
-       T=(tf-t0)*[0;data.tau_inc]*data.Nm/ns+t0;
-       [hc,edges,bin]  = histcounts(T,t0:problem.inputs.t_zone:tf);
-       temp=cumsum([1 hc]);
-       data.t_zone_map=temp(bin);
+       if isfield(problem.inputs,'t_zone') && problem.inputs.t_zone>0
+           t0=problem.time.t0_min;
+           tf=problem.time.tf_min;
+           T=(tf-t0)*[0;data.tau_inc]*data.Nm/ns+t0;
+           [hc,edges,bin]  = histcounts(T,t0:problem.inputs.t_zone:tf);
+           temp=cumsum([1 hc]);
+           data.t_zone_map=temp(bin);       
+       end
+       data.ProblemTypes.FixedTime=1;
    else
-       error('Zoning of input is only availabe for fixed t0 and tf problems')
+       if isfield(problem.inputs,'t_zone')
+           error('Zoning of input is only availabe for fixed t0 and tf problems')
+       end
+       data.ProblemTypes.FixedTime=0;
    end
-end
+
 
 end
 
