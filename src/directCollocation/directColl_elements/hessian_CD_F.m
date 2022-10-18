@@ -6,6 +6,12 @@ function [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT
     ex=data.FD.vector.f.ex;eu=data.FD.vector.f.eu;
     
     persistent solsave; 
+    if isfield(solsave,'ft') && (size(solsave.ft,1)~=nfd || size(solsave.ft,2)~=nfd)
+        solsave = rmfield(solsave,'ft');
+    end
+    if isfield(solsave,'f') && (size(solsave.f.fp1_save,1)~=nfd || size(solsave.f.fp1_save,2)~=nfd)
+        solsave = rmfield(solsave,'f');
+    end
 
     if data.FD.FcnTypes.Ftype==3 && (data.ProblemTypes.FixedTime || (~data.ProblemTypes.FixedTime && ~data.FD.FcnTypes.FTRelation))
         if data.ProblemTypes.FixedTime
@@ -30,12 +36,21 @@ function [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT
                 solsave.ft=ft_save;
             end
             
-            for i=1:nfd
-               for j=1:i
-                  ft=solsave.ft{i,j}.*adjoint_f;
-                  fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft',M*n,1),nz,nz);
-               end
-            end  
+            if isfield(data.options,'parfor') && data.options.parfor
+                parfor i=1:nfd
+                   for j=1:i
+                      ft=solsave.ft{i,j}.*adjoint_f;
+                      fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft',M*n,1),nz,nz);
+                   end
+                end  
+            else
+                for i=1:nfd
+                   for j=1:i
+                      ft=solsave.ft{i,j}.*adjoint_f;
+                      fzz=fzz+sparse(idx(:,i),idx(:,j),reshape(ft',M*n,1),nz,nz);
+                   end
+                end  
+            end
         elseif ~data.ProblemTypes.FixedTime && ~data.FD.FcnTypes.FTRelation
             if ~isfield(solsave,'f')
                 fp1_save=cell(nfd,nfd);
