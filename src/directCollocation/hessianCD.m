@@ -42,11 +42,11 @@ e2=e*e;                     % Pertubation size
 if nargout==2 || nargout==5
     % Compute (w'L)zz
     % ----------------
-    if data.FD.FcnTypes.Ltype
+    if data.FD.FcnTypes.Ltype==0 || data.FD.FcnTypes.Ltype==2
+        Lzz=sparse(nz,nz);
+    else
         Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
         [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
-    else
-        Lzz=sparse(nz,nz);
     end
 
 
