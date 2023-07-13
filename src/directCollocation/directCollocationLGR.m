@@ -106,6 +106,7 @@ else
     tau_inc=data.tau_inc;
     t=(tf-t0)/2*tau_inc+(tf+t0)/2;
 
+
     %for multi-interval mesh
     if nt>=2
         t_segment=(tf-t0)/2*data.tau_segment'+(tf+t0)/2; %Time at start/end of each segment
@@ -151,6 +152,19 @@ w=data.map.w;
 
 % Prepare the data for linkage constraints
 [XU0f] = prepareForLinkageConstraintInfo(x0,xf,u0,uf,vdat);
+
+
+if  strcmp(data.options.transcription,'direct_collocation_intres_reg')
+        intres_reg=1;
+        if strcmp(data.options.derivatives,'adigator')
+            T=[data.resmin.tau;1]*(tf-t0)+t0;
+            [ ResNorm_vec, ~] = getAdigator4ICLOCS_minres( X_Np1,[U;U(end,:)], T, P, data.resmin );
+        end
+
+    else
+        intres_reg=0;
+end
+
 %%
 %--------------------------------------------------------------------------
 % Return the relevant data
@@ -161,11 +175,29 @@ w=data.map.w;
 switch required
 
     case{'cost'} 
-        sol{phaseNo}.cost= w'*(t_segment_end.*L(X,Xr,U,Ur,P,t,vdat))+E(x0,xf,u0,uf,p,t0,tf,vdat);
+        if intres_reg
+            if strcmp(data.resmin.dataNLP.options.derivatives,'adigator')
+                ResNorm_v=ResNorm_vec.f;
+            else
+                [ResNorm] = costResidualMin_ModeMinRes( X_Np1,[U;U(end,:)],P,[t;tf],data.resmin);
+                ResNorm_v=sum(ResNorm,2);
+            end
+            sol{phaseNo}.cost= w'*(t_segment_end.*L(X,Xr,U,Ur,P,t,vdat))+E(x0,xf,u0,uf,p,t0,tf,vdat)+ResNorm_v;
+        else
+            sol{phaseNo}.cost= w'*(t_segment_end.*L(X,Xr,U,Ur,P,t,vdat))+E(x0,xf,u0,uf,p,t0,tf,vdat);
+        end
         solution=sol{phaseNo}.cost;
-        
+
     case{'gradCost'}
         [sol{phaseNo}.gradCost,sol{phaseNo}.JL]=gradientCostLGR(L,X,Xr,U,Ur,P,tau_inc,t,E,x0,xf,u0,uf,p,t0,tf,data);
+        if intres_reg
+            if strcmp(data.resmin.dataNLP.options.derivatives,'adigator')
+                sol{phaseNo}.gradCost(1,ResNorm_vec.dY_location)=sol{phaseNo}.gradCost(1,ResNorm_vec.dY_location)+ResNorm_vec.dY';
+            else
+                tau=[data.resmin.dataNLP.tau_inc;1];
+                sol{phaseNo}.gradCost=sol{phaseNo}.gradCost+resMin_gradientCost_ModeMinRes(X_Np1,[U;U(end,:)],P,tau,t0,tf,data.resmin);
+            end
+        end
         if data.options.reorderLGR
             solution=sol{phaseNo}.gradCost(data.reorder.z_idx);
         else
@@ -220,12 +252,25 @@ switch required
                                                     xf,u0,uf,p,t0,tf,data);
             fgzz=-fzz+gzz;
       elseif strcmp(data.options.derivatives,'adigator')
-            [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+          if intres_reg
+            data.ResNorm_vec=ResNorm_vec;
+            [Lzz,Ezz,fgzz,bzz,Reszz]=hessianCDAdigator_LGR(L,f,g,X_Np1,[U;U(end,:)],P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+          else
+            [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator_LGR(L,f,g,X_Np1,[U;U(end,:)],P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+          end
       else
-            [Lzz,Ezz,fzz,gzz,bzz]=hessianCD_LGR(L,f,g,X,U,P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+            if intres_reg
+                [Lzz,Ezz,fzz,gzz,bzz,Reszz]=hessianCD_LGR(L,f,g,X_Np1,[U;U(end,:)],P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+            else
+                [Lzz,Ezz,fzz,gzz,bzz]=hessianCD_LGR(L,f,g,X_Np1,[U;U(end,:)],P,tau_inc,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+            end
             fgzz=-fzz+gzz;
       end
-      hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+      if intres_reg
+        hessc=data.sigma*(Lzz+Ezz+Reszz)+fgzz+bzz;
+      else
+        hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+      end
       hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
       sol{phaseNo}.hessian=hessc;     
                

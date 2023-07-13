@@ -1,4 +1,4 @@
-function [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
+function [varargout]=hessianCDAdigator_LGR(L,f,g,X_Np1,U_Np1,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
 
 %  It evaluates the Hessian of the Lagrangian with Adigator
 %
@@ -52,7 +52,8 @@ k0=tf+t0;
 DT=tf-t0;
 DTLP=repmat(data.t_segment_end,1,n);
 % DTLP=(tf-t0)/2;
-
+X=X_Np1(1:end-1,:);
+U=U_Np1(1:end-1,:);
 
 e=data.options.perturbation.H;
 e2=e*e;                     % Pertubation size
@@ -84,17 +85,39 @@ else
     Ezz=sparse(nz,nz);
 end
 
+if nargout==4 || nargout>=5
 % Compute bzz
 % ------------
-if nb
-    bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-    [ bzz ] = hessian_LGR_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
-else
-    bzz=sparse(nz,nz);
-end
+    if nb
+        bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+        [ bzz ] = hessian_LGR_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
+    else
+        bzz=sparse(nz,nz);
+    end
 
 end
 
+switch nargout
+    case 2
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+    case 4
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fgzz;
+        varargout{4}=bzz; 
+    case 5
+%         [ng_eq,ng_neq]=deal(data.resmin.dataNLP.sizes{18:19});
+%         [ ResNormz ] = hessian_LGR_CD_Res( M, nz, nt, n, m, np, ng_eq, npd, nps, X_Np1, U_Np1, P, k0, [T;1], DT, e, e2, data );
+        ResNorm_vec=data.ResNorm_vec;
+        ResNormz=sparse(ResNorm_vec.dYdY_location(:,1),ResNorm_vec.dYdY_location(:,2),ResNorm_vec.dYdY,ResNorm_vec.dYdY_size(1),ResNorm_vec.dYdY_size(2));
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fgzz;
+        varargout{4}=bzz; 
+        varargout{5}=tril(ResNormz); 
+       
+end
 
 % Return the Hessian of the Lagrangian
 % -------------------------------------

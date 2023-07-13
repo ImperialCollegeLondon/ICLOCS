@@ -43,7 +43,7 @@ end
 
 % Discretization Error Tol
 options.discErrorTol=problem.states.xErrorTol_local;
-if strcmp(options.transcription,'integral_res_min')
+if strcmp(options.transcription,'integral_res_min') || strcmp(options.transcription,'direct_collocation_intres_reg')
     discErrorTol_Full=[problem.states.xErrorTol_integral problem.constraints.gTol_eq];
     global mode_min_res
     mode_min_res=1;
@@ -95,11 +95,11 @@ N=problem.inputs.N;                        % Number of control actions
 if ~isfield(problem.states,'resNormCusWeight') && ~isfield(problem.constraints,'resNormCusWeight_eq')
     problem.data.resNormCusWeight=ones(1,n+ng_eq);
 elseif isfield(problem.states,'resNormCusWeight') && isfield(problem.constraints,'resNormCusWeight_eq')
-    problem.data.resNormCusWeight=[problem.states.resNormCusWeight problem.constraints,resNormCusWeight_eq];
+    problem.data.resNormCusWeight=[problem.states.resNormCusWeight.*ones(1,n) problem.constraints.resNormCusWeight_eq.*ones(1,ng_eq)];
 elseif ~isfield(problem.states,'resNormCusWeight') && isfield(problem.constraints,'resNormCusWeight_eq')
-    problem.data.resNormCusWeight=[ones(1,n) problem.constraints,resNormCusWeight_eq];
+    problem.data.resNormCusWeight=[ones(1,n) problem.constraints,resNormCusWeight_eq.*ones(1,ng_eq)];
 elseif isfield(problem.states,'resNormCusWeight') && ~isfield(problem.constraints,'resNormCusWeight_eq')
-    problem.data.resNormCusWeight=[problem.states.resNormCusWeight ones(1,ng_eq)];
+    problem.data.resNormCusWeight=[problem.states.resNormCusWeight.*ones(1,n) ones(1,ng_eq)];
 else
     error('Customized weighting for residual norm not properly configured! Please assign the relative weighting with problem.states.resNormCusWeight and problem.constraints,resNormCusWeight_eq accordingly')
 end
@@ -730,7 +730,7 @@ switch options.transcription
         data.zidx.org.t=1:nt;
         data.zidx.org.p=nt+1:nt+np;
     
-    case{'direct_collocation','integral_res_min'}
+    case{'direct_collocation','direct_collocation_intres_reg','integral_res_min'}
         
         switch options.discretization
             case{'discrete','euler','trapezoidal','hermite'}
@@ -802,15 +802,28 @@ end
 %              gk -> general path constraints g(x(k),u(k),p,k) for
 %              k=0,...,ng-1
 %              bo(k) -> nb boundary conditions b(x(0),x(f),u(0),u(f),p,t)
+if isfield(options,'directColleqtol')
+    directColleqtol=options.directColleqtol;
+else
+    directColleqtol=eps;
+end
+% directColleqtol=1e-9;
 if strcmp(options.transcription,'multiple_shooting')
     infoNLP.cl=[kron(ones(M,1),zeros(n,1));glAll;bl(:)];
     infoNLP.cu=[kron(ones(M,1),zeros(n,1));guAll;bu(:)];   
-elseif strcmp(options.transcription,'direct_collocation')
-    infoNLP.cl=[kron(ones(M,1),-eps*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
-    infoNLP.cu=[kron(ones(M,1),eps*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
+elseif strcmp(options.transcription,'direct_collocation') || strcmp(options.transcription,'direct_collocation_intres_reg')
+    infoNLP.cl=[kron(ones(M,1),-directColleqtol*ones(n,1));glAll(gAllidx);rcl(:);bl(:)];
+    infoNLP.cu=[kron(ones(M,1),directColleqtol*ones(n,1));guAll(gAllidx);rcu(:);bu(:)];
     if strcmp(options.discretization,'discrete') || strcmp(options.discretization,'euler')
         infoNLP.cl(end-length([rcl(:);bl(:)])-ng+1:end-length([rcl(:);bl(:)]),1)=0;
         infoNLP.cu(end-length([rcl(:);bl(:)])-ng+1:end-length([rcl(:);bl(:)]),1)=0;
+    end
+    if strcmp(options.transcription,'direct_collocation_intres_reg')
+        discErrorTol_Full=discErrorTol_Full.^2;
+        discErrorTol_Full=discErrorTol_Full';
+        data.data.discErrorTol_Full=discErrorTol_Full;
+        data.data.discErrorConstScaling=ones(1,n+ng_eq);
+        data.data.discErrorTol_FullScaling=discErrorTol_Full;
     end
 %     infoNLP.cl=[kron(ones(M,1),zeros(n,1));glAll(gAllidx);rcl(:);bl(:)];
 %     infoNLP.cu=[kron(ones(M,1),zeros(n,1));guAll(gAllidx);rcu(:);bu(:)];
@@ -875,7 +888,7 @@ data.nConst=length(infoNLP.cl);
 % 
 %     ~(isfield(options,'sysStructTest') && ~options.sysStructTest)
 sparsity_num=getStructure(data.sizes,options.discretization);
-if ~strcmp(options.derivatives,'adigator') && (strcmp(options.resultRep,'default') || strcmp(options.resultRep,'manual')) && strcmp(options.transcription,'direct_collocation') && (isfield(options,'sysStructTest') && options.sysStructTest) && ~(strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR'))
+if ~strcmp(options.derivatives,'adigator') && (strcmp(options.resultRep,'default') || strcmp(options.resultRep,'manual')) && (strcmp(options.transcription,'direct_collocation') || strcmp(options.transcription,'direct_collocation_intres_reg')) && (isfield(options,'sysStructTest') && options.sysStructTest) && ~(strcmp(options.discretization,'globalLGR') || strcmp(options.discretization,'hpLGR'))
     try
         sparsity=getStructure_NaNTest( problem, options, data, sparsity_num );
     catch
@@ -1087,6 +1100,8 @@ if ~strcmp(options.transcription,'multiple_shooting')
         data.hessianStruct=Lz'*Lz+Ez'*Ez+(jS_noB'*jS_noB);
         if strcmp(options.transcription,'integral_res_min') || strcmp(options.discretization,'resMinInterpolationForSolution')
             data.hessianStruct_resmin=Lz'*Lz+Ez'*Ez+(jS_Hrm'*jS_Hrm);
+        elseif strcmp(options.transcription,'direct_collocation_intres_reg')
+            data.hessianStruct=Lz'*Lz+Ez'*Ez+(jS_noB'*jS_noB)+(jS_Hrm'*jS_Hrm);
         end
         if options.reorderLGR
              data.hessianStruct=data.hessianStruct(data.reorder.z_idx,data.reorder.z_idx);
@@ -1583,9 +1598,15 @@ end
         data.data.resmin=0;
     end
     
-    if isfield(options.print,'residual_error') && options.print.residual_error
+    if strcmp(options.transcription,'direct_collocation_intres_reg')
+        data.resmin = transcribeResMin( t_list,options,data );
+        if strcmp(options.derivatives,'adigator')
+            genAdigator4ICLOCS_resmin( options, data.resmin, n, m, np, nt, M ,ng_eq );
+        end
+    elseif isfield(options.print,'residual_error') && options.print.residual_error
         data.resmin = transcribeResErrorAnalysis( t_list,options,data );
     end
+    
   end
 
   

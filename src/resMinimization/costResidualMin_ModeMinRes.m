@@ -1,4 +1,4 @@
-function [ ResNorm, Res_int ] = costResidualMin_ModeMinRes( X,U,P,T,data)
+function [ varargout  ] = costResidualMin_ModeMinRes( X,U,P,T,data)
 %costResidualMin_ModeMinRes - cost computation for integrated residual minimization (alternating method: residual minimization)
 %
 % Syntax:   [ ResNorm, Res_int ] = costResidualMin_ModeMinRes( X,U,P,T,data)
@@ -69,7 +69,14 @@ else
 end
 
 ResNorm=sum([Res_int;Gp_eq].*data.ResNormScale',1);
-Res_int=scale_variables( [Res_int;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
+
+if nargout==1
+    varargout{1} = ResNorm;
+else
+    Res_int=scale_variables( [Res_int;Gp_eq]', data.dataNLP.data.discErrorConstScaling, 0 )';
+    varargout{1} = ResNorm;
+    varargout{2} = Res_int;
+end
 
 end
 

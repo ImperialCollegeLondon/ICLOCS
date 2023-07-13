@@ -6,7 +6,11 @@ function [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT
     ex=data.FD.vector.f.ex;eu=data.FD.vector.f.eu;
     
     persistent solsave; 
-    if isfield(solsave,'ft') && (size(solsave.ft,1)~=nfd || size(solsave.ft,2)~=nfd)
+    if isfield(vdat,'HesSave') && ~isfield(solsave,'ft') && ~isfield(solsave,'f')
+        solsave=vdat.HesSave;
+    end
+
+    if isfield(solsave,'ft') && (size(solsave.ft,1)~=nfd || size(solsave.ft,2)~=nfd || size(solsave.ft{1},1)~=M)
         solsave = rmfield(solsave,'ft');
     end
     if isfield(solsave,'f') && (size(solsave.f.fp1_save,1)~=nfd || size(solsave.f.fp1_save,2)~=nfd)
@@ -120,6 +124,9 @@ function [ fzz ] = hessian_CD_F( fzz, adjoint_f, M, n, nz, f, X, U, P, t0, T, DT
         end    
     end
     
-
+    global HesSave;
+    if isempty(HesSave)
+        HesSave=solsave;
+    end
 end
 

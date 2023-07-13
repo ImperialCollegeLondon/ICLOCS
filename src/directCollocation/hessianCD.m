@@ -1,4 +1,4 @@
-function [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
+function [varargout]=hessianCD(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
 %  It evaluates the Hessian of the Lagrangian with finite diferences
 %  considering central difference formula
 %
@@ -28,6 +28,7 @@ function [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,d
 
 % Define some useful variables
 [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{1:13});
+[ng_eq,ng_neq]=deal(data.sizes{15:16});
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+M*n+N*m;                           % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
@@ -39,7 +40,7 @@ e=data.options.perturbation.H;
 e2=e*e;                     % Pertubation size
 %
 
-if nargout==2 || nargout==5
+if nargout==2 || nargout==5 || nargout==6
     % Compute (w'L)zz
     % ----------------
     if data.FD.FcnTypes.Ltype==0 || data.FD.FcnTypes.Ltype==2
@@ -61,7 +62,7 @@ if nargout==2 || nargout==5
 end
 
 
-if nargout==3 || nargout==5
+if nargout==3 || nargout==5 || nargout==6
     
     lambda=data.lambda(:);
     adjoint_f=reshape(lambda(n+1:n*M)'*data.map.B,n,M)';
@@ -72,7 +73,7 @@ if nargout==3 || nargout==5
     % ------------
 
     if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-        if (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2) && (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2)
+        if (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2) && (data.FD.FcnTypes.Gtype==0 || data.FD.FcnTypes.Gtype==2)
             fzz=sparse(nz,nz);
             gzz=sparse(nz,nz);
         else
@@ -128,7 +129,16 @@ switch nargout
         varargout{2}=Ezz;
         varargout{3}=fzz;
         varargout{4}=gzz; 
-        varargout{5}=bzz; 
+        varargout{5}=bzz;
+    case 6
+        [ ResNormz ] = hessian_CD_Res( M, nz, nt, n, m, np, ng_eq, X, U, P, t0, T, DT, e, e2, data );
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fzz;
+        varargout{4}=gzz; 
+        varargout{5}=bzz;
+        varargout{6}=tril(ResNormz);
+
 end
 
 %------------- END OF CODE --------------

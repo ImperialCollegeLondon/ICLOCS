@@ -10,7 +10,10 @@ function [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, 
     ex=data.FD.vector.Ly.ex;eu=data.FD.vector.Ly.eu;%ez=data.FD.vector.Ly.ez;
     
     persistent solsave; 
-    if isfield(solsave,'Lt') && (size(solsave.Lt,1)~=nfd || size(solsave.Lt,2)~=nfd)
+    if isfield(vdat,'wLSave') && ~isfield(solsave,'Lt') && ~isfield(solsave,'L')
+        solsave=vdat.wLSave;
+    end
+    if isfield(solsave,'Lt') && (size(solsave.Lt,1)~=nfd || size(solsave.Lt,2)~=nfd || size(solsave.Lt{1},1)~=M)
         solsave = rmfield(solsave,'Lt');
     end
     if isfield(solsave,'L') && (size(solsave.L.Lp1_save,1)~=nfd || size(solsave.L.Lp1_save,2)~=nfd)
@@ -131,7 +134,10 @@ function [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, 
     end
     
     
-    
+    global wLSave;
+    if isempty(wLSave)
+        wLSave=solsave;
+    end
     
     
     

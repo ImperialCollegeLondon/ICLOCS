@@ -1,4 +1,4 @@
-function [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
+function [varargout]=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
 %  It evaluates the Hessian of the Lagrangian with Adigator
 %
 % Syntax:  hessian=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data)
@@ -27,6 +27,7 @@ function [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0
 
 % Define some useful variables
 [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive]=deal(data.sizes{1:13});
+[ng_eq,ng_neq]=deal(data.sizes{15:16});
 nz=nt+np+M*n+N*m;                           % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
 lambda=data.lambda(:);
@@ -49,35 +50,59 @@ fgzz=sparse(const_vec_Adigator.dYdY_location(:,2),const_vec_Adigator.dYdY_locati
 % ResNormz=sparse(ResNorm_vec.dYdY_location(:,1),ResNorm_vec.dYdY_location(:,2),ResNorm_vec.dYdY,ResNorm_vec.dYdY_size(1),ResNorm_vec.dYdY_size(2));
 
 
-% Compute (w'L)zz
-% ----------------
+% if nargout==2 || nargout>=5 
+    % Compute (w'L)zz
+    % ----------------
+    if data.FD.FcnTypes.Ltype
+        Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
+        [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
+    else
+        Lzz=sparse(nz,nz);
+    end
 
-if data.FD.FcnTypes.Ltype
-    Lzz=spalloc(nz,nz,data.map.spmatsize.hSL);
-    [ Lzz ] = hessian_CD_wL( Lzz, M, nz, L, X, Xr, U, Ur, P, t0, T, DT, e, e2, vdat, data );
-else
-    Lzz=sparse(nz,nz);
+
+    % Compute Ezz
+    % ------------
+    if data.FD.FcnTypes.Etype
+        Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
+        [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
+    else
+        Ezz=sparse(nz,nz);
+    end
+% end
+
+if nargout==4 || nargout>=5 
+
+    % Compute bzz
+    % ------------
+    if nb
+        bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
+        adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
+        [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
+    else
+        bzz=sparse(nz,nz);
+    end
+
 end
 
-
-% Compute Ezz
-% ------------
-if data.FD.FcnTypes.Etype
-    Ezz=spalloc(nz,nz,data.map.spmatsize.hSE);
-    [ Ezz ] = hessian_CD_E( Ezz, E, x0, xf, u0, uf, p, t0, tf, e, e2, vdat, data );
-else
-    Ezz=sparse(nz,nz);
-end
-
-% Compute bzz
-% ------------
-if nb
-    bzz=spalloc(nz,nz,(2*m+2*n+nt+np)*(2*m+2*n+nt+np));
-    adjoint_b=data.lambda(n*M+ngActive+nrc+(~~nb):n*M+ngActive+nrc+nb).';
-    [ bzz ] =  hessian_CD_B( bzz, nz, b, x0, xf, u0, uf, p, t0, tf, e, e2, adjoint_b, vdat, data );
-else
-    bzz=sparse(nz,nz);
-end
+switch nargout
+    case 2
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+    case 4
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fgzz;
+        varargout{4}=bzz; 
+    case 5
+%         [ ResNormz ] = hessian_CD_Res( M, nz, nt, n, m, np, ng_eq, X, U, P, t0, T, DT, e, e2, data );
+        ResNorm_vec=data.ResNorm_vec;
+        ResNormz=sparse(ResNorm_vec.dYdY_location(:,1),ResNorm_vec.dYdY_location(:,2),ResNorm_vec.dYdY,ResNorm_vec.dYdY_size(1),ResNorm_vec.dYdY_size(2));
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fgzz;
+        varargout{4}=bzz;
+        varargout{5}=tril(ResNormz);
 
 end
 

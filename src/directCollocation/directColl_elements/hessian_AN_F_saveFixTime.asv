@@ -1,0 +1,63 @@
+      if ~isempty(df{1})
+          if nt==1
+           ft_save{1,1}=(2*df{1}.*Tj+DT*Hf{1,1}.*(Tj.^2));  
+           val_indicator(1,1)
+          elseif nt==2
+            ft_save{1,1}=-(2*df{1}.*Tj+DT*Hf{1,1}.*(Tj.^2));  
+            ft_save{2,2}=(2*df{2}.*Tj+DT*Hf{2,2}.*(Tj.^2));  
+            ft_save{2,1}=-(2*df{1}.*Tj+DT*Hf{1,2}.*(Tj.^2));  
+          end 
+          for i=1+nt:nfd
+           for j=1:i
+               val_indicator(i,j)=any(Hf{j,i},'all');
+               if val_indicator(i,j)
+                  if (nt==1&&(j==1))
+                        ft_save{i,j}=(df{i}+DT*Hf{j,i}.*Tj);
+                  elseif (nt==2&&(j<=nt))
+                    if j==1
+                        ft_save{i,j}=-(df{i}+DT*Hf{j,i}.*Tj);
+                    elseif j==2
+                        ft_save{i,j}=(df{i}+DT*Hf{j,i}.*Tj);
+                    end
+                  else 
+                    ft_save{i,j}=DT*Hf{j,i}.*adjoint_f;
+                  end
+               end
+            end
+          end
+      else
+            et0=e*data.FD.vector.f.et0;etf=e*data.FD.vector.f.etf;ep=data.FD.vector.f.ep;
+            ex=data.FD.vector.f.ex;eu=data.FD.vector.f.eu;
+
+            for i=1:nt
+               for j=1:nfd
+                 if j==i
+                      fp1=(DT+etf(i)-et0(i))*f(X+ex{i}*e,U+eu{i}*e,P+ep{i}*e,(DT+etf(i)-et0(i)).*T+t0+et0(i),vdat);
+                      fp2=(DT-etf(i)+et0(i))*f(X-ex{i}*e,U-eu{i}*e,P-ep{i}*e,(DT-etf(i)+et0(i)).*T+t0-et0(i),vdat);
+                      fo=DT*f(X,U,P,DT*T+t0,vdat);
+                      ft_save{i,j}=(fp2-2*fo+fp1)/e2;
+                 else
+                    fpp=(DT+etf(i)+etf(j)-et0(i)-et0(j))*f(X+(ex{i}+ex{j})*e,U+(eu{i}+eu{j})*e,P+(ep{i}+ep{j})*e,(DT+etf(i)+etf(j)-et0(i)-et0(j)).*T+t0+et0(i)+et0(j),vdat);   
+                     fpm=(DT+etf(i)-etf(j)-et0(i)+et0(j))*f(X+(ex{i}-ex{j})*e,U+(eu{i}-eu{j})*e,P+(ep{i}-ep{j})*e,(DT+etf(i)-etf(j)-et0(i)+et0(j)).*T+t0+et0(i)-et0(j),vdat); 
+                     fmm=(DT-etf(i)-etf(j)+et0(i)+et0(j))*f(X-(ex{i}+ex{j})*e,U-(eu{i}+eu{j})*e,P-(ep{i}+ep{j})*e,(DT-etf(i)-etf(j)+et0(i)+et0(j)).*T+t0-et0(i)-et0(j),vdat);
+                     fmp=(DT-etf(i)+etf(j)+et0(i)-et0(j))*f(X-(ex{i}-ex{j})*e,U-(eu{i}-eu{j})*e,P-(ep{i}-ep{j})*e,(DT-etf(i)+etf(j)+et0(i)-et0(j)).*T+t0-et0(i)+et0(j),vdat); 
+                     ft_save{i,j}=(fpp-fpm+fmm-fmp)/e2/4;
+                 end
+               end
+            end
+          for i=1+nt:nfd
+           for j=1+nt:i
+              if (nt==1&&(j==1))
+                    ft_save{i,j}=(df{i}+DT*Hf{j,i}.*Tj);
+              elseif (nt==2&&(j<=nt))
+                if j==1
+                    ft_save{i,j}=-(df{i}+DT*Hf{j,i}.*Tj);
+                elseif j==2
+                    ft_save{i,j}=(df{i}+DT*Hf{j,i}.*Tj);
+                end
+              else 
+                ft_save{i,j}=DT*Hf{j,i};
+              end
+            end
+          end
+      end

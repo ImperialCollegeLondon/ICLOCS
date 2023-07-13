@@ -45,7 +45,7 @@ for i=1:length(auxdata.phasedata)
             constraints=multipleShooting('const',z,data);
 
         % Direct Collocation
-        case {'direct_collocation'}
+        case {'direct_collocation','direct_collocation_intres_reg'}
 
             switch data.options.discretization
 

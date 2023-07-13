@@ -70,8 +70,7 @@ end
 
 idx0=find([dLdt dLdp dLdx dLdu]);
 nfd=nnz(idx0);
-% idx=spalloc(M,nfd,M*nfd);
-idx=zeros(M,nfd);
+idx=spalloc(M,nfd,M*nfd);
 
 et0=cell(1,nfd);etf=cell(1,nfd);et=cell(1,nfd);ep=cell(1,nfd);
 ex=cell(1,nfd);eu=cell(1,nfd);
@@ -206,8 +205,8 @@ if nt
     vector.f.etf(2)=1;
 end
 vector.f.ep=eg;vector.f.ex=eg;vector.f.eu=eg;
-% ixf=spalloc(n*M,ngcol,n*M*ngcol);
-ixf=zeros(n*M,ngcol);
+ixf=spalloc(n*M,ngcol,n*M*ngcol);
+
 
 for i=1:ngcol
     eg(colgroup==i,i)=1;
@@ -262,8 +261,7 @@ if nt
     vector.g.etf(2)=1;
 end
 vector.g.ep=eg;vector.g.ex=eg;vector.g.eu=eg;
-% ig=spalloc(ng*M,ngcol,ng*M*ngcol);
-ig=zeros(ng*M,ngcol);
+ig=spalloc(ng*M,ngcol,ng*M*ngcol);
 
 for i=1:ngcol
     eg(colgroup==i,i)=1;
@@ -315,8 +313,7 @@ if nt
     vector.rc.etf(2)=1;
 end
 vector.rc.ep=erc;vector.rc.ex=erc;vector.rc.eu=erc;
-% irc=spalloc(nrc,nrccol,nrc*nz);
-irc=zeros(nrc,nrccol);
+irc=spalloc(nrc,nrccol,nrc*nz);
 
 for i=1:nrccol
     erc(colgroup==i,i)=1;

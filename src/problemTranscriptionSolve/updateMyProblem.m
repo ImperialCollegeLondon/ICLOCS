@@ -45,6 +45,13 @@ function [OCP_updated] = updateMyProblem(OCP_old,varargin)
         [nt,np,n,m,ng,nb,M,N,ns,nrcl,nrcu,nrce,ngActive,nps,ng_eq,ng_neq]=deal(OCP_updated.data.sizes{1:16});
    end
 
+   if isnumeric(p.Results.z0)
+      if size(OCP_updated.infoNLP.z0,1)~=size(p.Results.z0,1)
+          warning('The dimension of z0 changes for the update');
+      end
+      OCP_updated.infoNLP.z0=p.Results.z0;   % Update the initial condition from new system information
+   end
+
    if isnumeric(p.Results.x0)
        
        if OCP_updated.data.options.scaling
@@ -69,12 +76,7 @@ function [OCP_updated] = updateMyProblem(OCP_old,varargin)
        end
    end
    
-   if isnumeric(p.Results.z0)
-      if size(OCP_updated.infoNLP.z0,1)~=size(p.Results.z0,1)
-          warning('The dimension of z0 changes for the update');
-      end
-      OCP_updated.infoNLP.z0=p.Results.z0;   % Update the initial condition from new system information
-   end
+
    
    if isnumeric(p.Results.bu)
       OCP_updated.infoNLP.cu(end-nb+1:end)=p.Results.bu';   % Update the initial condition from new system information

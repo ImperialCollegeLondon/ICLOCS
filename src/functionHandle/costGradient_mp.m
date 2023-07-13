@@ -40,7 +40,7 @@ for i=1:length(auxdata.phasedata)
             grad=multipleShooting('gradCost',z,data);
 
         % Direct Collocation
-        case {'direct_collocation'}
+        case {'direct_collocation','direct_collocation_intres_reg'}
 
             switch data.options.discretization
 

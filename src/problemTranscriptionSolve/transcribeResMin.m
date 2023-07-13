@@ -22,11 +22,13 @@ switch dataNLP.options.discretization
         t0_list=t_list(1:end-1)'./t_list(end); tf_list=t_list(2:end)'./t_list(end); 
         if isfield(options,'pdegree') 
                 npd=options.pdegree*ones(1,options.nsegment);
-                npd_quad=max(max(npd)*4+1,5)*ones(1,length(t0_list));
+%                 npd_quad=max(max(npd)*4+1,5)*ones(1,length(t0_list));
+                npd_quad=max(max(npd)+1,5)*ones(1,length(t0_list));
                 nps=options.nsegment;
         else
                 npd=options.npsegment;
-                npd_quad=max(max(npd)*4+1,5)*ones(1,length(t0_list));            
+%                 npd_quad=max(max(npd)*4+1,5)*ones(1,length(t0_list));            
+                npd_quad=max(max(npd)+1,5)*ones(1,length(t0_list));            
                 nps=length(options.npsegment);                
         end
     case{'hermite'} 
@@ -37,6 +39,7 @@ switch dataNLP.options.discretization
         t0_list=t_list(1:end-1)'./t_list(end); tf_list=t_list(2:end)'./t_list(end); 
         npd=3*ones(1,length(t0_list));
         npd_quad=13*ones(1,length(t0_list));
+%         npd_quad=2*ones(1,length(t0_list));
         nps=length(t0_list);
 
     otherwise % h Transcription Method

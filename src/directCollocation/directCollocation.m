@@ -129,6 +129,15 @@ try
     % Prepare the data for linkage constraints
     [XU0f] = prepareForLinkageConstraintInfo(x0,xf,u0,uf,vdat);
 
+    if  strcmp(data.options.transcription,'direct_collocation_intres_reg')
+        intres_reg=1;
+        if strcmp(data.options.derivatives,'adigator')
+            [ ResNorm_vec, ~] = getAdigator4ICLOCS_minres( X, U, t, P, data.resmin );
+        end
+    else
+        intres_reg=0;
+    end
+
     %--------------------------------------------------------------------------
     % Return the relevant data
     %--------------------------------------------------------------------------
@@ -139,13 +148,31 @@ try
 
         case{'cost'}
             snm=ones(M,1); 
-            sol{phaseNo}.cost= mp.w'*((tf-t0)*L(X,Xr,U,Ur,P,t,vdat).*snm)+E(x0,xf,u0,uf,p,t0,tf,vdat);
+            if intres_reg
+                if strcmp(data.resmin.dataNLP.options.derivatives,'adigator')
+                    ResNorm_v=ResNorm_vec.f;
+                else
+                    [ResNorm] = costResidualMin_ModeMinRes( X,U,P,t,data.resmin);
+                    ResNorm_v=sum(ResNorm,2);
+                end
+                sol{phaseNo}.cost= mp.w'*((tf-t0)*L(X,Xr,U,Ur,P,t,vdat).*snm)+E(x0,xf,u0,uf,p,t0,tf,vdat)+ResNorm_v;
+            else
+                sol{phaseNo}.cost= mp.w'*((tf-t0)*L(X,Xr,U,Ur,P,t,vdat).*snm)+E(x0,xf,u0,uf,p,t0,tf,vdat);
+            end
             solution=sol{phaseNo}.cost;
-
+%             
 
         case{'gradCost'}
             [sol{phaseNo}.gradCost,sol{phaseNo}.JL]=gradientCost(L,X,Xr,U,Ur,P,tau,E,x0,xf,u0,uf,p,t0,tf,data);
+            if intres_reg
+                if strcmp(data.resmin.dataNLP.options.derivatives,'adigator')
+                    sol{phaseNo}.gradCost(1,ResNorm_vec.dY_location)=sol{phaseNo}.gradCost(1,ResNorm_vec.dY_location)+ResNorm_vec.dY';
+                else
+                    sol{phaseNo}.gradCost=sol{phaseNo}.gradCost+resMin_gradientCost_ModeMinRes(X,U,P,tau,t0,tf,data.resmin);
+                end
+            end
             solution=sol{phaseNo}.gradCost;
+            
 
         case{'const'}
             if strcmp(data.options.derivatives,'adigator')
@@ -203,12 +230,26 @@ try
                                                         xf,u0,uf,p,t0,tf,data);          
                 fgzz=fzz+gzz;
           elseif strcmp(data.options.derivatives,'adigator')
+              if intres_reg
+                 data.ResNorm_vec=ResNorm_vec;
+                 [Lzz,Ezz,fgzz,bzz,Reszz]=hessianCDAdigator(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+              else
                 [Lzz,Ezz,fgzz,bzz]=hessianCDAdigator(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,const_vec_Adigator,data); 
+              end
           else
-                [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+              if intres_reg
+                  [Lzz,Ezz,fzz,gzz,bzz,Reszz]=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+              else
+                  [Lzz,Ezz,fzz,gzz,bzz]=hessianCD(L,f,g,X,U,P,tau,E,b,x0,xf,u0,uf,p,t0,tf,data); 
+              end
                 fgzz=fzz+gzz;
           end
-          hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+%           
+          if intres_reg
+              hessc=data.sigma*(Lzz+Ezz+Reszz)+fgzz+bzz;
+          else
+              hessc=data.sigma*(Lzz+Ezz)+fgzz+bzz;
+          end
           hessc(end-n+1:end,end-n-m+1:end-n)=hessc(end-n+1:end,end-n-m+1:end-n)+hessc(end-n-m+1:end-n,end-n+1:end)';
           sol{phaseNo}.hessian=tril(hessc);    
           
@@ -248,8 +289,7 @@ try
 
     end
 
-catch
-    
-    warning(['Error encountered when evaluating ' required ' function'])
-    pause
+catch e
+    fprintf(1,'There was an error! The message was:\n%s \n',e.message);
+    error(['Error encountered when evaluating ' required ' function'])
 end

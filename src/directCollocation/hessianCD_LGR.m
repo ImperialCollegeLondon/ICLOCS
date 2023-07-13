@@ -1,4 +1,4 @@
-function [varargout]=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
+function [varargout]=hessianCD_LGR(L,f,g,X_Np1,U_Np1,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
 %  It evaluates the Hessian of the Lagrangian with finite diferences
 %  considering central difference formula
 %
@@ -31,7 +31,8 @@ function [varargout]=hessianCD_LGR(L,f,g,X,U,P,T,E,b,x0,xf,u0,uf,p,t0,tf,data)
 nrc=nrcl+nrcu+nrce;
 nz=nt+np+(M+1)*n+M*m;                              % Length of the primal variable
 Xr=data.references.xr;Ur=data.references.ur;
-
+X=X_Np1(1:end-1,:);
+U=U_Np1(1:end-1,:);
 
 vdat=data.data;
 fg=vdat.functionfg;
@@ -75,7 +76,7 @@ if nargout==3 || nargout==5
     % Compute fzz and gzz
     % ------------
     if ng && size(data.FD.index.f,2)==size(data.FD.index.g,2)
-        if (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2) && (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2)
+        if (data.FD.FcnTypes.Ftype==0 || data.FD.FcnTypes.Ftype==2) && (data.FD.FcnTypes.Gtype==0 || data.FD.FcnTypes.Gtype==2)
             fzz=sparse(nz,nz);
             gzz=sparse(nz,nz);
         else
@@ -125,6 +126,16 @@ switch nargout
         varargout{3}=fzz;
         varargout{4}=gzz; 
         varargout{5}=bzz; 
+    case 6
+        [ng_eq,ng_neq]=deal(data.resmin.dataNLP.sizes{18:19});
+        [ ResNormz ] = hessian_LGR_CD_Res( M, nz, nt, n, m, np, ng_eq, npd, nps, X_Np1, U_Np1, P, k0, [T;1], DT, e, e2, data );
+        varargout{1}=Lzz;
+        varargout{2}=Ezz;
+        varargout{3}=fzz;
+        varargout{4}=gzz; 
+        varargout{5}=bzz; 
+        varargout{6}=tril(ResNormz); 
+       
 end
 %------------- END OF CODE --------------
 

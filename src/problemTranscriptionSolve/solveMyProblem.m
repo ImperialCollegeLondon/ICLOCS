@@ -24,8 +24,9 @@ elseif nargin==4
     options=varargin{3};
     OCP_in=varargin{4};
 end
+clearIntermVariables;
 
-
+problem_org=problem;
 % Multi-phase problem
 if isfield(options,'mp')
     switch options.mp.meshstrategy
@@ -55,7 +56,8 @@ if isfield(options,'mp')
                         data.options.resultRep='res_min';
                         [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                     end
-                catch
+                catch e
+                    fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                     error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
             end
@@ -195,7 +197,8 @@ if isfield(options,'mp')
                         end
                     end
                     i=i+1;
-                catch
+                catch e
+                    fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                     error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
             end
@@ -231,7 +234,8 @@ if isfield(options,'mp')
                             end
                             infoNLP.mpinfoNLP.z0=solution.mp.z_org;
                             i=i+1;
-                        catch
+                        catch e
+                    fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                             error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                         end
                     end
@@ -271,14 +275,29 @@ else % single phase problem
     switch options.meshstrategy
         case{'fixed','hp_flexible'}
             
-            if strcmp(options.transcription,'integral_res_min') && strcmp(options.min_res_mode,'weightedCost')
+            if strcmp(options.transcription,'direct_collocation_intres_reg') || (strcmp(options.transcription,'integral_res_min') && strcmp(options.min_res_mode,'weightedCost'))
                 if isfield(options,'resCostWeight') 
-                    for i=1:length(options.resCostWeight)
-                        if isfield(problem.data,'resNormCusWeight')
-                            problem.data.resNormCusWeight=problem.data.resNormCusWeight*options.resCostWeight(i);
+                    if exist('OCP_in','var') == 1
+                        startindex=length(options.resCostWeight);
+                    else
+                        startindex=1;
+                    end
+                    for i=startindex:length(options.resCostWeight)
+                        if isfield(problem_org.states,'resNormCusWeight')
+                            problem.states.resNormCusWeight=problem_org.states.resNormCusWeight*(1/2/options.resCostWeight(i));
                         else
-                            problem.data.resNormCusWeight=options.resCostWeight(i);
+                            problem.states.resNormCusWeight=1/2/options.resCostWeight(i);
                         end
+                        if isfield(problem_org.constraints,'resNormCusWeight_eq')
+                            problem.constraints.resNormCusWeight_eq=problem_org.constraints.resNormCusWeight_eq*(1/2/options.resCostWeight(i));
+                        else
+                            problem.constraints.resNormCusWeight_eq=(1/2/options.resCostWeight(i));
+                        end
+%                         if isfield(problem.data,'resNormCusWeight')
+%                             problem.data.resNormCusWeight=problem.data.resNormCusWeight*options.resCostWeight(i);
+%                         else
+%                             problem.data.resNormCusWeight=options.resCostWeight(i);
+%                         end
                         
                         if exist('OCP_in','var') == 1
                             infoNLP=OCP_in.infoNLP;
@@ -296,7 +315,11 @@ else % single phase problem
                         end
                         
                         [solution,status,data] = solveNLP(infoNLP,data);      % Solve the NLP
-                        [ options, guess] = doWarmStart( options, guess, solution, data.dataNLP );
+                        if strcmp(options.transcription,'direct_collocation_intres_reg')
+                            [ options, guess] = doWarmStart( options, guess, solution, data );
+                        else
+                            [ options, guess] = doWarmStart( options, guess, solution, data.dataNLP );
+                        end
                     end
                     
                     try
@@ -307,7 +330,8 @@ else % single phase problem
                         if nargout==3
                             varargout{3}=OCP_ini;
                         end
-                    catch
+                    catch e
+                        fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                         error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                     end
                 else
@@ -341,13 +365,21 @@ else % single phase problem
                             data.options.resultRep='res_min';
                             [solution]=runPostSolveTasks(problem,solution,options,data);         % Output solutions
                         end
-                    catch
+                    catch e
+                        fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                         error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                     end
                 end
                 varargout{1}=solution;
                 varargout{2}=status;
                 if nargout==3
+                    global HesSave wLSave
+                    if ~isempty(HesSave)
+                        OCP_ini.data.data.HesSave=HesSave;
+                    end
+                    if ~isempty(wLSave)
+                        OCP_ini.data.data.wLSave=wLSave;
+                    end
                     varargout{3}=OCP_ini;
                 end
             end
@@ -370,16 +402,40 @@ else % single phase problem
             
             runCondition=1;
             i=1; imax=options.maxMRiter;
+            i_reg=1;
 
-            problem_iter=problem;
+%             problem_iter=problem;
             while runCondition
+                problem_iter=problem;
+                if strcmp(options.transcription,'direct_collocation_intres_reg') 
+                        if isfield(problem_org.states,'resNormCusWeight')
+                            problem_iter.states.resNormCusWeight=problem_iter.states.resNormCusWeight*(1/2/options.resCostWeight(i_reg));
+                        else
+                            problem_iter.states.resNormCusWeight=1/2/options.resCostWeight(i_reg);
+                        end
+                        if isfield(problem_org.constraints,'resNormCusWeight_eq')
+                            problem_iter.constraints.resNormCusWeight_eq=problem_iter.constraints.resNormCusWeight_eq*(1/2/options.resCostWeight(i_reg));
+                        else
+                            problem_iter.constraints.resNormCusWeight_eq=(1/2/options.resCostWeight(i_reg));
+                        end
+                        if i_reg< length(options.resCostWeight)
+                            i_reg=i_reg+1;
+                        end
+                else
+                    if isfield(options,'resCostWeight')
+                        options=rmfield(options,'resCostWeight');
+                    end
+                end
+
 
                 if isfield(options,'ECH') && options.ECH.enabled
                     if i~=1
-                        [ problem_iter,guess,options ] = selectAppliedConstraint( problem, guess, options, data, solutionHistory, i );
+                        [ problem_iter,guess,options ] = selectAppliedConstraint( problem_iter, guess, options, data, solutionHistory, i );
                     end
-                    problemHistory{i}=problem_iter;
                 end
+                
+                
+                problemHistory{i}=problem_iter;
                 
                 if i==1 && exist('OCP_in','var') == 1
                     infoNLP=OCP_in.infoNLP;
@@ -456,15 +512,24 @@ else % single phase problem
                         if i>1
                               MRiterCheck(i)=(any((min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0) || all(0<(min(cell2mat(errorHistory(1:i-1)))-errorHistory{i})./min(cell2mat(errorHistory(1:i-1)))<0.05)) && (any((min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0) || all(0<(min(cell2mat(ConstraintErrorHistory(1:i-1)))-ConstraintErrorHistory{i})./min(cell2mat(ConstraintErrorHistory(1:i-1)))<0.05));
                         end
-                        if runCondition_MR && i>5 && all(MRiterCheck(i-4:i)) 
+                        if runCondition_MR && i>3 && all(MRiterCheck(i-2:i)) 
                             if isfield(options,'DisableMRConvergenceCheck') && options.DisableMRConvergenceCheck
                             else
                                 waitAnswer=1;
                                 while waitAnswer
-                                    keepMR = input('Possible slow convergence or diverging mesh refinement iterations, continue to refine the mesh? (Yes/No) \n', 's');
-                                    if strcmp(keepMR, 'Yes')
+                                    disp('Possible slow convergence or diverging mesh refinement iterations, Please selection your options')
+                                    disp('1. Continue with mesh refinement')
+                                    disp('2. Switch to integrated residuals regulated direct collocation method')
+                                    disp('3. Terminate now')
+                                    keepMR = input('\n', 's');
+                                    if strcmp(keepMR, '1')
                                         waitAnswer=0;
-                                    elseif strcmp(keepMR, 'No')
+                                    elseif strcmp(keepMR, '2')
+                                        options.transcription='direct_collocation_intres_reg';
+                                        options.resCostWeight = str2num(input('Please provide one or a sequence of weights for regularization, e.g. [1e-3 1e-6] \n', 's'));
+                                        % options.ipopt.hessian_approximation='limited-memory';
+                                        waitAnswer=0;
+                                    elseif strcmp(keepMR, '3')
                                         runCondition_MR=false(1); 
                                         waitAnswer=0;
                                     else
@@ -550,7 +615,9 @@ else % single phase problem
 
                     runCondition=runCondition_MR;
                     if runCondition_MR
-                        [ options, guess ] = doMeshRefinement( options, problem, guess, data, solution, i );
+                        if ~isfield(options,'resCostWeight') || i_reg == length(options.resCostWeight)
+                            [ options, guess ] = doMeshRefinement( options, problem, guess, data, solution, i );
+                        end
                     else
                         if isfield(options,'regstrategy') && strcmp(options.regstrategy,'simultaneous') && data.data.penalty.i<length(data.data.penalty.values)
                             [ options, guess] = doWarmStart( options, guess, solution, data );
@@ -558,7 +625,8 @@ else % single phase problem
                         end
                     end
                     i=i+1;
-                catch
+                catch e
+                    fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                     error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                 end
 
@@ -591,7 +659,8 @@ else % single phase problem
                             data.multipliers.lambda=solution.multipliers.lambdaNLP;
                             infoNLP.z0=solution.z;
                             i=i+1;
-                        catch
+                        catch e
+                             fprintf(1,'There was an error! The message was:\n%s \n',e.message);
                             error('Error encountered when post-processing the solution. Please ensure the NLP solve has been terminated successfully, and the error tolerances have been correctly configured');
                         end
                     end

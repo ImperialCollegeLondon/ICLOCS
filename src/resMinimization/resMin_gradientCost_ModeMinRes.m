@@ -51,12 +51,12 @@ switch dataNLP.options.discretization
             if (data.free_time && i<=(m+n)) || (~data.free_time)
                 for j=1:size(data.idx_perturb,2)
                     if i<=n
-                        [ResNormCost_p,~]=costResidualMin_ModeMinRes( X+[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U+[eu{i};eu{i}(end,:)].*data.idx_perturb(:,j)*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
-                        [ResNormCost_m,~]=costResidualMin_ModeMinRes( X-[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U-[eu{i};eu{i}(end,:)].*data.idx_perturb(:,j)*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
+                        [ResNormCost_p]=costResidualMin_ModeMinRes( X+[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U+[eu{i};eu{i}(end,:)].*data.idx_perturb(:,j)*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
+                        [ResNormCost_m]=costResidualMin_ModeMinRes( X-[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U-[eu{i};eu{i}(end,:)].*data.idx_perturb(:,j)*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
                         dRes=(ResNormCost_p-ResNormCost_m)/(2*e);
                     else
-                        [ResNormCost_p,~]=costResidualMin_ModeMinRes( X+[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U+[eu{i};eu{i}(end,:)].*[data.idx_perturb(1:end-1,j);data.idx_perturb(end-1,j)]*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
-                        [ResNormCost_m,~]=costResidualMin_ModeMinRes( X-[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U-[eu{i};eu{i}(end,:)].*[data.idx_perturb(1:end-1,j);data.idx_perturb(end-1,j)]*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
+                        [ResNormCost_p]=costResidualMin_ModeMinRes( X+[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U+[eu{i};eu{i}(end,:)].*[data.idx_perturb(1:end-1,j);data.idx_perturb(end-1,j)]*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
+                        [ResNormCost_m]=costResidualMin_ModeMinRes( X-[ex{i};ex{i}(end,:)].*data.idx_perturb(:,j)*e,U-[eu{i};eu{i}(end,:)].*[data.idx_perturb(1:end-1,j);data.idx_perturb(end-1,j)]*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
                         dRes=(ResNormCost_p-ResNormCost_m)/(2*e);
                     end
                     if j==1
@@ -91,8 +91,8 @@ switch dataNLP.options.discretization
                     end
                 end
             else
-                [ResNormCost_p,~]=costResidualMin_ModeMinRes( X,U,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
-                [ResNormCost_m,~]=costResidualMin_ModeMinRes( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
+                [ResNormCost_p]=costResidualMin_ModeMinRes( X,U,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)/2*[T;1]+(tf+etf{i}*e+t0+et0{i}*e)/2,data);
+                [ResNormCost_m]=costResidualMin_ModeMinRes( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)/2*[T;1]+(tf-etf{i}*e+t0-et0{i}*e)/2,data);
                 dRes=sum((ResNormCost_p-ResNormCost_m)/(2*e));
                 Resz=Resz+sparse(1,idx(1,i),dRes,1,nz);
             end
@@ -116,8 +116,8 @@ switch dataNLP.options.discretization
          for i=i_st:i_end
             if (nt && i>(nt+np)) || (~nt)
                 for j=1:size(data.idx_perturb,2)
-                    [ResNormCost_p,~]=costResidualMin_ModeMinRes( X+ex{i}.*data.idx_perturb(:,j)*e,U+eu{i}.*data.idx_perturb(:,j)*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)*T+t0+et0{i}*e,data);
-                    [ResNormCost_m,~]=costResidualMin_ModeMinRes( X-ex{i}.*data.idx_perturb(:,j)*e,U-eu{i}.*data.idx_perturb(:,j)*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data);
+                    [ResNormCost_p]=costResidualMin_ModeMinRes( X+ex{i}.*data.idx_perturb(:,j)*e,U+eu{i}.*data.idx_perturb(:,j)*e,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)*T+t0+et0{i}*e,data);
+                    [ResNormCost_m]=costResidualMin_ModeMinRes( X-ex{i}.*data.idx_perturb(:,j)*e,U-eu{i}.*data.idx_perturb(:,j)*e,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data);
                     dRes=(ResNormCost_p-ResNormCost_m)/(2*e);
                     if j==1
                          if mod(data.nps,2)
@@ -138,8 +138,8 @@ switch dataNLP.options.discretization
                     end
                 end
             else
-                [ResNormCost_p,~]=costResidualMin_ModeMinRes( X,U,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)*T+t0+et0{i}*e,data);
-                [ResNormCost_m,~]=costResidualMin_ModeMinRes( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data);
+                [ResNormCost_p]=costResidualMin_ModeMinRes( X,U,P+ep{i}*e,(tf+etf{i}*e-t0-et0{i}*e)*T+t0+et0{i}*e,data);
+                [ResNormCost_m]=costResidualMin_ModeMinRes( X,U,P-ep{i}*e,(tf-etf{i}*e-t0+et0{i}*e)*T+t0-et0{i}*e,data);
                 dRes=sum(ResNormCost_p-ResNormCost_m)/(2*e);
                 Resz=Resz+sparse(1,idx(1,i),dRes,1,nz);
             end

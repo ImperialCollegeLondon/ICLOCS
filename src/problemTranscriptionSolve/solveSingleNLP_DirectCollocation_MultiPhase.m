@@ -284,7 +284,6 @@ switch(data.mpdata.options.mp.NLPsolver)
 
 end
 
-clearIntermVariables;
 
 % Store the results in solution structure:
 %solution.status=status;

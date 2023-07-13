@@ -261,7 +261,7 @@ for k1=1:size(data.idx_perturb_hes,2)
                 ResNormt=(ResNorm_m-2*ResNorm_o+ResNorm_p)/e2;
                 Rest=(Res_m-2*Res_o+Res_p).*adjoint_Res/e2;
               else
-                dtf2=e*etf{j};dp2=e*ep{j};dx2=e*ex{j}; du2=e*eu{j};
+                dt02=e*et0{j};dtf2=e*etf{j};dp2=e*ep{j};dx2=e*ex{j}; du2=e*eu{j};
                 [ResNorm_pp, Res_pp]=costResidualMin_ModeMinRes(X+dx1.*data.idx_perturb_hes(:,k1)+dx2.*data.idx_perturb_hes(:,k2),U+du1.*data.idx_perturb_hes(:,k1)+du2.*data.idx_perturb_hes(:,k2),P+dp1+dp2,(DT+dtf1+dtf2-dt01-dt02)*T+t0+dt01+dt02,data);
                 [ResNorm_pm, Res_pm]=costResidualMin_ModeMinRes(X+dx1.*data.idx_perturb_hes(:,k1)-dx2.*data.idx_perturb_hes(:,k2),U+du1.*data.idx_perturb_hes(:,k1)-du2.*data.idx_perturb_hes(:,k2),P+dp1-dp2,(DT+dtf1-dtf2-dt01+dt02)*T+t0+dt01-dt02,data);
                 [ResNorm_mp, Res_mp]=costResidualMin_ModeMinRes(X-dx1.*data.idx_perturb_hes(:,k1)+dx2.*data.idx_perturb_hes(:,k2),U-du1.*data.idx_perturb_hes(:,k1)+du2.*data.idx_perturb_hes(:,k2),P-dp1+dp2,(DT-dtf1+dtf2+dt01-dt02)*T+t0-dt01+dt02,data);

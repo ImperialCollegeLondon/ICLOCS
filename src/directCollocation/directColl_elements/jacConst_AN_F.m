@@ -25,7 +25,7 @@ function [ fz,Jf ] = jacConst_AN_F( df, fz, M, n, m, np, nt, nz, f, X, U, P, t0,
            ft=((tf+etf(i)-t0-et0(i))*fp-(tf-etf(i)-t0+et0(i))*fm)/(2*e);
            fz=fz+sparse(1:M*n,idx(:,i),reshape(ft',M*n,1),M*n,nz);
         end
-        Jaf=[cell(1,1)];
+        Jaf=[cell(nt,nt)];
    end
   if np 
   for i=1:np

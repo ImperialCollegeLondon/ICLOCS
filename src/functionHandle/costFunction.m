@@ -34,7 +34,7 @@ switch data.options.transcription
         J=multipleShooting('cost',z,data);
       
     % Direct Collocation
-    case {'direct_collocation'}
+    case {'direct_collocation','direct_collocation_intres_reg'}
         
         switch data.options.discretization
             
