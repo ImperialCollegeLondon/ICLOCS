@@ -41,7 +41,7 @@ D_y=posy-problem.data.auxdata.l_rear.*sin(theta)+problem.data.auxdata.b_width.*c
 
 
 %%
-xx=linspace(solution.T(1,1),solution.tf,1000);
+xx=solution.T;
 
 figure
 xwall=linspace(-8,10,10000);
@@ -115,7 +115,6 @@ grid on
 figure
 hold on
 plot(xx,speval(solution,'X',5,xx)*180/pi,'b-' )
-plot(tv,uv(:,2)*180/pi,'k-.')
 plot([solution.T(1,1); solution.tf],[problem.states.xl(5), problem.states.xl(5)]*180/pi,'r-' )
 plot([solution.T(1,1); solution.tf],[problem.states.xu(5), problem.states.xu(5)]*180/pi,'r-' )
 xlim([0 solution.tf])
@@ -124,11 +123,7 @@ ylabel('Steering Angle [deg]')
 grid on
 
 figure
-if length(solution.T)==length(solution.dU)
-    plot(solution.T,solution.dU(:,1)*180/pi,'b-')
-else
-    plot(solution.T(1:end-1,1),solution.dU(:,1)*180/pi,'b-')
-end
+plot(xx,speval(solution,'dU',1,xx)*180/pi,'b-' )
 hold on
 plot([solution.T(1,1); solution.tf],[problem.inputs.url(1), problem.inputs.url(1)]*180/pi,'r-' )
 plot([solution.T(1,1); solution.tf],[problem.inputs.uru(1), problem.inputs.uru(1)]*180/pi,'r-' )
@@ -147,67 +142,3 @@ xlim([0 solution.tf])
 xlabel('Time [s]')
 ylabel('Control Input (steering rate) [deg/s]')
 grid on
-
-% %% figure
-% xx=linspace(solution.T(1,1),solution.tf,100000);
-% 
-% figure
-% plot(speval(solution,'X',2,xx)/100,speval(solution,'X',1,xx),'b-')
-% hold on
-% plot(xv(:,2)/100,xv(:,1),'k-.')
-% xlabel('Airspeed [100 m/s]')
-% ylabel('Altitude [m]')
-% grid on
-% 
-% figure
-% % plot([solution.T(:,1); solution.tf],speval(solution.Xp,3,[solution.T(:,1); solution.tf])*180/pi,'bo' )
-% hold on
-% plot(xx,speval(solution,'X',3,xx)*180/pi,'b-' )
-% plot(tv,xv(:,3)*180/pi,'k-.')
-% plot([solution.T(1,1); solution.tf],[problem.states.xl(3), problem.states.xl(3)]*180/pi,'r-' )
-% plot([solution.T(1,1); solution.tf],[problem.states.xu(3), problem.states.xu(3)]*180/pi,'r-' )
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Flight Path Angle [deg]')
-% grid on
-% 
-% figure
-% % plot([solution.T(:,1); solution.tf],speval(solution.Xp,1,[solution.T(:,1); solution.tf]),'bo' )
-% hold on
-% plot(xx,speval(solution,'X',1,xx),'b-' )
-% plot(tv,xv(:,1),'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Altitude [m]')
-% grid on
-% 
-% figure
-% % plot([solution.T(:,1); solution.tf],speval(solution.Xp,2,[solution.T(:,1); solution.tf])/100,'bo' )
-% hold on
-% plot(xx,speval(solution,'X',2,xx)/100,'b-' )
-% plot(tv,xv(:,2)/100,'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Velocity [100 m/s]')
-% grid on
-% 
-% figure
-% % plot([solution.T(:,1); solution.tf],speval(solution.Xp,4,[solution.T(:,1); solution.tf]),'bo' )
-% hold on
-% plot(xx,speval(solution,'X',4,xx),'b-' )
-% plot(tv,xv(:,4),'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Aircraft Mass [kg]')
-% grid on
-% 
-% figure
-% % plot(solution.T(:,1),speval(solution.Up,1,solution.T)*180/pi,'bo')
-% hold on
-% plot(xx,speval(solution,'U',1,xx),'b-' )
-% plot(tv,uv(:,1),'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Control Input (angle of attack) [deg]')
-% grid on
-% 
