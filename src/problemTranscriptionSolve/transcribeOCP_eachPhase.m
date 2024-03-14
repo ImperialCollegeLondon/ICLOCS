@@ -33,8 +33,6 @@ function [infoNLP,data,options]=transcribeOCP_eachPhase(problem,guess,options)
 % 1 Aug 2019
 % iclocs@imperial.ac.uk
 
-persistent adigatorGen
-
 checkProblem(problem);
 
 if ~isfield(problem.data,'mode')
@@ -1440,20 +1438,9 @@ end
 
 %Offline generation of adigator files
  if strcmp(options.derivatives,'adigator') 
-     if adigatorGen==1
-        if ~strcmp(options.transcription,'integral_res_min')
-            data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
-        end
-     else
-        currentFolder = pwd;
-        cd(options.adigatorPath);
-        startupadigator;
-        cd(currentFolder);
-        if ~strcmp(options.transcription,'integral_res_min')
-            data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
-        end
-        adigatorGen=1;
-     end
+    if ~strcmp(options.transcription,'integral_res_min')
+        data=genAdigator4ICLOCS( options, data, n, m, np, nt, M );
+    end
  end
 
 
