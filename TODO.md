@@ -9,8 +9,8 @@ This list tracks repository modernization work that should avoid changing the ex
 - [x] Add a script that stores GitHub usage metrics in `docs/metrics/github-usage.json`.
 - [x] Push the counter workflow and metric files to GitHub.
 - [ ] Add a repository secret named `TRAFFIC_TOKEN` with repository Administration read access.
-- [ ] Run the **Update usage metrics** workflow manually once from the GitHub Actions tab.
-- [ ] Confirm the README badges update after the first successful workflow run.
+- [x] Run the **Update usage metrics** workflow manually once from the GitHub Actions tab.
+- [x] Confirm the README badges update after the first successful workflow run.
 - [ ] Decide whether future releases should attach ZIP/toolbox assets so GitHub can count release asset downloads separately.
 
 ## Continuous Integration
