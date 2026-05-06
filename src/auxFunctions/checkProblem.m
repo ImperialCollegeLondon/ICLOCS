@@ -1,19 +1,6 @@
 function checkProblem(problem)
-%checkProblem Validate key dimensions in an ICLOCS problem structure.
-%
-% Syntax:
-%   checkProblem(problem)
-%
-% Input:
-%   problem - ICLOCS problem structure returned by a problem-definition file.
-%
-% Output:
-%   None.
-%
-% Notes:
-%   Throws an error when state, input, path-constraint, or boundary-constraint
-%   bounds and tolerances have inconsistent dimensions. Also checks for the
-%   ICLOCS 2.5 problem.data.ng_eq convention.
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
 
 if length(problem.states.x0l)==length(problem.states.x0u) && length(problem.states.x0l)==length(problem.states.xl) && length(problem.states.x0l)==length(problem.states.xu) && length(problem.states.x0l)==length(problem.states.xErrorTol_local) && length(problem.states.x0l)==length(problem.states.xErrorTol_integral) && length(problem.states.x0l)==length(problem.states.xConstraintTol) && length(problem.states.x0l)==length(problem.states.xfl) && length(problem.states.x0l)==length(problem.states.xfu)
 else
