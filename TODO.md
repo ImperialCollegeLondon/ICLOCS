@@ -19,7 +19,7 @@ This list tracks repository modernization work that should avoid changing the ex
 - [x] Check which MATLAB versions should be supported.
 - [x] Add a lightweight syntax/path validation job that does not require expensive solver runs.
 - [x] Add at least one smoke test that exercises a small example problem.
-- [ ] Add CI badges to the README once the workflow is stable.
+- [x] Add CI badges to the README once the workflow is stable.
 
 ## Unit Tests And Coverage
 

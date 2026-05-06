@@ -3,6 +3,7 @@ Imperial College London Optimal Control Software (ICLOCS)
 
 [![Recorded clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/master/docs/metrics/clones-badge.json)](docs/metrics/github-usage.json)
 [![Release downloads](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/master/docs/metrics/release-downloads-badge.json)](docs/metrics/github-usage.json)
+[![MATLAB CI](https://github.com/ImperialCollegeLondon/ICLOCS/actions/workflows/matlab-ci.yml/badge.svg)](https://github.com/ImperialCollegeLondon/ICLOCS/actions/workflows/matlab-ci.yml)
 
 http://www.ee.ic.ac.uk/ICLOCS/
 
