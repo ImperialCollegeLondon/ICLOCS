@@ -7,7 +7,7 @@ This list tracks repository modernization work that should avoid changing the ex
 - [x] Add README badges for recorded clone activity and release asset downloads.
 - [x] Add a GitHub Actions workflow to refresh usage metrics.
 - [x] Add a script that stores GitHub usage metrics in `docs/metrics/github-usage.json`.
-- [ ] Push the counter workflow and metric files to GitHub.
+- [x] Push the counter workflow and metric files to GitHub.
 - [ ] Add a repository secret named `TRAFFIC_TOKEN` with repository Administration read access.
 - [ ] Run the **Update usage metrics** workflow manually once from the GitHub Actions tab.
 - [ ] Confirm the README badges update after the first successful workflow run.
