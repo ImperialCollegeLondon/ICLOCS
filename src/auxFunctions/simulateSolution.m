@@ -1,30 +1,16 @@
 function [ tv, xv, uv ] = simulateSolution( varargin )
-%simulateSolution Simulate an optimized open-loop solution with an ODE solver.
+% simulateSolution - Simulate the obtained solution (open-loop) with ODE integration
 %
 % Syntax:  
-%   [tv,xv,uv] = simulateSolution(problem,solution)
-%   [tv,xv,uv] = simulateSolution(problem,solution,odesolver)
-%   [tv,xv,uv] = simulateSolution(problem,solution,odesolver,tstep)
-%   [tv,xv,uv] = simulateSolution(problem,solution,odesolver,tstep,stateInputSwap)
+%          [ tv, xv, uv ] = simulateSolution( problem, solution)	
+%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver)                     (Request a specific ODE solver)
+%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver, tstep)              (Request a specific ODE solver and integration time step)
+%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver, tstep, s_i_swarp)   (Request a specific ODE solver and integration time step, with state-input swarping)
 % 
-% Inputs:
-%   problem        - Original ICLOCS problem structure.
-%   solution       - Solution structure returned by solveMyProblem.
-%   odesolver      - Optional ODE solver name: 'ode113', 'ode45', or 'ode23'.
-%                    The default is 'ode113'.
-%   tstep          - Optional scalar simulation time step.
-%   stateInputSwap - Optional two-row index map for examples that swap selected
-%                    states and inputs during simulation.
-%
-% Outputs:
-%   tv - Time vector returned by the ODE solver.
-%   xv - Simulated state trajectory.
-%   uv - Interpolated input trajectory evaluated at tv.
-%
-% Notes:
-%   This function simulates the supplied solution and does not re-optimize. The
-%   returned input trajectory is clipped to the configured mapped-state and
-%   input bounds.
+% Output:
+%    tv - time vector 
+%    xv - state vector
+%    uv - input vector
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
@@ -115,3 +101,4 @@ if any(uv>uu)
 end
 
 end
+

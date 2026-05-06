@@ -1,27 +1,16 @@
 function [OCP_updated] = updateMyProblem(OCP_old,varargin)
-%updateMyProblem Update selected fields of a transcribed OCP.
+% updateMyProblem - Update problem formulation without redo transcription
 %
 % Syntax:  
-%   OCP_updated = updateMyProblem(OCP_old,'x0',x0)
-%   OCP_updated = updateMyProblem(OCP_old,'z0',z0)
-%   OCP_updated = updateMyProblem(OCP_old,'bl',bl,'bu',bu)
-%   OCP_updated = updateMyProblem(OCP_old,'userdata',userdata)
+%          [OCP_updated] = updateMyProblem(OCP_old, 'options', values)	
 % 
 % Inputs:
-%   OCP_old  - Previous transcribed OCP structure.
-%   x0       - Optional updated initial state vector.
-%   z0       - Optional updated NLP decision-vector initial guess.
-%   bl       - Optional updated boundary-constraint lower bounds.
-%   bu       - Optional updated boundary-constraint upper bounds.
-%   userdata - Optional structure merged into the existing user data.
+%    OCP_old - Previous OCP formulation
+%    options - field to be updated ('x0', 'z0', 'bu', 'bl', 'userdata')
+%    values - values corresponding to options
 % 
 % Output:
-%   OCP_updated - Updated OCP formulation for a later solveMyProblem call.
-%
-% Notes:
-%   This helper supports single-phase direct-collocation OCP structures. Omitted
-%   name-value pairs are left unchanged, and x0 is scaled when the stored OCP
-%   data indicates that scaling is enabled.
+%    OCP_updated - Updated OCP formulation
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
@@ -106,3 +95,4 @@ function [OCP_updated] = updateMyProblem(OCP_old,varargin)
    OCP_updated.data.infoNLP=OCP_updated.infoNLP;
    
 end
+
