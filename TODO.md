@@ -11,7 +11,7 @@ This list tracks repository modernization work that should avoid changing the ex
 - [ ] Add a repository secret named `TRAFFIC_TOKEN` with repository Administration read access.
 - [x] Run the **Update usage metrics** workflow manually once from the GitHub Actions tab.
 - [x] Confirm the README badges update after the first successful workflow run.
-- [ ] Decide whether future releases should attach ZIP/toolbox assets so GitHub can count release asset downloads separately.
+- [x] Decide whether future releases should attach ZIP/toolbox assets so GitHub can count release asset downloads separately.
 
 ## Continuous Integration
 
@@ -49,7 +49,7 @@ This list tracks repository modernization work that should avoid changing the ex
 
 - [x] Inventory public functions, templates, and user-facing entry points.
 - [ ] Add or improve MATLAB help text for public functions.
-- [ ] Document inputs, outputs, defaults, side effects, and assumptions.
+- [x] Document inputs, outputs, defaults, side effects, and assumptions.
 - [x] Generate browsable API documentation from MATLAB comments if practical.
 - [ ] Keep internal implementation comments focused on behavior that is hard to infer from code.
 
