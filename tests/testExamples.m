@@ -11,7 +11,7 @@ end
 
 function testDoubleIntegratorTrackingDefinition(testCase)
 exampleDir = fullfile(testCase.TestData.RootDir,'exampleProblems','DoubleIntegratorTracking');
-cleanup = addPathForTest(exampleDir);
+cleanup = addExamplePath(exampleDir);
 
 [problem,guess] = DoubleIntegratorTracking;
 
@@ -30,7 +30,7 @@ verifyTrue(testCase, isa(problem.sim.functions,'function_handle'));
 delete(cleanup);
 end
 
-function cleanup = addPathForTest(pathToAdd)
+function cleanup = addExamplePath(pathToAdd)
 addpath(pathToAdd);
 cleanup = onCleanup(@() rmpath(pathToAdd));
 end

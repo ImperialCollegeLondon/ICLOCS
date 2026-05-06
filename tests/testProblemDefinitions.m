@@ -11,7 +11,7 @@ end
 
 function testBangBangFixedMeshDefinition(testCase)
 exampleDir = fullfile(testCase.TestData.RootDir,'exampleProblems','BangBang','Fixed Mesh');
-cleanup = addPathForTest(exampleDir);
+cleanup = addExamplePath(exampleDir);
 
 [problem,guess] = BangBang;
 
@@ -32,7 +32,7 @@ end
 
 function testOrbitRaisingOriginalDefinition(testCase)
 exampleDir = fullfile(testCase.TestData.RootDir,'exampleProblems','OrbitRaising','Original_Formulation');
-cleanup = addPathForTest(exampleDir);
+cleanup = addExamplePath(exampleDir);
 
 [problem,guess] = OrbitRaising;
 
@@ -52,7 +52,7 @@ verifyEqual(testCase, problem.data.md, 0.0749);
 delete(cleanup);
 end
 
-function cleanup = addPathForTest(pathToAdd)
+function cleanup = addExamplePath(pathToAdd)
 addpath(pathToAdd);
 cleanup = onCleanup(@() rmpath(pathToAdd));
 end
