@@ -1,13 +1,23 @@
 function [  Xout] = speval( solution,solType,nidx,T)
-%speval - evaluate the spline functions
+%speval Evaluate interpolated solution components at requested times.
 %
-% Syntax:   Xout = speval( Xp,solType,nidx,T)
+% Syntax:
+%   Xout = speval(solution,solType,nidx,T)
 %
 % Inputs:
-%    solution  - solution to the OCP after post-processing.
-%    solType - 'X' for states and 'U' for input variable
-%    nidx - Return result for the nth state/input variable
-%    T - Time vector
+%   solution - Post-processed solution structure from solveMyProblem.
+%   solType  - Component type: 'X'/'state', 'U'/'input', 'dX'/'dynamics',
+%              or 'dU'.
+%   nidx     - Scalar or vector of component indices to evaluate.
+%   T        - Time vector where the interpolation is evaluated.
+%
+% Output:
+%   Xout - Matrix with one row per time value and one column per index.
+%
+% Notes:
+%   The solution must contain the interpolation fields generated during
+%   post-processing. Segmented LGR interpolation data is handled when
+%   solution.TSeg_Bar is present.
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
@@ -84,4 +94,3 @@ for k=1:length(nidx)
 end
 
 end
-

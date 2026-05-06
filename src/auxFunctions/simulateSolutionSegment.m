@@ -1,16 +1,26 @@
 function [ tv, xv, uv ] = simulateSolution( varargin )
-% simulateSolution - Simulate the obtained solution (open-loop) with ODE integration
+%simulateSolutionSegment Simulate a solution over an explicit time vector.
 %
 % Syntax:  
-%          [ tv, xv, uv ] = simulateSolution( problem, solution)	
-%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver)                     (Request a specific ODE solver)
-%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver, tstep)              (Request a specific ODE solver and integration time step)
-%          [ tv, xv, uv ] = simulateSolution( problem, solution, odesolver, tstep, s_i_swarp)   (Request a specific ODE solver and integration time step, with state-input swarping)
+%   [tv,xv,uv] = simulateSolutionSegment(problem,solution,odesolver,T)
+%   [tv,xv,uv] = simulateSolutionSegment(problem,solution,odesolver,T,stateInputSwap)
 % 
-% Output:
-%    tv - time vector 
-%    xv - state vector
-%    uv - input vector
+% Inputs:
+%   problem        - Original ICLOCS problem structure.
+%   solution       - Solution structure returned by solveMyProblem.
+%   odesolver      - ODE solver name: 'ode113', 'ode45', or 'ode23'.
+%   T              - Explicit simulation time vector.
+%   stateInputSwap - Optional two-row index map for examples that swap selected
+%                    states and inputs during simulation.
+%
+% Outputs:
+%   tv - Time vector returned by the ODE solver.
+%   xv - Simulated state trajectory.
+%   uv - Interpolated input trajectory evaluated at tv.
+%
+% Notes:
+%   This function is the segment-time-vector variant of simulateSolution. It
+%   simulates the supplied solution and does not re-optimize.
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
@@ -98,4 +108,3 @@ if any(uv>uu)
 end
 
 end
-

@@ -1,0 +1,52 @@
+{
+  "title": "ICLOCS: Imperial College London Optimal Control Software",
+  "upload_type": "software",
+  "description": "ICLOCS is MATLAB software for formulating, transcribing, and solving optimal-control problems using supported nonlinear programming solvers.",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Van Wyk, E. J.",
+      "affiliation": "Imperial College London"
+    },
+    {
+      "name": "Falugi, P.",
+      "affiliation": "Imperial College London"
+    },
+    {
+      "name": "Kerrigan, E. C.",
+      "affiliation": "Imperial College London"
+    },
+    {
+      "name": "Nie, Yuanbo",
+      "affiliation": "Imperial College London"
+    },
+    {
+      "name": "Faqir, Omar",
+      "affiliation": "Imperial College London"
+    }
+  ],
+  "keywords": [
+    "MATLAB",
+    "optimal control",
+    "direct collocation",
+    "trajectory optimization",
+    "nonlinear programming",
+    "scientific computing",
+    "IPOPT",
+    "WORHP",
+    "fmincon"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/ImperialCollegeLondon/ICLOCS",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "http://www.ee.ic.ac.uk/ICLOCS/",
+      "relation": "isDocumentedBy",
+      "scheme": "url"
+    }
+  ]
+}

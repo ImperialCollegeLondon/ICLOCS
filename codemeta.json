@@ -1,0 +1,80 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "ICLOCS",
+  "description": "Imperial College London Optimal Control Software for MATLAB, supporting direct optimal-control problem transcription and solution workflows.",
+  "codeRepository": "https://github.com/ImperialCollegeLondon/ICLOCS",
+  "url": "http://www.ee.ic.ac.uk/ICLOCS/",
+  "issueTracker": "https://github.com/ImperialCollegeLondon/ICLOCS/issues",
+  "license": "https://spdx.org/licenses/MIT",
+  "version": "2.5",
+  "softwareVersion": "2.5",
+  "datePublished": "2019-08-01",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "MATLAB"
+  },
+  "runtimePlatform": "MATLAB R2017a or later",
+  "operatingSystem": [
+    "Windows",
+    "macOS",
+    "Linux"
+  ],
+  "applicationCategory": "Scientific computing",
+  "applicationSubCategory": "Optimal control",
+  "keywords": [
+    "MATLAB",
+    "optimal control",
+    "direct collocation",
+    "trajectory optimization",
+    "nonlinear programming",
+    "IPOPT",
+    "WORHP",
+    "fmincon",
+    "scientific computing"
+  ],
+  "softwareRequirements": [
+    "MATLAB R2017a or later",
+    "A supported nonlinear programming solver such as IPOPT, Optimization Toolbox fmincon, or WORHP",
+    "Optional ADiGator for algorithmic differentiation workflows",
+    "Optional Simulink for workflows that use Simulink models"
+  ],
+  "installUrl": "https://github.com/ImperialCollegeLondon/ICLOCS#quick-install",
+  "readme": "https://github.com/ImperialCollegeLondon/ICLOCS/blob/master/README.md",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "E. J.",
+      "familyName": "Van Wyk"
+    },
+    {
+      "@type": "Person",
+      "givenName": "P.",
+      "familyName": "Falugi"
+    },
+    {
+      "@type": "Person",
+      "givenName": "E. C.",
+      "familyName": "Kerrigan"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Yuanbo",
+      "familyName": "Nie"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Omar",
+      "familyName": "Faqir"
+    }
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "name": "Imperial College London",
+    "url": "https://www.imperial.ac.uk/"
+  },
+  "maintainer": {
+    "@type": "Organization",
+    "name": "Imperial College London"
+  }
+}
