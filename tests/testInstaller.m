@@ -1,0 +1,1 @@
+@tests/testInstaller.m
