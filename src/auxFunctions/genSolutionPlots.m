@@ -1,7 +1,20 @@
 function genSolutionPlots(options, solution)
-%genSolutionPlots - generate plots for the obtained solution
+%genSolutionPlots Generate standard plots for an ICLOCS solution.
 %
-% Syntax:  [ X,Xr,U,Ur,P,x0,xf,u0,uf,p,data ] = batchScaleBack(X,Xr,U,Ur,P,x0,xf,u0,uf,p,data)
+% Syntax:
+%   genSolutionPlots(options,solution)
+%
+% Inputs:
+%   options  - Options structure used to solve the problem.
+%   solution - Solution structure returned by solveMyProblem.
+%
+% Output:
+%   None.
+%
+% Notes:
+%   Creates MATLAB figures for states, inputs, adjoints, local error estimates,
+%   and constraint violations according to the configured plot options. Supports
+%   both single-phase and multiphase solution structures.
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
