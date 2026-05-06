@@ -18,6 +18,7 @@ Modernization work is tracked in [`TODO.md`](TODO.md).
 - [Options reference](docs/OPTIONS_REFERENCE.md)
 - [Closed-loop simulation](docs/CLOSED_LOOP_SIMULATION.md)
 - [Development and CI](docs/DEVELOPMENT.md)
+- [Public API reference](docs/PUBLIC_API.md)
 - [API index](docs/API-INDEX.md)
 - [Repository layout](docs/REPOSITORY_LAYOUT.md)
 - [Release guide](docs/RELEASE_GUIDE.md)
