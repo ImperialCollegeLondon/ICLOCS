@@ -63,3 +63,17 @@ This list tracks repository modernization work that should avoid changing the ex
 - [x] Review repository layout and document what each top-level folder contains.
 - [x] Add release guidance for maintainers.
 - [x] Add citation metadata if there is a preferred paper or software citation.
+
+## Discoverability And Packaging
+
+- [x] Set GitHub About description, website, and topic tags.
+- [x] Add `codemeta.json` for research-software metadata indexes.
+- [x] Add `.zenodo.json` for DOI-backed release archiving.
+- [x] Add a `CHANGELOG.md` release-history surface.
+- [x] Add a GitHub release-notes configuration.
+- [x] Add a lightweight GitHub Pages documentation landing page.
+- [x] Add a discoverability checklist for maintainers.
+- [ ] Enable GitHub Pages from the repository settings after the docs branch lands on `master`.
+- [ ] Connect the repository to Zenodo and confirm the first release DOI.
+- [ ] Submit or link ICLOCS through MATLAB File Exchange.
+- [ ] Add a GitHub social preview image.

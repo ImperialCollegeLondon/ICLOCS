@@ -27,6 +27,7 @@ The installer adds the ICLOCS source folders to the MATLAB path, checks optional
 
 ## Documentation
 
+- [Documentation landing page](docs/index.md)
 - [Installation](docs/INSTALLATION.md)
 - [Examples](docs/EXAMPLES.md)
 - [Example results](docs/EXAMPLE_RESULTS.md)
@@ -38,8 +39,16 @@ The installer adds the ICLOCS source folders to the MATLAB path, checks optional
 - [API index](docs/API-INDEX.md)
 - [Repository layout](docs/REPOSITORY_LAYOUT.md)
 - [Release guide](docs/RELEASE_GUIDE.md)
+- [Discoverability and packaging](docs/DISCOVERABILITY.md)
 - [Source website map](docs/SOURCE_WEBSITE.md)
 - [LLM and agent orientation](llms.txt)
+- [Changelog](CHANGELOG.md)
+
+## Citation And Metadata
+
+- Citation metadata: [`CITATION.cff`](CITATION.cff)
+- Research software metadata: [`codemeta.json`](codemeta.json)
+- Zenodo release metadata: [`.zenodo.json`](.zenodo.json)
 
 ## Repository usage counter
 

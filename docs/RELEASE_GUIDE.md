@@ -14,7 +14,9 @@ This guide is for maintainers preparing a GitHub release.
 
 - Review `README.md`, `docs/INSTALLATION.md`, and `docs/EXAMPLES.md`.
 - Update `CITATION.cff` if version or citation details changed.
+- Update `codemeta.json`, `.zenodo.json`, and `CHANGELOG.md` if version, citation, author, website, or release details changed.
 - Confirm the usage metrics workflow is healthy.
+- Confirm repository topics, About metadata, and documentation links are still accurate.
 
 ## GitHub Release Assets
 
@@ -44,3 +46,9 @@ Include:
 - Changes to examples, templates, or documentation.
 - Known limitations.
 - Migration notes for users updating existing problem files.
+
+## DOI And Indexing
+
+If Zenodo GitHub integration is enabled, each GitHub release should be archived automatically and assigned a DOI. Check the Zenodo record before announcing the release, then add or update a DOI badge in the README if maintainers want citation counts and archival status to be visible.
+
+For broader MATLAB community discovery, update the MATLAB File Exchange entry after publishing the GitHub release.
