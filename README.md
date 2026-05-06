@@ -1,8 +1,8 @@
 # ICLOCS
 Imperial College London Optimal Control Software (ICLOCS)
 
-[![Recorded clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/master/docs/metrics/clones-badge.json)](docs/metrics/github-usage.json)
-[![Release downloads](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/master/docs/metrics/release-downloads-badge.json)](docs/metrics/github-usage.json)
+[![Recorded clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/usage-metrics/docs/metrics/clones-badge.json)](https://github.com/ImperialCollegeLondon/ICLOCS/blob/usage-metrics/docs/metrics/github-usage.json)
+[![Release downloads](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ImperialCollegeLondon/ICLOCS/usage-metrics/docs/metrics/release-downloads-badge.json)](https://github.com/ImperialCollegeLondon/ICLOCS/blob/usage-metrics/docs/metrics/github-usage.json)
 [![MATLAB CI](https://github.com/ImperialCollegeLondon/ICLOCS/actions/workflows/matlab-ci.yml/badge.svg)](https://github.com/ImperialCollegeLondon/ICLOCS/actions/workflows/matlab-ci.yml)
 
 http://www.ee.ic.ac.uk/ICLOCS/
@@ -25,7 +25,7 @@ Modernization work is tracked in [`TODO.md`](TODO.md).
 
 ## Repository usage counter
 
-This repository includes a lightweight GitHub Actions workflow that records repository usage metrics in [`docs/metrics/github-usage.json`](docs/metrics/github-usage.json). The README badges above are updated from the same metric files once the workflow has run on GitHub.
+This repository includes a lightweight GitHub Actions workflow that records repository usage metrics in `docs/metrics/github-usage.json` on the `usage-metrics` branch. The README badges above are updated from the same metric files once the workflow has run on GitHub.
 
 GitHub exposes clone traffic only for the previous 14 days, so the recorded clone counter starts from the first successful scheduled or manual workflow run and cannot reconstruct historical downloads. GitHub release asset downloads are counted separately when releases provide downloadable assets. To enable clone/view traffic collection, add a repository secret named `TRAFFIC_TOKEN` with repository Administration read access, then run the **Update usage metrics** workflow from the Actions tab.
 
