@@ -1,0 +1,71 @@
+# ICLOCS
+
+ICLOCS is the Imperial College London Optimal Control Software for MATLAB. It transcribes and solves optimal-control problems using direct collocation, direct multiple shooting, mesh-refinement workflows, and supported nonlinear programming solvers.
+
+Canonical repository: https://github.com/ImperialCollegeLondon/ICLOCS
+
+Project website: http://www.ee.ic.ac.uk/ICLOCS/
+
+## Quick Setup
+
+From the repository root in MATLAB:
+
+```matlab
+installIclocs
+```
+
+From a terminal with MATLAB R2019a or later:
+
+```bash
+matlab -batch "installIclocs"
+```
+
+`installIclocs` adds the ICLOCS source folders to the MATLAB path, checks optional solver dependencies, and builds the `DoubleIntegratorTracking` example problem without solving it.
+
+## Important Docs
+
+- `README.md`: project overview, badges, and documentation index.
+- `docs/INSTALLATION.md`: first-time setup, solver requirements, and troubleshooting.
+- `docs/EXAMPLES.md`: beginner and advanced example walkthroughs.
+- `docs/PUBLIC_API.md`: user-facing MATLAB entry points.
+- `docs/API-INDEX.md`: generated inventory of MATLAB files and first help lines.
+- `docs/OPTIONS_REFERENCE.md`: solver, transcription, scaling, and mesh-refinement options.
+- `docs/DEVELOPMENT.md`: local testing and CI workflow.
+- `TODO.md`: modernization checklist and remaining maintenance tasks.
+
+## Main User Entry Points
+
+- `installIclocs`: one-command path setup and dependency check.
+- `tools/setupIclocsPath.m`: add ICLOCS `src` folders to the MATLAB path.
+- `tools/iclocsDoctor.m`: report MATLAB version, path, optional dependency, and solver status.
+- `solveMyProblem`: transcribe and solve a configured ICLOCS problem.
+- `updateMyProblem`: update a previously transcribed single-phase problem for re-solving.
+- `simulateSolution` and `simulateSolutionSegment`: simulate solved open-loop trajectories.
+
+Typical problem workflow:
+
+```matlab
+installIclocs
+exampleDir = fullfile(pwd,'exampleProblems','DoubleIntegratorTracking');
+addpath(exampleDir)
+[problem, guess] = DoubleIntegratorTracking;
+options = problem.settings(100);
+[solution, status] = solveMyProblem(problem, guess, options);
+```
+
+## Dependencies
+
+- Required: MATLAB R2017a or later.
+- Solver: IPOPT, Optimization Toolbox `fmincon`, or WORHP MATLAB interface.
+- Optional: ADiGator for algorithmic differentiation workflows.
+- Optional: Simulink for models or examples that explicitly require it.
+
+Third-party solvers are detected but not installed automatically because their MATLAB interfaces, binaries, and licenses vary by platform.
+
+## Guidance For LMs And Agents
+
+- Preserve existing solver behavior unless a maintainer explicitly requests behavioral changes.
+- Prefer documentation, tests, CI, setup helpers, metadata, and examples for modernization work.
+- Add only the example folder being used to the MATLAB path; broad example paths can collide because many examples intentionally reuse callback names.
+- Do not run expensive optimal-control solves in documentation or CI unless solver availability and runtime are explicitly controlled.
+- Prefer small solver-free smoke tests that build problem and guess structures.
