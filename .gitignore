@@ -1,0 +1,27 @@
+# MATLAB
+*.asv
+*.m~
+*.mex*
+*.mlappinstall
+*.mltbx
+*.slxc
+*.mldatx
+
+# MATLAB generated folders
+codegen/
+slprj/
+*.slprj/
+
+# Test and coverage artifacts
+test-results/
+code-coverage/
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Python helper caches
+__pycache__/
+*.py[cod]
