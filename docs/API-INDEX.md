@@ -407,9 +407,9 @@ python3 tools/generate_api_index.py
 | `src/auxFunctions/batchScaleGradCost.m` | function | batchScaleBack - Scale the variables back into original dimension in batches |
 | `src/auxFunctions/batchScalejacConst.m` | function | batchScaleBack - Scale the variables back into original dimension in batches |
 | `src/auxFunctions/batchScaleLagHessian.m` | function | batchScaleBack - Scale the variables back into original dimension in batches |
-| `src/auxFunctions/checkProblem.m` | function | UNTITLED Summary of this function goes here |
+| `src/auxFunctions/checkProblem.m` | function | checkProblem Validate key dimensions in an ICLOCS problem structure. |
 | `src/auxFunctions/convertHessianANStruct.m` | function | convertHessianANStruct - convert the Hessian structure to a format compatible with h method formulation of ICLOCS2 |
-| `src/auxFunctions/genSolutionPlots.m` | function | genSolutionPlots - generate plots for the obtained solution |
+| `src/auxFunctions/genSolutionPlots.m` | function | genSolutionPlots Generate standard plots for an ICLOCS solution. |
 | `src/auxFunctions/linspaceMat.m` | function | linspaceMat - Generates a matrix of linearly equally spaced points between column vectors a and b, and return in vector format |
 | `src/auxFunctions/multipleShooting.m` | function | Generate the cost,constraint and gradient information needed for the |
 | `src/auxFunctions/multipliers.m` | function | MULTIPLIERS - Extract the adjoint variables and the multipliers relative to |
@@ -429,8 +429,8 @@ python3 tools/generate_api_index.py
 | `src/auxFunctions/scale_variables_back.m` | function | scale_variables_back - scale the variables back |
 | `src/auxFunctions/setFunctionTypes.m` | function | UNTITLED Summary of this function goes here |
 | `src/auxFunctions/simulateDynamics.m` | function | simulateSolution - Simulate the obtained solution (open-loop) with ODE integration |
-| `src/auxFunctions/simulateSolution.m` | function | simulateSolution - Simulate the obtained solution (open-loop) with ODE integration |
-| `src/auxFunctions/simulateSolutionSegment.m` | function | simulateSolution - Simulate the obtained solution (open-loop) with ODE integration |
+| `src/auxFunctions/simulateSolution.m` | function | simulateSolution Simulate an optimized open-loop solution with an ODE solver. |
+| `src/auxFunctions/simulateSolutionSegment.m` | function | simulateSolutionSegment Simulate a solution over an explicit time vector. |
 | `src/auxFunctions/spkroneye.m` | function | UNTITLED Summary of this function goes here |
 | `src/constraintHandling/checkConstraintReactivation.m` | function | checkConstraintReactivation - check if certain path constraints have become |
 | `src/constraintHandling/identifyConstActive.m` | function | identifyConstActive - identify time intervals that the path constraints are potentially active |
@@ -567,7 +567,7 @@ python3 tools/generate_api_index.py
 | `src/problemTranscriptionSolve/overlapping.m` | function | OVERLAPPING - It  groups orthogonal colums of the matrix M together. |
 | `src/problemTranscriptionSolve/postProcessSolution.m` | function | postProcessSolution - post process the solution obtained from NLP solver |
 | `src/problemTranscriptionSolve/runPostSolveTasks.m` | function | runPostSolveTasks - run Post-Solve Tasks |
-| `src/problemTranscriptionSolve/solveMyProblem.m` | function | solveMyProblem - main file for solving NLPs |
+| `src/problemTranscriptionSolve/solveMyProblem.m` | function | solveMyProblem Transcribe and solve an ICLOCS optimal-control problem. |
 | `src/problemTranscriptionSolve/solveNLP.m` | function | SOLVENLP - Solve the nonlinear program and return the solution |
 | `src/problemTranscriptionSolve/solveSingleNLP_DirectCollocation.m` | function | solveSingleNLP_DirectCollocation - Solve a single nonlinear program and |
 | `src/problemTranscriptionSolve/solveSingleNLP_DirectCollocation_MultiPhase.m` | function | solveSingleNLP_DirectCollocation - Solve a single multi-phase nonlinear program and |
@@ -579,7 +579,7 @@ python3 tools/generate_api_index.py
 | `src/problemTranscriptionSolve/transcribeResMin.m` | function | transcribeResErrorAnalysis - transcribe the problem in preparation for |
 | `src/problemTranscriptionSolve/transcriptionMatrix.m` | function | TRANSCRIPTIONMATRIX -  Format matrices for transcription method |
 | `src/problemTranscriptionSolve/transcriptionMatrixRC.m` | function | TRANSCRIPTIONMATRIX -  Precalculate the jacobian calculation of rate |
-| `src/problemTranscriptionSolve/updateMyProblem.m` | function | updateMyProblem - Update problem formulation without redo transcription |
+| `src/problemTranscriptionSolve/updateMyProblem.m` | function | updateMyProblem Update selected fields of a transcribed OCP. |
 | `src/rateConstraint/addRateConstraint.m` | function | addRateConstraint - Format the implementation for rate constraints. |
 | `src/rateConstraint/getVariableRate.m` | function | getVariableRate - Obtain the variable rate of change from the discretization mesh. |
 | `src/resMinimization/collmatch_endpt.m` | function | collmatch_endpt - for obtaining integrated residual minimization solution representation with matching of direct collocation result at endpoints |
@@ -622,7 +622,7 @@ python3 tools/generate_api_index.py
 | `src/solutionInterpolation/Linsplines.m` | function | Linsplines - Approximate the trajectory in x with a linear |
 | `src/solutionInterpolation/Quadsplines.m` | function | Quadsplines - Approximate the trajectory in x with a quadratic |
 | `src/solutionInterpolation/QuadsplinesU.m` | function | QuadsplinesU - Approximate the trajectory in u with a quadratic |
-| `src/solutionInterpolation/speval.m` | function | speval - evaluate the spline functions |
+| `src/solutionInterpolation/speval.m` | function | speval Evaluate interpolated solution components at requested times. |
 | `src/thirdParty/catstruct/catstruct.m` | function | CATSTRUCT   Concatenate or merge structures with different fieldnames |
 | `tools/setupIclocsPath.m` | function | SETUPICLOCSPATH Add ICLOCS source folders to the MATLAB path. |
 | `usr/Multi Phase Problem/callback_myProblem.m` | function | t is the current iteration of the algorithm. |

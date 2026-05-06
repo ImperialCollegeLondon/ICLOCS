@@ -1,7 +1,30 @@
 function [ varargout ] = solveMyProblem( varargin )
-%solveMyProblem - main file for solving NLPs
+%solveMyProblem Transcribe and solve an ICLOCS optimal-control problem.
 %
-% Syntax:  [ varargout ] = solveMyProblem( problem,guess,options )
+% Syntax:
+%   [solution,status] = solveMyProblem(problem,guess,options)
+%   [solution,status,OCP] = solveMyProblem(problem,guess,options)
+%   [solution,history,OCP_MR,OCP_initial] = solveMyProblem(problem,guess,options)
+%   [...] = solveMyProblem(problem,guess,options,OCP_in)
+%
+% Inputs:
+%   problem - ICLOCS problem structure returned by a problem-definition file.
+%   guess   - Initial-guess structure for states, inputs, time, and parameters.
+%   options - Transcription, solver, mesh, derivative, print, and plot options.
+%   OCP_in  - Optional pre-transcribed OCP structure for re-solving updates.
+%
+% Outputs:
+%   solution    - Post-processed solution structure.
+%   status      - NLP solver status for fixed-mesh solves.
+%   history     - Mesh-refinement history for mesh-refinement solves.
+%   OCP         - Optional transcribed OCP data for warm starts or updates.
+%   OCP_MR      - Optional mesh-refinement OCP data.
+%   OCP_initial - Optional initial OCP data before mesh refinement.
+%
+% Notes:
+%   Defaults are supplied through options. This function may call the selected
+%   NLP solver, run post-solve analysis, print progress, and create plots
+%   depending on the supplied options.
 %
 % Copyright (C) 2019 Yuanbo Nie, Omar Faqir, and Eric Kerrigan. All Rights Reserved.
 % The contribution of Paola Falugi, Eric Kerrigan and Eugene van Wyk for the work on ICLOCS Version 1 (2010) is kindly acknowledged.
