@@ -8,7 +8,7 @@
     "total": 0,
     "unique_daily_total": 0
   },
-  "last_updated": null,
+  "last_updated": "2026-05-06T18:43:07Z",
   "limitations": [
     "Clone and view traffic are only available from GitHub for the previous 14 days.",
     "Recorded clone totals start from the first successful workflow run.",
@@ -30,6 +30,7 @@
     "unique_daily_total": 0
   },
   "warnings": [
-    "Metrics will populate after the Update usage metrics workflow runs on GitHub."
+    "Could not update clones: HTTP 403: {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/metrics/traffic#get-repository-clones\",\"status\":\"403\"}. For traffic counters, configure TRAFFIC_TOKEN with repository Administration read access.",
+    "Could not update views: HTTP 403: {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/metrics/traffic#get-page-views\",\"status\":\"403\"}. For traffic counters, configure TRAFFIC_TOKEN with repository Administration read access."
   ]
 }
