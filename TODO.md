@@ -48,7 +48,7 @@ This list tracks repository modernization work that should avoid changing the ex
 ## Function And API Documentation
 
 - [x] Inventory public functions, templates, and user-facing entry points.
-- [ ] Add or improve MATLAB help text for public functions.
+- [x] Add or improve MATLAB help text for public functions.
 - [x] Document inputs, outputs, defaults, side effects, and assumptions.
 - [x] Generate browsable API documentation from MATLAB comments if practical.
 - [ ] Keep internal implementation comments focused on behavior that is hard to infer from code.
