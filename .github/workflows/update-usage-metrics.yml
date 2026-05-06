@@ -12,6 +12,9 @@ concurrency:
   group: update-usage-metrics
   cancel-in-progress: false
 
+env:
+  METRICS_BRANCH: usage-metrics
+
 jobs:
   update:
     name: Refresh GitHub usage counters
@@ -21,6 +24,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Restore previous metric files
+        run: |
+          git fetch origin "${METRICS_BRANCH}" || true
+          git checkout "origin/${METRICS_BRANCH}" -- docs/metrics || true
+
       - name: Update metric files
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -28,7 +36,7 @@ jobs:
           TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
         run: python3 tools/update_github_usage_metrics.py
 
-      - name: Commit metric updates
+      - name: Publish metric updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -37,5 +45,5 @@ jobs:
             echo "No metric changes to commit."
           else
             git commit -m "Update GitHub usage metrics"
-            git push
+            git push --force-with-lease origin "HEAD:${METRICS_BRANCH}"
           fi
